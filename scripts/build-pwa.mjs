@@ -30,8 +30,8 @@ const mobileCss = `
   html{-webkit-tap-highlight-color:transparent;-webkit-text-size-adjust:100%;text-size-adjust:100%;overscroll-behavior:none;color-scheme:light dark;background:#F6F8FB}
   @media (prefers-color-scheme:dark){html{background:#0E141A}}
   html,body{height:100%}
-  body{position:fixed;top:0;left:0;right:0;height:var(--app-h,100%);overscroll-behavior:none;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
-  #root{position:fixed;top:0;left:0;right:0;height:var(--app-h,100%);display:flex}
+  body{position:fixed;top:0;left:0;right:0;height:max(var(--app-h,100%),100lvh);overscroll-behavior:none;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+  #root{position:fixed;top:0;left:0;right:0;height:max(var(--app-h,100%),100lvh);display:flex}
   /* los controles no seleccionan su texto al mantener pulsado; el contenido sí */
   button,[role=button],[role=radio],[role=checkbox],[role=tab],a{touch-action:manipulation;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
   /* iOS hace zoom al enfocar campos de menos de 16 px */

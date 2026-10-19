@@ -67,3 +67,23 @@ A partir de una captura en iPhone se corrigió: etiquetas cortadas en la barra d
 - Pestañas sin animación al cambiar; solo el relleno de la activa cambia de color (120 ms).
 - **Sobre «iOS 27»**: no dispongo de la guía oficial de iOS 27; el diseño sigue el lenguaje «Liquid Glass» (iOS 26) y los principios de Apple (materiales, concentricidad, jerarquía). Cuando exista la guía de iOS 27 conviene revisarlo.
 - **Sin verificar en dispositivo**: el cálculo real de las zonas seguras del iPhone (isla dinámica e indicador de inicio) y el aspecto del desenfoque; solo se probó en Chromium emulando un iPhone, sin zonas seguras.
+
+## Profundidad y movimiento (revisión con los skills de animación)
+**Qué se animó y por qué** (puerta de los skills: frecuencia → propósito → velocidad → función):
+| Dónde | Movimiento | Propósito | Frecuencia | Cómo |
+|---|---|---|---|---|
+| Hoy y Más, al abrir | Entrada escalonada (sube 18 px y se asienta, 380 ms, 70 ms entre bloques) | Evitar el cambio brusco / delicia | Una vez por pantalla y sesión | Animación CSS de Reanimated (`transform` + `opacity`, hilo de UI); no se repite al volver a la pestaña |
+| Barra de pestañas | Indicador deslizante entre pestañas (220 ms, ease-out fuerte) | Indicación de estado | Decenas al día | Transición CSS de `transform`; el contenido NO se desliza |
+| Botones, chips, tarjetas | Escala 0,97 al pulsar (120 ms) | Feedback | Decenas al día | Transición CSS |
+
+**Profundidad estática** (sin coste de animación): cabecera con degradado y círculos translúcidos, tarjeta principal sobre un «mazo» de dos capas, sombras suaves, títulos de sección con icono, barra de cristal flotante.
+
+**Rechazado a propósito:**
+- Deslizar el contenido entre pestañas (pares; decenas de veces al día).
+- Efecto de apilado por scroll (las tarjetas se encogen al subir): decoración sobre información que se lee y se usa; coste y riesgo de fluidez sin beneficio funcional.
+- Sombras o desenfoque animados (repintan cada fotograma).
+- Animar listas largas (síntomas, historial): frecuentes y paginadas.
+
+**Rendimiento:** solo `transform`/`opacity`; ninguna propiedad de diseño (layout) se anima; sin `transition: all`; el cristal es estático. Verificado: el indicador usa `translateX` con duración 220 ms (en el DOM) y las entradas son animaciones CSS de Reanimated. **Pendiente en teléfono:** fluidez real en un iPhone/Android modestos y sensación del indicador.
+
+**Barra de pestañas:** ahora es una capa propia sobre el grupo de pestañas (no dentro del navegador, cuyo contenedor la recortaba en iOS); la altura de la raíz usa `max(--app-h, 100lvh)`.

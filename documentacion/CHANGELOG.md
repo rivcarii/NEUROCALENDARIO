@@ -47,6 +47,10 @@
 - El texto pequeño de la cabecera baja para quedar fuera de la zona que iOS difumina bajo la barra de estado.
 - Ajustes muestra las medidas de pantalla (ventana y dispositivo) para diagnosticar diferencias en iPhone.
 
+### Profundidad, entrada escalonada y barra corregida (3.ª captura del iPhone)
+- La barra de pestañas se recortaba (etiquetas cortadas y franja vacía): ahora es una capa propia con indicador deslizante; raíz con `100lvh`.
+- Cabecera con degradado y círculos, tarjeta principal con «mazo» detrás, títulos de sección con icono, entrada escalonada una vez por sesión.
+
 ### Defectos encontrados y corregidos durante el desarrollo
 - Restaurar una copia reutilizaba la ruta de los adjuntos del original: borrar un documento en un perfil podía borrar el archivo del otro. **Ahora se generan rutas nuevas** (con prueba).
 - Una copia sin `data` provocaba una excepción interna en lugar de un error de validación.

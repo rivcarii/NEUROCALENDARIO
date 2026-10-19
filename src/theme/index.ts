@@ -45,3 +45,9 @@ export function cardSurface(dark: boolean): ViewStyle {
 
 /** Espacio que dejan las pantallas con pestañas al final para que la barra flotante no tape el contenido. */
 export const TAB_BAR_SPACE = 112;
+
+/** Oscurece un color #RRGGBB (0–1) para los degradados de cabecera. */
+export function shade(hex: string, amount = 0.28): string {
+  const n = (i: number) => Math.round(parseInt(hex.slice(i, i + 2), 16) * (1 - amount)).toString(16).padStart(2, '0');
+  return `#${n(1)}${n(3)}${n(5)}`;
+}

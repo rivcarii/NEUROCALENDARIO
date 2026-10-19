@@ -2,8 +2,10 @@ import * as Haptics from 'expo-haptics';
 import { router } from 'expo-router';
 import { Alert, View } from 'react-native';
 import { Text } from '../../components/Text';
+import { Deck } from '../../components/Deck';
 import { Mascot } from '../../components/Mascot';
-import { Button, Card, Empty, ErrorBox, H, Loading, P, Row, Screen, errorMessage, TapText } from '../../components/ui';
+import { Reveal } from '../../components/Reveal';
+import { Button, Card, Empty, ErrorBox, H, Loading, P, Row, Screen, errorMessage, TapText, SectionTitle } from '../../components/ui';
 import { loadDay } from '../../domain/day';
 import { INTAKE_LABEL } from '../../domain/labels';
 import { durationMinutes, formatDateLong, formatDuration, formatTime, localDateKey } from '../../domain/time';
@@ -39,7 +41,8 @@ export default function Hoy() {
 
   return (
     <Screen tabs>
-      <H>{formatDateLong(today)}</H>
+      <Reveal id="hoy" index={0}><H>{formatDateLong(today)}</H></Reveal>
+      <Reveal id="hoy" index={1}><Deck>
       <Card>
         <H level={2}>Anotar ahora</H>
         <P muted small>Guarda un síntoma con la hora de ahora en el perfil de {profile.displayName}. Después puede añadir más detalles.</P>
@@ -50,13 +53,15 @@ export default function Hoy() {
         </Row>
         <Button title="Anotar con más detalle" onPress={() => router.push('/episodio/nuevo')} />
       </Card>
+      </Deck></Reveal>
 
       {loading && !data ? <Loading /> : null}
       {error ? <ErrorBox message={error} onRetry={reload} /> : null}
 
       {data ? (
         <>
-          <H level={2}>Medicinas de hoy</H>
+          <Reveal id="hoy" index={2}><View style={{ gap: 12 }}>
+          <SectionTitle icon="medkit">Medicinas de hoy</SectionTitle>
           {data.doses.length > 0 && data.doses.every((d) => d.intake && d.intake.status !== 'pospuesta') ? (
             <Card style={{ alignItems: 'center' }}>
               <Mascot mood="contento" size={84} />
@@ -78,7 +83,9 @@ export default function Hoy() {
             </Card>
           ))}
 
-          <H level={2}>Citas de hoy</H>
+          </View></Reveal>
+          <Reveal id="hoy" index={3}><View style={{ gap: 12 }}>
+          <SectionTitle icon="calendar">Citas de hoy</SectionTitle>
           {data.appointments.length === 0 ? <P muted>Sin citas hoy.</P> : null}
           {data.appointments.map((a) => (
             <Card key={a.id}>
@@ -87,7 +94,9 @@ export default function Hoy() {
             </Card>
           ))}
 
-          <H level={2}>Síntomas de hoy</H>
+          </View></Reveal>
+          <Reveal id="hoy" index={4}><View style={{ gap: 12 }}>
+          <SectionTitle icon="pulse">Síntomas de hoy</SectionTitle>
           {data.episodes.length === 0 ? <P muted>Hoy no ha anotado síntomas.</P> : null}
           {data.episodes.map((e) => (
             <Card key={e.id}>
@@ -97,6 +106,7 @@ export default function Hoy() {
               <P muted small>Duró: {formatDuration(durationMinutes(e.startedAt, e.endedAt))}{e.intensity !== null ? ` · Intensidad ${e.intensity}/10` : ''}</P>
             </Card>
           ))}
+          </View></Reveal>
         </>
       ) : null}
       <View style={{ height: 8 }} />

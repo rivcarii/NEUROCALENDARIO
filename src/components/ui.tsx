@@ -1,3 +1,4 @@
+import Ionicons from '@expo/vector-icons/Ionicons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useState, type ReactNode } from 'react';
 import { ActivityIndicator, Alert, Platform, Pressable, ScrollView, StyleSheet, TextInput, View, type StyleProp, type TextInputProps, type TextStyle, type ViewStyle } from 'react-native';
@@ -15,7 +16,7 @@ export const MAX_CONTENT = 640;
 export function Screen({ children, scroll = true, footer, tabs = false }: { children: ReactNode; scroll?: boolean; footer?: ReactNode; /** Pantalla con barra de pestañas flotante: deja espacio al final. */ tabs?: boolean }) {
   const t = useTheme();
   const insets = useSafeAreaInsets();
-  const bottomPad = tabs && Platform.OS !== 'android' ? TAB_BAR_SPACE + insets.bottom : space.xl * 2;
+  const bottomPad = tabs ? TAB_BAR_SPACE + Math.min(insets.bottom, 34) : space.xl * 2;
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: t.bg }} edges={['left', 'right', 'bottom']}>
       {scroll ? (
@@ -225,4 +226,17 @@ export function ProfileBar({ name, color, label = 'Perfil' }: { name: string; co
 
 export function errorMessage(e: unknown): string {
   return e instanceof Error ? e.message : 'Ocurrió un error inesperado.';
+}
+
+/** Título de sección con icono en una pastilla tintada. */
+export function SectionTitle({ icon, children }: { icon: React.ComponentProps<typeof Ionicons>['name']; children: ReactNode }) {
+  const t = useTheme();
+  return (
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.sm, marginTop: space.sm }}>
+      <View style={{ width: 34, height: 34, borderRadius: 12, alignItems: 'center', justifyContent: 'center', backgroundColor: t.chip, borderCurve: 'continuous' }}>
+        <Ionicons name={icon} size={19} color={t.primary} accessibilityElementsHidden importantForAccessibility="no" />
+      </View>
+      <H level={2}>{children}</H>
+    </View>
+  );
 }

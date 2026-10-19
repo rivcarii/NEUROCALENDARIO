@@ -1,6 +1,7 @@
 import { router } from 'expo-router';
 import { Text } from '../../components/Text';
 import { PressableScale } from '../../components/PressableScale';
+import { Reveal } from '../../components/Reveal';
 import { P, Screen } from '../../components/ui';
 import { isStandalone, isWeb } from '../../services/install';
 import { useSession } from '../../services/session';
@@ -26,12 +27,14 @@ export default function Mas() {
   const { account } = useSession();
   return (
     <Screen tabs>
-      {ITEMS.filter((i) => (!i.ownerOnly || account?.role === 'owner') && (!i.webOnly || (isWeb && !isStandalone()))).map((i) => (
-        <PressableScale key={i.href} accessibilityRole="button" accessibilityLabel={`${i.title}. ${i.hint}`} onPress={() => router.push(i.href)}
+      {ITEMS.filter((i) => (!i.ownerOnly || account?.role === 'owner') && (!i.webOnly || (isWeb && !isStandalone()))).map((i, n) => (
+        <Reveal key={i.href} id="mas" index={n}>
+        <PressableScale accessibilityRole="button" accessibilityLabel={`${i.title}. ${i.hint}`} onPress={() => router.push(i.href)}
           style={{ minHeight: MIN_TOUCH, backgroundColor: t.card, borderRadius: radius.lg, borderWidth: 1, borderColor: t.border, padding: space.lg, gap: space.sm }}>
           <Text style={{ color: t.text, fontSize: 17, fontWeight: '700' }}>{i.title}</Text>
           <P muted small>{i.hint}</P>
         </PressableScale>
+        </Reveal>
       ))}
     </Screen>
   );
