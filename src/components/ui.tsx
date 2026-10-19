@@ -57,8 +57,8 @@ export function P({ children, muted, small, style }: { children: ReactNode; mute
   return <Text style={[{ color: muted ? t.muted : t.text, fontSize: small ? size.caption : platform.body, lineHeight: small ? 18 : Math.round(platform.body * 1.4) }, style as never]}>{children}</Text>;
 }
 
-export function Button({ title, onPress, kind = 'primary', disabled, loading, accessibilityHint }: {
-  title: string; onPress: () => void; kind?: 'primary' | 'secondary' | 'danger'; disabled?: boolean; loading?: boolean; accessibilityHint?: string;
+export function Button({ title, onPress, kind = 'primary', disabled, loading, accessibilityHint, checked }: {
+  title: string; onPress: () => void; kind?: 'primary' | 'secondary' | 'danger'; disabled?: boolean; loading?: boolean; accessibilityHint?: string; /** Estado elegido: muestra una marca para que se vea que quedó guardado. */ checked?: boolean;
 }) {
   const t = useTheme();
   const bg = kind === 'primary' ? t.primary : kind === 'danger' ? t.danger : 'transparent';
@@ -72,7 +72,7 @@ export function Button({ title, onPress, kind = 'primary', disabled, loading, ac
         minHeight: MIN_TOUCH, borderRadius: platform.buttonRadius, paddingHorizontal: space.lg, alignItems: 'center', justifyContent: 'center',
         backgroundColor: bg, borderWidth: kind === 'secondary' ? 1.5 : 0, borderColor: t.primary, flexDirection: 'row', gap: space.sm,
       }}>
-      {loading ? <ActivityIndicator color={fg} /> : null}
+      {loading ? <ActivityIndicator color={fg} /> : checked ? <Ionicons name="checkmark-circle" size={20} color={fg} /> : null}
       <Text style={{ color: fg, fontSize: size.body, fontWeight: '600' }}>{title}</Text>
     </PressableScale>
   );

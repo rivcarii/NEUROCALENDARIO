@@ -1,7 +1,7 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import * as Haptics from 'expo-haptics';
 import { router } from 'expo-router';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Alert, View } from 'react-native';
 import { Text } from '../../components/Text';
 import { Deck } from '../../components/Deck';
@@ -9,6 +9,7 @@ import { Mascot } from '../../components/Mascot';
 import { PressableScale } from '../../components/PressableScale';
 import { Reveal } from '../../components/Reveal';
 import { Ring } from '../../components/Ring';
+import { SymptomDeck } from '../../components/SymptomDeck';
 import { UndoToast, type ToastAction } from '../../components/UndoToast';
 import { Button, Card, Empty, ErrorBox, H, Loading, P, Row, Screen, errorMessage, TapText, SectionTitle } from '../../components/ui';
 import { loadDay, type Dose } from '../../domain/day';
@@ -20,13 +21,6 @@ import { platform, space, useTheme } from '../../theme';
 import { font } from '../../theme/type';
 
 type IconName = React.ComponentProps<typeof Ionicons>['name'];
-
-const QUICK: { kind: string; icon: IconName }[] = [
-  { kind: 'Dolor de cabeza', icon: 'thunderstorm-outline' },
-  { kind: 'Mareo', icon: 'sync-outline' },
-  { kind: 'Temblor', icon: 'pulse-outline' },
-  { kind: 'Otro', icon: 'add-circle-outline' },
-];
 
 const PERIODS = [
   { key: 'manana', label: 'Por la mañana', icon: 'sunny-outline' as IconName, until: 12 },
@@ -48,9 +42,19 @@ export default function Hoy() {
   const { data, loading, error, reload } = useData(() => loadDay(store, profile.id, today), [today]);
   const [toast, setToast] = useState<Toast | null>(null);
   const closeToast = useCallback(() => setToast(null), []);
+  // Marca inmediata (antes de que termine de guardar y recargar): así se ve en el acto que «sí se marcó».
+  const [marked, setMarked] = useState<Record<string, 'tomada' | 'omitida'>>({});
+  const [flash, setFlash] = useState<string | null>(null);
+  useEffect(() => {
+    if (!flash) return;
+    const h = setTimeout(() => setFlash(null), 2200);
+    return () => clearTimeout(h);
+  }, [flash]);
   const show = (message: string, actions: ToastAction[]) => setToast((prev) => ({ id: (prev?.id ?? 0) + 1, message, actions }));
 
   async function markDose(medicationId: string, scheduleId: string, dueAt: string, status: 'tomada' | 'omitida', name: string) {
+    const key = dueAt + scheduleId;
+    setMarked((m) => ({ ...m, [key]: status }));
     try {
       const rec = await store.recordIntake(profile.id, {
         medicationId, scheduleId, scheduledAt: dueAt, status,
@@ -60,14 +64,18 @@ export default function Hoy() {
       void (status === 'tomada' ? Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success) : Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)).catch(() => undefined);
       show(status === 'tomada' ? `Anotado: tomó ${name}` : `Anotado: no tomó ${name}`, [{
         label: 'Deshacer',
-        onPress: () => { void store.remove('intake', profile.id, rec.id).then(() => { bump(); closeToast(); }).catch((e) => Alert.alert('No se pudo deshacer', errorMessage(e))); },
+        onPress: () => { void store.remove('intake', profile.id, rec.id).then(() => { setMarked((m) => { const { [key]: _x, ...rest } = m; return rest; }); bump(); closeToast(); }).catch((e) => Alert.alert('No se pudo deshacer', errorMessage(e))); },
       }]);
-    } catch (e) { Alert.alert('No se pudo guardar', errorMessage(e)); }
+    } catch (e) {
+      setMarked((m) => { const { [key]: _x, ...rest } = m; return rest; });
+      Alert.alert('No se pudo guardar', errorMessage(e));
+    }
   }
 
   async function quick(kind: string) {
     try {
       const ep = await store.create('episode', profile.id, { startedAt: new Date().toISOString(), kind, isQuick: true });
+      setFlash(kind);
       bump();
       void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => undefined);
       const setIntensity = (n: number) => { void store.update('episode', profile.id, ep.id, { intensity: n }).then(() => { bump(); closeToast(); }).catch((e) => Alert.alert('No se pudo guardar', errorMessage(e))); };
@@ -81,22 +89,27 @@ export default function Hoy() {
   }
 
   const doses = data?.doses ?? [];
-  const settled = (d: Dose) => !!d.intake && d.intake.status !== 'pospuesta';
+  const statusOf = (d: Dose): string | null => marked[d.dueAt + d.schedule.id] ?? d.intake?.status ?? null;
+  const settled = (d: Dose) => { const st = statusOf(d); return st !== null && st !== 'pospuesta'; };
+  const counts: Record<string, number> = {};
+  for (const e of data?.episodes ?? []) counts[e.kind] = (counts[e.kind] ?? 0) + 1;
   const done = doses.filter(settled).length;
   const next = doses.find((d) => !settled(d));
   const hour = new Date().getHours();
 
   function doseCard(d: Dose) {
+    const st = statusOf(d);
+    const takenAt = d.intake?.status === 'tomada' ? d.intake.takenAt : null;
     return (
-      <Card key={d.dueAt + d.schedule.id}>
+      <Card key={d.dueAt + d.schedule.id} style={st === 'tomada' ? { borderColor: t.success, borderWidth: 1.5 } : undefined}>
         <Text style={{ color: t.text, fontSize: 17, fontWeight: '600' }}>{formatTime(d.dueAt)} · {d.medication.name}</Text>
         {d.medication.doseText ? <P muted small>{d.medication.doseText}</P> : null}
-        {d.intake ? (
-          <P>{d.intake.status === 'tomada' ? `✔ La tomé${d.intake.takenAt ? ` a las ${formatTime(d.intake.takenAt)}` : ''}` : `Anotada: «${INTAKE_LABEL[d.intake.status] ?? d.intake.status}»`}</P>
+        {st ? (
+          <P>{st === 'tomada' ? `✔ La tomé${takenAt ? ` a las ${formatTime(takenAt)}` : ''}` : `Anotada: «${INTAKE_LABEL[st] ?? st}»`}</P>
         ) : null}
         <Row>
-          <Button title="La tomé" kind={d.intake?.status === 'tomada' ? 'primary' : 'secondary'} onPress={() => void markDose(d.medication.id, d.schedule.id, d.dueAt, 'tomada', d.medication.name)} />
-          <Button title="No la tomé" kind="secondary" onPress={() => void markDose(d.medication.id, d.schedule.id, d.dueAt, 'omitida', d.medication.name)} />
+          <Button title="La tomé" kind={st === 'tomada' ? 'primary' : 'secondary'} checked={st === 'tomada'} onPress={() => void markDose(d.medication.id, d.schedule.id, d.dueAt, 'tomada', d.medication.name)} />
+          <Button title="No la tomé" kind={st === 'omitida' ? 'danger' : 'secondary'} checked={st === 'omitida'} onPress={() => void markDose(d.medication.id, d.schedule.id, d.dueAt, 'omitida', d.medication.name)} />
         </Row>
       </Card>
     );
@@ -153,17 +166,8 @@ export default function Hoy() {
       <Reveal id="hoy" index={3}><Deck>
         <Card>
           <H level={2}>Anotar ahora</H>
-          <P muted small>Un toque guarda el síntoma con la hora de ahora en el perfil de {profile.displayName}. Después puede decir qué tan fuerte fue.</P>
-          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: space.sm }}>
-            {QUICK.map((q) => (
-              <PressableScale key={q.kind} accessibilityRole="button" accessibilityLabel={q.kind} onPress={() => void quick(q.kind)}
-                containerStyle={{ flexBasis: '48%', flexGrow: 1 }}
-                style={{ minHeight: 68, borderRadius: 20, backgroundColor: t.chip, alignItems: 'center', justifyContent: 'center', gap: 4, paddingVertical: 10, borderCurve: 'continuous' }}>
-                <Ionicons name={q.icon} size={24} color={t.primary} />
-                <Text style={{ color: t.text, fontWeight: '600' }}>{q.kind}</Text>
-              </PressableScale>
-            ))}
-          </View>
+          <P muted small>Elija el tipo de afección y toque el síntoma: se guarda con la hora de ahora en el perfil de {profile.displayName}. Deslice para ver más tipos.</P>
+          <SymptomDeck counts={counts} flash={flash} onPick={(k) => void quick(k)} />
           <Button title="Anotar con más detalle" onPress={() => router.push('/episodio/nuevo')} />
         </Card>
       </Deck></Reveal>
