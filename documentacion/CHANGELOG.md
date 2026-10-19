@@ -1,6 +1,7 @@
 # Registro de cambios
 
 ## 0.1.0 — 19-oct-2026 (versión de pruebas)
+- Hoy rediseñada (investigación de apps de salud: una acción clara a la vez, estado de un vistazo para cuidadores, registro en pocos toques con deshacer, lenguaje sencillo): saludo, anillo de avance de medicinas, tarjeta «Siguiente medicina» con «Ya la tomé», medicinas agrupadas por mañana/tarde/noche, síntomas rápidos con iconos que preguntan «¿Qué tan fuerte fue?» (Leve/Media/Fuerte) y aviso con «Deshacer» para tomas y síntomas.
 - Aplicación base Expo SDK 58 / React Native 0.88 con Expo Router y TypeScript estricto.
 - Datos locales en SQLite con migraciones versionadas, transacciones, auditoría sin contenido clínico.
 - Perfiles independientes, permisos por perfil (`read`/`write`/`admin`), cuentas familiares (modelo local).
