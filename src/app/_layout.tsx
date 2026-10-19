@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 import { Text } from '../components/Text';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { Mascot } from '../components/Mascot';
 import { Button, Card, H, P, Screen, TextField } from '../components/ui';
 import { configureNotifications, rescheduleAll } from '../services/notifications';
 import { SessionProvider, useSession } from '../services/session';
@@ -79,14 +80,16 @@ function Onboarding() {
   const [err, setErr] = useState<string | null>(null);
   return (
     <Screen>
+      <View style={{ alignItems: 'center' }}><Mascot mood="hola" size={150} entrance /></View>
       <H>Bienvenido a NeuroCalendario</H>
-      <P muted>Seguimiento neurológico personal y familiar. Los datos se guardan en este dispositivo. No sustituye la atención de un profesional sanitario.</P>
+      <P>¡Hola! Soy Nuri y voy a acompañarle.</P>
+      <P muted>Un diario para anotar cómo se siente, sus medicinas y sus citas, y compartirlo con su médico. Sus datos se guardan solo en este teléfono. No reemplaza la atención médica.</P>
       <Card>
-        <TextField label="Su nombre (propietario de la aplicación)" value={owner} onChangeText={setOwner} autoCapitalize="words" />
-        <TextField label="Nombre de la persona principal de seguimiento" value={person} onChangeText={setPerson} autoCapitalize="words" hint="Podrá crear más perfiles después, cada uno con su historial independiente." />
-        <TextField label="Parentesco o relación" value={rel} onChangeText={setRel} />
+        <TextField label="Su nombre (quien administra la app)" value={owner} onChangeText={setOwner} autoCapitalize="words" />
+        <TextField label="¿A quién va a acompañar principalmente?" value={person} onChangeText={setPerson} autoCapitalize="words" hint="Después podrá añadir a otras personas, cada una con su propio historial." />
+        <TextField label="¿Qué es suya esa persona? (mamá, yo…)" value={rel} onChangeText={setRel} />
       </Card>
-      <P muted small>Use esta aplicación solo con datos de personas que le hayan autorizado a registrarlos. Cada perfil tiene su propio historial y nunca se mezclan.</P>
+      <P muted small>Anote datos de otra persona solo si ella lo sabe y está de acuerdo. Cada persona tiene su propio historial y nunca se mezclan.</P>
       {err ? <Text accessibilityRole="alert" style={{ color: t.danger }}>{err}</Text> : null}
       <Button
         title="Comenzar" loading={busy} disabled={!owner.trim() || !person.trim()}

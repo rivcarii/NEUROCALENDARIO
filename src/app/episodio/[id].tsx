@@ -13,7 +13,7 @@ import { useActive, useSession } from '../../services/session';
 import { useData } from '../../services/useData';
 
 const form = z.object({
-  kind: z.string().trim().min(1, 'Indique el tipo de episodio'),
+  kind: z.string().trim().min(1, 'Cuéntenos qué sintió'),
   startDate: z.string().min(1, 'Indique la fecha de inicio'),
   startTime: z.string().min(1, 'Indique la hora de inicio'),
   endDate: z.string().nullable(),
@@ -104,64 +104,64 @@ export default function EpisodioForm() {
   });
 
   async function remove() {
-    if (!(await confirmDestructive('¿Eliminar episodio?', 'Se eliminará este episodio de forma permanente.', 'Eliminar'))) return;
+    if (!(await confirmDestructive('¿Borrar este síntoma?', 'Se borrará de forma permanente. No se puede deshacer.', 'Eliminar'))) return;
     try { await store.remove('episode', lockedProfile, id); bump(); router.back(); } catch (e) { Alert.alert('No se pudo eliminar', errorMessage(e)); }
   }
 
   if (loading && !data) return <Loading />;
   if (error) return <ErrorBox message={error} onRetry={reload} />;
-  if (!isNew && !data?.episode) return <Screen><P>Este episodio no existe en el perfil activo.</P><Button title="Volver" onPress={() => router.back()} /></Screen>;
+  if (!isNew && !data?.episode) return <Screen><P>Este síntoma no está en el perfil activo.</P><Button title="Volver" onPress={() => router.back()} /></Screen>;
 
   return (
     <>
-      <Stack.Screen options={{ title: isNew ? 'Nuevo episodio' : 'Editar episodio' }} />
+      <Stack.Screen options={{ title: isNew ? 'Anotar un síntoma' : 'Editar síntoma' }} />
       <ProfileBar name={profile.displayName} color={profile.color} label="Se guardará en" />
       <Screen>
         <Controller control={control} name="kind" render={({ field }) => (
           <>
-            <Chips label="Tipo de episodio" options={EPISODE_KINDS.map((k) => ({ value: k, label: k }))} value={field.value} onChange={field.onChange} />
-            <TextField label="Otro tipo / descripción breve" value={field.value} onChangeText={field.onChange} error={errors.kind?.message} />
+            <Chips label="¿Qué sintió?" options={EPISODE_KINDS.map((k) => ({ value: k, label: k }))} value={field.value} onChange={field.onChange} />
+            <TextField label="Otro, o descríbalo con sus palabras" value={field.value} onChangeText={field.onChange} error={errors.kind?.message} />
           </>
         )} />
-        <DateTimeField label="Inicio" date={v.startDate} time={v.startTime} error={errors.startDate?.message ?? errors.startTime?.message}
+        <DateTimeField label="¿Cuándo empezó?" date={v.startDate} time={v.startTime} error={errors.startDate?.message ?? errors.startTime?.message}
           onChange={(d, tm) => { if (d) setValue('startDate', d, { shouldValidate: true }); if (tm) setValue('startTime', tm, { shouldValidate: true }); }} />
-        <DateTimeField label="Finalización (opcional)" optional date={v.endDate} time={v.endTime} error={errors.endDate?.message}
+        <DateTimeField label="¿Cuándo terminó? (opcional)" optional date={v.endDate} time={v.endTime} error={errors.endDate?.message}
           onChange={(d, tm) => { setValue('endDate', d, { shouldValidate: true }); setValue('endTime', tm, { shouldValidate: true }); }} />
-        <Card><P>Duración calculada: <Text style={{ fontWeight: '700' }}>{formatDuration(dur)}</Text></P></Card>
+        <Card><P>Duró: <Text style={{ fontWeight: '700' }}>{formatDuration(dur)}</Text></P></Card>
 
         <Controller control={control} name="intensity" render={({ field }) => (
-          <Chips label="Intensidad subjetiva (0 = ninguna, 10 = máxima)" options={scale} value={field.value} onChange={(x) => field.onChange(field.value === x ? null : x)} />
+          <Chips label="¿Qué tan fuerte fue? (0 = nada, 10 = lo peor)" options={scale} value={field.value} onChange={(x) => field.onChange(field.value === x ? null : x)} />
         )} />
 
-        {!full ? <Button title="Mostrar campos completos" kind="secondary" onPress={() => setFull(true)} /> : (
+        {!full ? <Button title="Añadir más detalles" kind="secondary" onPress={() => setFull(true)} /> : (
           <>
             <Controller control={control} name="associated" render={({ field }) => (
-              <Chips multi label="Síntomas asociados" options={ASSOCIATED_SYMPTOMS.map((k) => ({ value: k, label: k }))} value={field.value}
+              <Chips multi label="¿Sintió también…?" options={ASSOCIATED_SYMPTOMS.map((k) => ({ value: k, label: k }))} value={field.value}
                 onChange={(x) => field.onChange(field.value.includes(x) ? field.value.filter((y) => y !== x) : [...field.value, x])} />
             )} />
             <Controller control={control} name="context" render={({ field }) => (
-              <TextField label="Contexto y actividad previa" value={field.value} onChangeText={field.onChange} multiline numberOfLines={3} />
+              <TextField label="¿Qué estaba haciendo antes?" value={field.value} onChangeText={field.onChange} multiline numberOfLines={3} />
             )} />
             <Controller control={control} name="sleepHours" render={({ field }) => (
-              <TextField label="Horas de sueño previas (opcional)" value={field.value} onChangeText={field.onChange} keyboardType="decimal-pad" error={errors.sleepHours?.message} />
+              <TextField label="¿Cuántas horas durmió antes? (opcional)" value={field.value} onChangeText={field.onChange} keyboardType="decimal-pad" error={errors.sleepHours?.message} />
             )} />
             <Controller control={control} name="stress" render={({ field }) => (
-              <Chips label="Nivel de estrés percibido (opcional)" options={scale} value={field.value} onChange={(x) => field.onChange(field.value === x ? null : x)} />
+              <Chips label="¿Cuánto estrés sentía? (opcional)" options={scale} value={field.value} onChange={(x) => field.onChange(field.value === x ? null : x)} />
             )} />
             <Controller control={control} name="triggers" render={({ field }) => (
-              <TextField label="Posibles desencadenantes según el usuario" value={field.value} onChangeText={field.onChange} hint="Separados por comas. Son percepciones, no causas demostradas." />
+              <TextField label="¿Qué cree que lo provocó?" value={field.value} onChangeText={field.onChange} hint="Sepárelos con comas. Es lo que usted percibe; no es una causa comprobada." />
             )} />
             {data?.meds.length ? (
               <Controller control={control} name="meds" render={({ field }) => (
-                <Chips multi label="Medicamentos relacionados" options={data.meds.map((m) => ({ value: m.id, label: m.name }))} value={field.value}
+                <Chips multi label="¿Tomó alguna medicina cerca de ese momento?" options={data.meds.map((m) => ({ value: m.id, label: m.name }))} value={field.value}
                   onChange={(x) => field.onChange(field.value.includes(x) ? field.value.filter((y) => y !== x) : [...field.value, x])} />
               )} />
             ) : null}
             <Controller control={control} name="recovery" render={({ field }) => (
-              <Chips label="Estado de recuperación" options={RECOVERY.map((r) => ({ value: r, label: RECOVERY_LABEL[r]! }))} value={field.value} onChange={field.onChange} />
+              <Chips label="¿Cómo quedó después?" options={RECOVERY.map((r) => ({ value: r, label: RECOVERY_LABEL[r]! }))} value={field.value} onChange={field.onChange} />
             )} />
             <Controller control={control} name="notes" render={({ field }) => (
-              <TextField label="Observaciones" value={field.value} onChangeText={field.onChange} multiline numberOfLines={4} />
+              <TextField label="Algo más que quiera anotar" value={field.value} onChangeText={field.onChange} multiline numberOfLines={4} />
             )} />
           </>
         )}
@@ -169,7 +169,7 @@ export default function EpisodioForm() {
           <P muted small>Creado por {data.episode.createdBy === store.accountId ? 'usted' : 'otra cuenta'} · última modificación por {data.episode.updatedBy === store.accountId ? 'usted' : 'otra cuenta'}.</P>
         ) : null}
         <Button title="Guardar" onPress={onSubmit} loading={busy} />
-        {!isNew ? <Button title="Eliminar episodio" kind="danger" onPress={() => void remove()} /> : null}
+        {!isNew ? <Button title="Borrar este síntoma" kind="danger" onPress={() => void remove()} /> : null}
       </Screen>
     </>
   );

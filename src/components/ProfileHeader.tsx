@@ -21,7 +21,7 @@ export function ProfileHeader({ title }: { title: string }) {
         </Text>
       </View>
       {profiles.length > 1 ? (
-        <Pressable accessibilityRole="button" accessibilityLabel="Cambiar de perfil" onPress={() => router.push('/perfiles')}
+        <Pressable accessibilityRole="button" accessibilityLabel="Cambiar de persona" onPress={() => router.push('/perfiles')}
           style={{ minHeight: 44, minWidth: 44, justifyContent: 'center', paddingHorizontal: space.md, borderRadius: 8, backgroundColor: t.headerButton }}>
           <Text style={{ color: t.onHeader, fontWeight: '700' }}>Cambiar</Text>
         </Pressable>

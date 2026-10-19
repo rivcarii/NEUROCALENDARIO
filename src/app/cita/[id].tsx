@@ -62,7 +62,7 @@ function CitaEditor({ id, isNew, pid, initial, fecha }: { id: string; isNew: boo
         <TextField label="Profesional o centro" value={provider} onChangeText={setProvider} />
         <TextField label="Lugar" value={location} onChangeText={setLocation} />
         <Chips label="Estado" options={[{ value: 'programada', label: 'Programada' }, { value: 'realizada', label: 'Realizada' }, { value: 'cancelada', label: 'Cancelada' }]} value={status} onChange={setStatus} />
-        <Chips label="Recordatorio" options={REMIND} value={remind} onChange={setRemind} />
+        <Chips label="Avisarme" options={REMIND} value={remind} onChange={setRemind} />
         <TextField label="Notas" value={notes} onChangeText={setNotes} multiline numberOfLines={3} />
         <Button title="Guardar" onPress={save} loading={busy} />
         {!isNew ? <Button title="Eliminar cita" kind="danger" onPress={() => void remove()} /> : null}

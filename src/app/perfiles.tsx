@@ -9,22 +9,22 @@ export default function Perfiles() {
   const t = useTheme();
   return (
     <>
-      <Stack.Screen options={{ title: 'Perfiles' }} />
+      <Stack.Screen options={{ title: 'Personas' }} />
       <Screen>
-        <P muted>Cada perfil tiene su propio calendario, episodios, medicación, citas, exámenes, documentos e informes. Nunca se mezclan.</P>
+        <P muted>Cada persona tiene su propio calendario, síntomas, medicinas, citas, estudios, documentos y resúmenes. Nunca se mezclan.</P>
         {profiles.map((p) => (
           <Card key={p.id} style={{ borderColor: p.color, borderWidth: 2 }}>
             <Text style={{ color: t.text, fontSize: 18, fontWeight: '700' }}>{p.displayName}{p.isPrimary ? ' · principal' : ''}</Text>
             <P muted small>{p.relationship || 'Sin relación indicada'}</P>
             <Row>
-              {activeProfile?.id === p.id ? <P>✔ Perfil activo</P> : (
-                <Button title="Usar este perfil" onPress={async () => { await setActiveProfile(p.id); router.replace('/'); }} />
+              {activeProfile?.id === p.id ? <P>✔ Es quien ve ahora</P> : (
+                <Button title="Ver a esta persona" onPress={async () => { await setActiveProfile(p.id); router.replace('/'); }} />
               )}
               {account?.role === 'owner' ? <Button title="Editar / eliminar" kind="secondary" onPress={() => router.push(`/perfil/${p.id}`)} /> : null}
             </Row>
           </Card>
         ))}
-        {account?.role === 'owner' ? <Button title="Crear perfil nuevo" onPress={() => router.push('/perfil/nuevo')} /> : null}
+        {account?.role === 'owner' ? <Button title="Añadir una persona" onPress={() => router.push('/perfil/nuevo')} /> : null}
       </Screen>
     </>
   );

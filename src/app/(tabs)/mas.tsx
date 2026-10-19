@@ -6,16 +6,16 @@ import { useSession } from '../../services/session';
 import { MIN_TOUCH, radius, space, useTheme } from '../../theme';
 
 const ITEMS: { title: string; hint: string; href: string; ownerOnly?: boolean }[] = [
-  { title: 'Citas médicas', hint: 'Próximas citas y recordatorios', href: '/citas' },
-  { title: 'Exámenes y resultados', hint: 'Estudios pedidos y sus resultados', href: '/examenes' },
+  { title: 'Mis citas', hint: 'Próximas citas y recordatorios', href: '/citas' },
+  { title: 'Estudios y resultados', hint: 'Estudios pedidos y sus resultados', href: '/examenes' },
   { title: 'Documentos', hint: 'PDF y fotos en almacenamiento privado', href: '/documentos' },
   { title: 'Notas', hint: 'Notas personales y del cuidador', href: '/notas' },
-  { title: 'Estadísticas', hint: 'Frecuencia, duración e intensidad', href: '/estadisticas' },
-  { title: 'Informes PDF', hint: 'Para llevar a la consulta', href: '/informes' },
-  { title: 'Perfiles', hint: 'Cambiar o crear perfiles', href: '/perfiles' },
-  { title: 'Copias de seguridad', hint: 'Exportar y restaurar (cifrado)', href: '/respaldo' },
+  { title: 'Cómo he estado', hint: 'Cuántas veces, cuánto duran y qué tan fuertes', href: '/estadisticas' },
+  { title: 'Resumen para el médico', hint: 'Para llevar a su cita', href: '/informes' },
+  { title: 'Personas', hint: 'Cambiar de persona o añadir otra', href: '/perfiles' },
+  { title: 'Respaldo de sus datos', hint: 'Guardar y recuperar sus datos (con clave)', href: '/respaldo' },
   { title: 'Acceso familiar', hint: 'Cuentas y permisos', href: '/acceso', ownerOnly: true },
-  { title: 'Privacidad y ajustes', hint: 'Bloqueo, notificaciones, eliminar datos', href: '/ajustes' },
+  { title: 'Privacidad y ajustes', hint: 'Bloqueo, avisos y borrar datos', href: '/ajustes' },
   { title: 'Acerca de y avisos', hint: 'Qué hace y qué no hace esta app', href: '/acerca' },
 ];
 

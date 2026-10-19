@@ -20,11 +20,11 @@ export default function TabsLayout() {
       tabBarActiveTintColor: t.primary, tabBarStyle: { backgroundColor: t.card, minHeight: 60 },
       tabBarLabelStyle: { fontSize: 12, fontFamily: font.body }, animation: 'none',
     }}>
-      <Tabs.Screen name="index" options={{ title: 'Hoy', tabBarIcon: icon('today', 'today-outline'), header: () => <ProfileHeader title="Resumen de hoy" /> }} />
+      <Tabs.Screen name="index" options={{ title: 'Hoy', tabBarIcon: icon('today', 'today-outline'), header: () => <ProfileHeader title="Mi día" /> }} />
       <Tabs.Screen name="calendario" options={{ title: 'Calendario', tabBarIcon: icon('calendar', 'calendar-outline'), header: () => <ProfileHeader title="Calendario" /> }} />
-      <Tabs.Screen name="episodios" options={{ title: 'Episodios', tabBarIcon: icon('pulse', 'pulse-outline'), header: () => <ProfileHeader title="Historial de episodios" /> }} />
-      <Tabs.Screen name="medicacion" options={{ title: 'Medicación', tabBarIcon: icon('medkit', 'medkit-outline'), header: () => <ProfileHeader title="Medicación" /> }} />
-      <Tabs.Screen name="mas" options={{ title: 'Más', tabBarIcon: icon('menu', 'menu-outline'), header: () => <ProfileHeader title="Más opciones" /> }} />
+      <Tabs.Screen name="episodios" options={{ title: 'Síntomas', tabBarIcon: icon('pulse', 'pulse-outline'), header: () => <ProfileHeader title="Mis síntomas" /> }} />
+      <Tabs.Screen name="medicacion" options={{ title: 'Medicinas', tabBarIcon: icon('medkit', 'medkit-outline'), header: () => <ProfileHeader title="Mis medicinas" /> }} />
+      <Tabs.Screen name="mas" options={{ title: 'Más', tabBarIcon: icon('menu', 'menu-outline'), header: () => <ProfileHeader title="Más" /> }} />
     </Tabs>
   );
 }

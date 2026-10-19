@@ -11,7 +11,7 @@ REPORT_HTML_OUT="$OUT/informe.html" npx jest tests/reportSample.test.ts >/dev/nu
 "$CHROME" --headless --no-sandbox --disable-gpu --no-pdf-header-footer --print-to-pdf="$OUT/informe.pdf" "file://$OUT/informe.html" >/dev/null 2>&1
 pdftotext -layout "$OUT/informe.pdf" "$OUT/informe.txt"
 fail=0
-for needle in "Informe de seguimiento neurológico" "Perfil Mamá (ficticio)" "01/03/2026 a 31/03/2026" "no constituye un diagnóstico" "Episodios neurológicos" "Medicamentos" "Citas médicas" "Exámenes y resultados" "Informe médico" "Observación ficticia 3 & <b>"; do
+for needle in "Resumen de seguimiento neurológico" "Perfil Mamá (ficticio)" "01/03/2026 a 31/03/2026" "no constituye un diagnóstico" "Síntomas" "Medicinas" "Citas médicas" "Estudios y resultados" "Informe del médico" "Observación ficticia 3 & <b>"; do
   if grep -qF "$needle" "$OUT/informe.txt"; then echo "OK   $needle"; else echo "FALTA $needle"; fail=1; fi
 done
 echo "Páginas: $(pdfinfo "$OUT/informe.pdf" | awk '/Pages/{print $2}')  Archivo: $OUT/informe.pdf"

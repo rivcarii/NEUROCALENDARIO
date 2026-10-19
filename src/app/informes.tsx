@@ -11,7 +11,7 @@ import { useActive } from '../services/session';
 
 const PRESETS = [{ value: 30, label: '30 días' }, { value: 90, label: '90 días' }, { value: 365, label: '1 año' }, { value: 0, label: 'Personalizado' }];
 const LABELS: Record<keyof ReportSections, string> = {
-  episodes: 'Episodios y estadísticas', medications: 'Medicamentos y tomas', appointments: 'Citas', exams: 'Exámenes y resultados', notes: 'Notas',
+  episodes: 'Síntomas y cómo ha estado', medications: 'Medicinas y lo que tomó', appointments: 'Citas', exams: 'Estudios y resultados', notes: 'Notas',
 };
 
 export default function Informes() {
@@ -48,17 +48,17 @@ export default function Informes() {
       if (out.exists) out.delete();
       new File(uri).move(out);
       await store.logReport(profile.id, from, to, Object.entries(sections).filter(([, v]) => v).map(([k]) => k));
-      if (await Sharing.isAvailableAsync()) await Sharing.shareAsync(out.uri, { mimeType: 'application/pdf', dialogTitle: 'Informe de seguimiento', UTI: 'com.adobe.pdf' });
-      else Alert.alert('Informe generado', `Archivo: ${out.uri}`);
-    } catch (e) { Alert.alert('No se pudo generar el informe', errorMessage(e)); } finally { setBusy(false); }
+      if (await Sharing.isAvailableAsync()) await Sharing.shareAsync(out.uri, { mimeType: 'application/pdf', dialogTitle: 'Resumen de seguimiento', UTI: 'com.adobe.pdf' });
+      else Alert.alert('Resumen listo', `Archivo: ${out.uri}`);
+    } catch (e) { Alert.alert('No se pudo crear el resumen', errorMessage(e)); } finally { setBusy(false); }
   }
 
   return (
     <>
-      <Stack.Screen options={{ title: 'Informes PDF' }} />
-      <ProfileBar name={profile.displayName} color={profile.color} label="Informe de" />
+      <Stack.Screen options={{ title: 'Resumen para el médico' }} />
+      <ProfileBar name={profile.displayName} color={profile.color} label="Resumen de" />
       <Screen>
-        <Chips label="Período" options={PRESETS} value={preset} onChange={pick} />
+        <Chips label="¿De cuándo?" options={PRESETS} value={preset} onChange={pick} />
         {preset === 0 ? (
           <>
             <DateTimeField label="Desde" withTime={false} date={from} onChange={(d) => d && setFrom(d)} />
@@ -74,8 +74,8 @@ export default function Informes() {
           ))}
         </Card>
         <P muted small>{DISCLAIMER}</P>
-        <P muted small>El PDF se genera en el dispositivo. Al compartirlo, usted decide con quién. Quien lo reciba lo tendrá fuera de la protección de esta aplicación.</P>
-        <Button title="Generar y compartir PDF" onPress={generate} loading={busy} />
+        <P muted small>El PDF se crea en su teléfono. Al compartirlo, usted decide con quién. Quien lo reciba ya no estará protegido por esta aplicación.</P>
+        <Button title="Crear y compartir PDF" onPress={generate} loading={busy} />
       </Screen>
     </>
   );

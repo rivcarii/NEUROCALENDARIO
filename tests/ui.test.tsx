@@ -37,8 +37,8 @@ async function boot(seed?: (owner: Store, ids: { mom: string; me: string }) => P
 
 async function onboard() {
   await screen.findByText('Bienvenido a NeuroCalendario');
-  await fireEvent.changeText(screen.getByLabelText('Su nombre (propietario de la aplicación)'), 'Propietario Ficticio');
-  await fireEvent.changeText(screen.getByLabelText('Nombre de la persona principal de seguimiento'), 'Mamá Ficticia');
+  await fireEvent.changeText(screen.getByLabelText('Su nombre (quien administra la app)'), 'Propietario Ficticio');
+  await fireEvent.changeText(screen.getByLabelText('¿A quién va a acompañar principalmente?'), 'Mamá Ficticia');
   await fireEvent.press(screen.getByRole('button', { name: 'Comenzar' }));
 }
 
@@ -51,7 +51,7 @@ describe('flujos de interfaz con SQLite real', () => {
     await boot();
     await onboard();
     expect(await screen.findByText('Mamá Ficticia')).toBeTruthy();
-    expect(screen.getByText('Registro rápido')).toBeTruthy();
+    expect(screen.getByText('Anotar ahora')).toBeTruthy();
     const rows = await holder.db!.all<{ display_name: string }>('SELECT display_name FROM profiles');
     expect(rows.map((r) => r.display_name)).toEqual(['Mamá Ficticia']);
   });
@@ -59,19 +59,19 @@ describe('flujos de interfaz con SQLite real', () => {
   it('el registro rápido guarda en SQLite y aparece en el historial', async () => {
     await boot();
     await onboard();
-    await screen.findByText('Registro rápido');
-    await fireEvent.press(screen.getByRole('button', { name: 'Cefalea' }));
+    await screen.findByText('Anotar ahora');
+    await fireEvent.press(screen.getByRole('button', { name: 'Dolor de cabeza' }));
     await waitFor(async () => {
       const n = await holder.db!.get<{ n: number }>('SELECT COUNT(*) AS n FROM episodes');
       expect(n!.n).toBe(1);
     });
     const ep = await holder.db!.get<{ kind: string; is_quick: number; profile_id: string; created_by: string }>('SELECT * FROM episodes');
-    expect(ep).toMatchObject({ kind: 'Cefalea', is_quick: 1 });
+    expect(ep).toMatchObject({ kind: 'Dolor de cabeza', is_quick: 1 });
     const prof = await holder.db!.get<{ id: string }>('SELECT id FROM profiles');
     expect(ep!.profile_id).toBe(prof!.id);
-    await fireEvent.press(screen.getAllByText('Episodios')[0]!);
-    expect(await screen.findByText('Nuevo episodio')).toBeTruthy();
-    expect((await screen.findAllByText('Cefalea')).length).toBeGreaterThan(0);
+    await fireEvent.press(screen.getAllByText('Síntomas')[0]!);
+    expect(await screen.findByText('Anotar un síntoma')).toBeTruthy();
+    expect((await screen.findAllByText('Dolor de cabeza')).length).toBeGreaterThan(0);
   });
 });
 
@@ -82,14 +82,14 @@ describe('separación de perfiles en la interfaz', () => {
       await o.create('episode', ids.me, { startedAt: new Date().toISOString(), kind: 'EPISODIO-PROPIO' });
     });
     expect(await screen.findByText('Mamá Ficticia')).toBeTruthy();
-    await fireEvent.press(screen.getAllByText('Episodios')[0]!);
+    await fireEvent.press(screen.getAllByText('Síntomas')[0]!);
     expect(await screen.findByText('EPISODIO-DE-MAMA')).toBeTruthy();
     expect(screen.queryByText('EPISODIO-PROPIO')).toBeNull();
 
     await testRouter.push('/perfiles');
-    await fireEvent.press(await screen.findByText('Usar este perfil'));
+    await fireEvent.press(await screen.findByText('Ver a esta persona'));
     expect(await screen.findByText('Perfil Propio Ficticio')).toBeTruthy();
-    await fireEvent.press(screen.getAllByText('Episodios')[0]!);
+    await fireEvent.press(screen.getAllByText('Síntomas')[0]!);
     expect(await screen.findByText('EPISODIO-PROPIO')).toBeTruthy();
     expect(screen.queryByText('EPISODIO-DE-MAMA')).toBeNull();
   });
@@ -98,15 +98,15 @@ describe('separación de perfiles en la interfaz', () => {
 describe('formulario de episodio', () => {
   it('valida el tipo obligatorio y guarda en el perfil activo', async () => {
     await boot(async () => undefined);
-    await screen.findByText('Registro rápido');
+    await screen.findByText('Anotar ahora');
     await testRouter.push('/episodio/nuevo');
     expect(await screen.findByText(/Se guardará en: Mamá Ficticia/)).toBeTruthy();
 
     await fireEvent.press(screen.getByRole('button', { name: 'Guardar' }));
-    expect(await screen.findByText('Indique el tipo de episodio')).toBeTruthy();
+    expect(await screen.findByText('Cuéntenos qué sintió')).toBeTruthy();
     expect((await holder.db!.get<{ n: number }>('SELECT COUNT(*) AS n FROM episodes'))!.n).toBe(0);
 
-    await fireEvent.changeText(screen.getByLabelText('Otro tipo / descripción breve'), 'Temblor (ficticio)');
+    await fireEvent.changeText(screen.getByLabelText('Otro, o descríbalo con sus palabras'), 'Temblor (ficticio)');
     await fireEvent.press(screen.getByRole('button', { name: 'Guardar' }));
     await waitFor(async () => {
       expect((await holder.db!.get<{ n: number }>('SELECT COUNT(*) AS n FROM episodes'))!.n).toBe(1);

@@ -5,6 +5,7 @@ import { PressableScale } from '../../components/PressableScale';
 import { Text } from '../../components/Text';
 import { Button, Card, Chips, ErrorBox, H, Loading, P, Row, Screen, TapText } from '../../components/ui';
 import { loadDay, loadMonthMarks, type DayData } from '../../domain/day';
+import { INTAKE_LABEL } from '../../domain/labels';
 import { addDays, DIAS_CORTOS, durationMinutes, formatDateLong, formatDuration, formatTime, localDateKey, monthGrid, monthName, startOfWeek } from '../../domain/time';
 import { useActive } from '../../services/session';
 import { useData } from '../../services/useData';
@@ -56,7 +57,7 @@ export default function Calendario() {
               const sel = k === selected;
               return (
                 <PressableScale key={k} accessibilityRole="button"
-                  accessibilityLabel={`${formatDateLong(k)}. ${mk?.episodes ?? 0} episodios, ${mk?.appointments ?? 0} citas`}
+                  accessibilityLabel={`${formatDateLong(k)}. ${mk?.episodes ?? 0} síntomas, ${mk?.appointments ?? 0} citas`}
                   onPress={() => setSelected(k)}
                   containerStyle={{ width: `${100 / 7}%` }}
                   style={{ width: '100%', minHeight: MIN_TOUCH + 8, alignItems: 'center', justifyContent: 'center', borderRadius: 8,
@@ -71,7 +72,7 @@ export default function Calendario() {
               );
             })}
           </View>
-          <P muted small>● rojo: episodios · verde: citas · ámbar: exámenes</P>
+          <P muted small>● rojo: síntomas · verde: citas · ámbar: estudios</P>
         </View>
       ) : null}
       {month.error ? <ErrorBox message={month.error} onRetry={month.reload} /> : null}
@@ -80,7 +81,7 @@ export default function Calendario() {
       {day.loading && !day.data ? <Loading /> : null}
       {day.error ? <ErrorBox message={day.error} onRetry={day.reload} /> : null}
       {day.data ? <DayDetail d={day.data} /> : null}
-      <Button title="Agregar episodio en este día" kind="secondary" onPress={() => router.push('/episodio/nuevo')} />
+      <Button title="Anotar un síntoma" kind="secondary" onPress={() => router.push('/episodio/nuevo')} />
       <Button title="Agregar cita" kind="secondary" onPress={() => router.push(`/cita/nueva?fecha=${selected}`)} />
     </Screen>
   );
@@ -97,13 +98,13 @@ function DayDetail({ d }: { d: DayData }) {
       ))}
       {d.episodes.map((e) => (
         <Card key={e.id}>
-          <TapText onPress={() => router.push(`/episodio/${e.id}`)} style={{ color: t.danger, fontWeight: '700' }}>Episodio {formatTime(e.startedAt)} · {e.kind}</TapText>
-          <P muted small>Duración: {formatDuration(durationMinutes(e.startedAt, e.endedAt))}</P>
+          <TapText onPress={() => router.push(`/episodio/${e.id}`)} style={{ color: t.danger, fontWeight: '700' }}>Síntoma {formatTime(e.startedAt)} · {e.kind}</TapText>
+          <P muted small>Duró: {formatDuration(durationMinutes(e.startedAt, e.endedAt))}</P>
         </Card>
       ))}
       {d.doses.map((x) => (
         <Card key={x.dueAt + x.schedule.id}>
-          <P>{formatTime(x.dueAt)} · {x.medication.name} — {x.intake ? x.intake.status : 'sin registrar'}</P>
+          <P>{formatTime(x.dueAt)} · {x.medication.name} — {x.intake ? INTAKE_LABEL[x.intake.status] : 'sin anotar'}</P>
         </Card>
       ))}
       {d.exams.map((x) => (

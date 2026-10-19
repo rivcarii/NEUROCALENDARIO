@@ -6,6 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { formatDateShort, formatTime, localDateKey, parseDateKey } from '../domain/time';
 import { MIN_TOUCH, radius, space, useTheme } from '../theme';
 import { font, size } from '../theme/type';
+import { Mascot, type MascotMood } from './Mascot';
 import { PressableScale } from './PressableScale';
 
 export function Screen({ children, scroll = true, footer }: { children: ReactNode; scroll?: boolean; footer?: ReactNode }) {
@@ -156,9 +157,10 @@ export function DateTimeField({ label, date, time, onChange, withTime = true, op
   );
 }
 
-export function Empty({ title, hint, action }: { title: string; hint?: string; action?: ReactNode }) {
+export function Empty({ title, hint, action, mood = 'descanso' }: { title: string; hint?: string; action?: ReactNode; mood?: MascotMood }) {
   return (
     <Card style={{ alignItems: 'center' }}>
+      <Mascot mood={mood} size={72} />
       <P>{title}</P>
       {hint ? <P muted small>{hint}</P> : null}
       {action}

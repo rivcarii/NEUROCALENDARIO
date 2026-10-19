@@ -26,7 +26,7 @@ export default function Documentos() {
       setTitle(''); bump();
     } catch (e) {
       if (stored) { try { deleteAttachment(stored.storagePath, pid); } catch { /* ya no existe */ } }
-      Alert.alert('No se pudo adjuntar', errorMessage(e));
+      Alert.alert('No se pudo añadir', errorMessage(e));
     }
   }
 
@@ -66,10 +66,10 @@ export default function Documentos() {
       <Screen>
         <TextField label="Título del documento (opcional)" value={title} onChangeText={setTitle} />
         <Row>
-          <Button title="Elegir PDF o imagen" onPress={pickFile} loading={busy} />
+          <Button title="Elegir un PDF o una foto" onPress={pickFile} loading={busy} />
           <Button title="Fotografiar" kind="secondary" onPress={takePhoto} disabled={busy} />
         </Row>
-        <P muted small>Solo PDF, JPG y PNG de hasta 15 MB. Los archivos se guardan en el almacenamiento privado de la app, no en la galería, y no se envían a ningún servidor.</P>
+        <P muted small>Solo PDF, JPG y PNG de hasta 15 MB. Se guardan dentro de la app (no en la galería) y no se envían a ningún servidor.</P>
         {loading && !data ? <Loading /> : null}
         {error ? <ErrorBox message={error} onRetry={reload} /> : null}
         {data && data.length === 0 ? <Empty title="No hay documentos." /> : null}

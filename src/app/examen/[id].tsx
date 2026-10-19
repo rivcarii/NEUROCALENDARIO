@@ -15,7 +15,7 @@ export default function ExamenForm() {
   const { data, loading, error, reload } = useData(async () => (isNew ? null : (await store.get('exam', pid, id)) ?? null), [id]);
   if (loading && !isNew && !data) return <Loading />;
   if (error) return <ErrorBox message={error} onRetry={reload} />;
-  if (!isNew && !data) return <Screen><P>Este examen no existe en el perfil activo.</P></Screen>;
+  if (!isNew && !data) return <Screen><P>Este estudio no está en el perfil activo.</P></Screen>;
   return <ExamenEditor key={data?.id ?? 'nuevo'} id={id} isNew={isNew} pid={pid} initial={data} />;
 }
 
@@ -43,29 +43,29 @@ function ExamenEditor({ id, isNew, pid, initial }: { id: string; isNew: boolean;
     } catch (e) { setErr(errorMessage(e)); } finally { setBusy(false); }
   }
   async function remove() {
-    if (!(await confirmDestructive('¿Eliminar examen?', 'Se eliminará este examen. Los documentos vinculados se conservan.', 'Eliminar'))) return;
+    if (!(await confirmDestructive('¿Borrar este estudio?', 'Se borrará este estudio. Los documentos que adjuntó se conservan.', 'Eliminar'))) return;
     try { await store.remove('exam', pid, id); bump(); router.back(); } catch (e) { Alert.alert('No se pudo eliminar', errorMessage(e)); }
   }
 
   return (
     <>
-      <Stack.Screen options={{ title: isNew ? 'Nuevo examen' : 'Examen' }} />
+      <Stack.Screen options={{ title: isNew ? 'Nuevo estudio' : 'Estudio' }} />
       <ProfileBar name={profile.displayName} color={profile.color} label="Se guardará en" />
       <Screen>
-        <TextField label="Nombre del examen" value={name} onChangeText={setName} error={err} />
+        <TextField label="¿Qué estudio es?" value={name} onChangeText={setName} error={err} />
         <TextField label="Tipo" value={kind} onChangeText={setKind} placeholder="Resonancia, EEG, análisis…" />
         <DateTimeField label="Fecha" withTime={false} date={date} onChange={(d) => d && setDate(d)} />
-        <TextField label="Solicitado por" value={requestedBy} onChangeText={setRequestedBy} />
+        <TextField label="Lo pidió" value={requestedBy} onChangeText={setRequestedBy} />
         <Chips label="Estado" options={[{ value: 'pendiente', label: 'Pendiente' }, { value: 'con_resultado', label: 'Con resultado' }]} value={status} onChange={setStatus} />
         {status === 'con_resultado' ? (
           <>
-            <Chips label="Origen del resultado" options={[{ value: 'informe_medico', label: 'Informe médico' }, { value: 'declarado_por_usuario', label: 'Lo declaro yo' }]} value={source} onChange={setSource} />
-            <TextField label="Resultado (transcrito tal como figura)" value={result} onChangeText={setResult} multiline numberOfLines={5} hint="No interprete ni agregue conclusiones propias como si fueran del informe." />
+            <Chips label="¿De dónde es el resultado?" options={[{ value: 'informe_medico', label: 'Informe del médico' }, { value: 'declarado_por_usuario', label: 'Lo anoto yo' }]} value={source} onChange={setSource} />
+            <TextField label="Resultado (cópielo tal como aparece)" value={result} onChangeText={setResult} multiline numberOfLines={5} hint="No agregue conclusiones suyas como si fueran del informe." />
           </>
         ) : null}
         <TextField label="Notas" value={notes} onChangeText={setNotes} multiline numberOfLines={3} />
         <Button title="Guardar" onPress={save} loading={busy} />
-        {!isNew ? <Button title="Eliminar examen" kind="danger" onPress={() => void remove()} /> : null}
+        {!isNew ? <Button title="Borrar este estudio" kind="danger" onPress={() => void remove()} /> : null}
       </Screen>
     </>
   );

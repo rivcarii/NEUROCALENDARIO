@@ -1,4 +1,6 @@
 import { Stack } from 'expo-router';
+import { View } from 'react-native';
+import { Mascot } from '../components/Mascot';
 import { Card, H, P, Screen } from '../components/ui';
 import { DISCLAIMER } from '../domain/report';
 
@@ -7,11 +9,12 @@ export default function Acerca() {
     <>
       <Stack.Screen options={{ title: 'Acerca de' }} />
       <Screen>
+        <View style={{ alignItems: 'center' }}><Mascot mood="hola" size={120} /></View>
         <H>NeuroCalendario</H>
-        <P muted>Versión 0.1.0 (pruebas)</P>
+        <P muted>Versión 0.1.0 (pruebas) · Nuri, su mascota, no da consejos médicos: solo le acompaña.</P>
         <Card>
           <H level={2}>Qué es</H>
-          <P>Un diario y calendario personal y familiar para registrar episodios neurológicos, medicación, citas, exámenes y documentos, y preparar informes para la consulta.</P>
+          <P>Un diario y calendario personal y familiar para anotar síntomas, medicinas, citas, estudios y documentos, y preparar un resumen para su médico.</P>
         </Card>
         <Card>
           <H level={2}>Qué no es</H>

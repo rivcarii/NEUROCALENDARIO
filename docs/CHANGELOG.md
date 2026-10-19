@@ -23,6 +23,10 @@
 - Movimiento: escala al pulsar y transición de color con Reanimated; sin animación en pestañas ni listas; respeta «reducir movimiento».
 - Tokens de radio/movimiento; colores fijos sustituidos por tokens.
 
+### Lenguaje cercano y mascota
+- Términos técnicos sustituidos por los que usan los pacientes (ver `docs/LENGUAJE.md`): «episodio» → «síntoma», «intensidad subjetiva» → «¿qué tan fuerte fue?», «medicación/pauta/prescrito» → «medicinas/horarios/recetada», «tomada/omitida» → «la tomé/no la tomé», «informe PDF» → «resumen para el médico», «perfil» → «persona», «copia de seguridad/restaurar» → «respaldo/recuperar»…
+- Mascota **Nuri** (neurona amable): bienvenida, listas vacías y «todo al día»; iconos de la app y pantalla de inicio. Ver `docs/MASCOTA.md`.
+
 ### Defectos encontrados y corregidos durante el desarrollo
 - Restaurar una copia reutilizaba la ruta de los adjuntos del original: borrar un documento en un perfil podía borrar el archivo del otro. **Ahora se generan rutas nuevas** (con prueba).
 - Una copia sin `data` provocaba una excepción interna en lugar de un error de validación.

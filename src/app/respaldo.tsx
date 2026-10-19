@@ -35,7 +35,7 @@ export default function Respaldo() {
       if (payload.missingFiles.length) Alert.alert('Aviso', `${payload.missingFiles.length} archivo(s) adjunto(s) no se encontraron y no se incluyeron.`);
       await Sharing.shareAsync(out.uri, { mimeType: 'application/octet-stream', dialogTitle: 'Guardar copia de seguridad cifrada' });
       setPass(''); setPass2('');
-    } catch (e) { Alert.alert('No se pudo crear la copia', errorMessage(e)); } finally { setBusy(null); }
+    } catch (e) { Alert.alert('No se pudo crear el respaldo', errorMessage(e)); } finally { setBusy(null); }
   }
 
   async function restore() {
@@ -56,29 +56,29 @@ export default function Respaldo() {
       const res = await restoreBackup(store, payload, newId, expoFileAdapter);
       await refreshProfiles();
       setRpass('');
-      Alert.alert('Copia restaurada', `Se creó un perfil nuevo con ${Object.values(res.counts).reduce((x, y) => x + y, 0)} registros. Sus perfiles existentes no se modificaron.`);
-    } catch (e) { Alert.alert('No se pudo restaurar', errorMessage(e)); } finally { setBusy(null); }
+      Alert.alert('Respaldo recuperado', `Se creó un perfil nuevo con ${Object.values(res.counts).reduce((x, y) => x + y, 0)} registros. Sus perfiles existentes no se modificaron.`);
+    } catch (e) { Alert.alert('No se pudo recuperar', errorMessage(e)); } finally { setBusy(null); }
   }
 
   return (
     <>
-      <Stack.Screen options={{ title: 'Copias de seguridad' }} />
+      <Stack.Screen options={{ title: 'Respaldo de sus datos' }} />
       <ProfileBar name={profile.displayName} color={profile.color} label="Copia de" />
       <Screen>
         <Card>
-          <H level={2}>Crear copia cifrada</H>
-          <P muted small>Incluye todos los datos y documentos de este perfil, cifrados con su contraseña (scrypt + XChaCha20-Poly1305). Si olvida la contraseña, la copia no se puede recuperar: nadie puede ayudarle a abrirla.</P>
-          <TextField label="Contraseña de la copia" value={pass} onChangeText={setPass} secureTextEntry autoCapitalize="none" autoCorrect={false} />
+          <H level={2}>Guardar un respaldo con clave</H>
+          <P muted small>Guarda todos los datos y documentos de esta persona, protegidos con una contraseña que usted elige. Si la olvida, nadie podrá abrir el respaldo: anótela en un lugar seguro.</P>
+          <TextField label="Contraseña del respaldo" value={pass} onChangeText={setPass} secureTextEntry autoCapitalize="none" autoCorrect={false} />
           <TextField label="Repita la contraseña" value={pass2} onChangeText={setPass2} secureTextEntry autoCapitalize="none" autoCorrect={false} />
-          <Button title="Crear y guardar copia" onPress={exportBackup} loading={busy === 'export'} disabled={busy !== null} />
+          <Button title="Crear y guardar respaldo" onPress={exportBackup} loading={busy === 'export'} disabled={busy !== null} />
         </Card>
         <Card>
-          <H level={2}>Restaurar copia</H>
-          <P muted small>La copia se restaura como un perfil NUEVO («… (restaurado)»). Nunca sobrescribe perfiles existentes.</P>
-          <TextField label="Contraseña de la copia" value={rpass} onChangeText={setRpass} secureTextEntry autoCapitalize="none" autoCorrect={false} />
-          <Button title="Elegir archivo y restaurar" kind="secondary" onPress={restore} loading={busy === 'restore'} disabled={busy !== null} />
+          <H level={2}>Recuperar un respaldo</H>
+          <P muted small>Se recupera como una persona NUEVA («… (recuperado)»). Nunca borra ni cambia lo que ya tiene.</P>
+          <TextField label="Contraseña del respaldo" value={rpass} onChangeText={setRpass} secureTextEntry autoCapitalize="none" autoCorrect={false} />
+          <Button title="Elegir el archivo y recuperar" kind="secondary" onPress={restore} loading={busy === 'restore'} disabled={busy !== null} />
         </Card>
-        <P muted small>Guarde la copia en un lugar seguro. El archivo está cifrado, pero la contraseña es la única protección.</P>
+        <P muted small>Guarde el respaldo en un lugar seguro (por ejemplo, su correo o la nube). Está protegido, pero la contraseña es lo único que lo abre.</P>
       </Screen>
     </>
   );

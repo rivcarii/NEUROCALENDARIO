@@ -21,7 +21,7 @@ export default function Citas() {
   );
   return (
     <>
-      <Stack.Screen options={{ title: 'Citas médicas' }} />
+      <Stack.Screen options={{ title: 'Mis citas' }} />
       <Screen>
         <Button title="Nueva cita" onPress={() => router.push('/cita/nueva')} />
         {loading && !data ? <Loading /> : null}
@@ -31,7 +31,7 @@ export default function Citas() {
         {upcoming.map(item)}
         {past.length ? <H level={2}>Anteriores y canceladas</H> : null}
         {past.map(item)}
-        <P muted small>Los recordatorios son locales y pueden retrasarse o no entregarse (ahorro de batería, permisos, modo no molestar). No los use como único medio para no perder una cita.</P>
+        <P muted small>Los avisos pueden retrasarse o no llegar (ahorro de batería, permisos, «no molestar»). No dependa solo de ellos para no perder una cita.</P>
       </Screen>
     </>
   );

@@ -11,17 +11,17 @@ export default function Examenes() {
   const { data, loading, error, reload } = useData(() => store.list('exam', profile.id));
   return (
     <>
-      <Stack.Screen options={{ title: 'Exámenes y resultados' }} />
+      <Stack.Screen options={{ title: 'Estudios y resultados' }} />
       <Screen>
-        <Button title="Nuevo examen" onPress={() => router.push('/examen/nuevo')} />
+        <Button title="Añadir un estudio" onPress={() => router.push('/examen/nuevo')} />
         {loading && !data ? <Loading /> : null}
         {error ? <ErrorBox message={error} onRetry={reload} /> : null}
-        {data && data.length === 0 ? <Empty title="No hay exámenes registrados." /> : null}
+        {data && data.length === 0 ? <Empty title="No hay estudios anotados." /> : null}
         {data?.map((e) => (
           <Card key={e.id}>
             <TapText onPress={() => router.push(`/examen/${e.id}`)} style={{ color: t.primary, fontSize: 17, fontWeight: '700' }}>{e.name}</TapText>
-            <P>{formatDateShort(e.examDate)} · {e.status === 'pendiente' ? 'Pendiente de resultado' : 'Con resultado'}</P>
-            {e.status === 'con_resultado' ? <P muted small>Origen: {e.resultSource === 'informe_medico' ? 'informe médico' : 'declarado por el usuario'}</P> : null}
+            <P>{formatDateShort(e.examDate)} · {e.status === 'pendiente' ? 'Esperando resultado' : 'Con resultado'}</P>
+            {e.status === 'con_resultado' ? <P muted small>Resultado: {e.resultSource === 'informe_medico' ? 'informe del médico' : 'lo anotó usted'}</P> : null}
           </Card>
         ))}
       </Screen>

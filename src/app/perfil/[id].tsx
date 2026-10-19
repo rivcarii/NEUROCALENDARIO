@@ -44,13 +44,13 @@ export default function PerfilForm() {
 
   return (
     <>
-      <Stack.Screen options={{ title: isNew ? 'Nuevo perfil' : 'Editar perfil' }} />
+      <Stack.Screen options={{ title: isNew ? 'Nueva persona' : 'Editar persona' }} />
       <Screen>
         <TextField label="Nombre" value={name} onChangeText={setName} error={err} />
-        <TextField label="Relación (ej.: Mamá, Yo)" value={rel} onChangeText={setRel} />
+        <TextField label="¿Qué es suya esa persona? (mamá, yo…)" value={rel} onChangeText={setRel} />
         <TextField label="Año de nacimiento (opcional)" value={year} onChangeText={setYear} keyboardType="number-pad" />
         <Chips label="Color de identificación" options={PROFILE_COLORS.map((c) => ({ value: c, label: c }))} value={color} onChange={setColor} />
-        <Row><Switch accessibilityLabel="Perfil principal" value={primary} onValueChange={setPrimary} /><P>Perfil principal de seguimiento</P></Row>
+        <Row><Switch accessibilityLabel="Perfil principal" value={primary} onValueChange={setPrimary} /><P>Persona principal de seguimiento</P></Row>
         <P muted small>Registre datos de otra persona solo con su conocimiento y autorización.</P>
         {isNew ? <P muted small>Al crearlo pasará a ser el perfil activo. La franja de color de la parte superior siempre indica de quién son los datos que ve.</P> : null}
         <Button title="Guardar" onPress={save} loading={busy} />

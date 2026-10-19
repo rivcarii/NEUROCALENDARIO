@@ -28,24 +28,24 @@ export default function Ajustes() {
               onValueChange={async (v) => { const r = await setAppLock(v); if (!r.ok && r.message) Alert.alert('No se pudo cambiar', r.message); }} />
             <P>Pedir huella, rostro o código al abrir</P>
           </Row>
-          <P muted small>Protege el acceso a la aplicación; no cifra la base de datos. Los datos quedan en el almacenamiento privado de la app, protegido por el bloqueo y el cifrado del propio teléfono. Active también el bloqueo de pantalla y el cifrado del dispositivo.</P>
+          <P muted small>Protege la entrada a la aplicación. Sus datos quedan guardados solo en este teléfono; active también el bloqueo de pantalla del teléfono para mayor seguridad.</P>
         </Card>
         <Card>
-          <H level={2}>Notificaciones</H>
+          <H level={2}>Avisos</H>
           <Row>
             <Switch accessibilityLabel="Mostrar detalles en notificaciones" value={data?.details ?? false}
               onValueChange={async (v) => { await store?.setSetting('notif_details', v ? '1' : '0'); bump(); reload(); }} />
-            <P>Mostrar nombre del medicamento o cita en la pantalla bloqueada</P>
+            <P>Mostrar el nombre de la medicina o la cita en la pantalla bloqueada</P>
           </Row>
-          <P muted small>Desactivado por defecto: las notificaciones dicen solo «Tiene un recordatorio pendiente».</P>
+          <P muted small>Apagado por defecto: el aviso dice solo «Tiene un recordatorio pendiente», para que nadie vea sus datos.</P>
           <P small>Estado: {statusText(data?.status ?? 'pendiente')}</P>
-          <P muted small>Los recordatorios son locales y no garantizan atención médica ni sirven como alarma de emergencia. Pueden retrasarse o no entregarse según el modo de ahorro, los permisos o un reinicio del teléfono.</P>
+          <P muted small>Los avisos no garantizan atención médica ni sirven como alarma de emergencia. Pueden retrasarse o no llegar si el teléfono está en ahorro de batería o sin permisos.</P>
         </Card>
         <Card>
           <H level={2}>Privacidad</H>
-          <P small>• Los datos se guardan solo en este dispositivo.</P>
-          <P small>• No se envía información médica a servicios externos, de análisis ni de inteligencia artificial.</P>
-          <P small>• Los informes y copias salen de la app únicamente cuando usted los comparte.</P>
+          <P small>• Sus datos se guardan solo en este teléfono.</P>
+          <P small>• Su información de salud no se envía a ningún servicio externo ni a inteligencia artificial.</P>
+          <P small>• Los resúmenes y respaldos salen de la app solo cuando usted los comparte.</P>
           <P small>• La app no genera diagnósticos ni cambia tratamientos.</P>
         </Card>
         <Card>

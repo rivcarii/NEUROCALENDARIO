@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <title>Nuri, la mascota de NeuroCalendario</title>
+  <g stroke="#2F5D8A" stroke-width="5" stroke-linecap="round" fill="none">
+    <path d="M80 62 Q66 34 54 28"/><path d="M120 62 Q134 34 146 28"/>
+    <path d="M40 120 Q22 112 16 126"/><path d="M160 120 Q178 112 184 126"/>
+  </g>
+  <circle cx="52" cy="26" r="8" fill="#F2B84B" stroke="#2F5D8A" stroke-width="3"/>
+  <circle cx="148" cy="26" r="8" fill="#F2B84B" stroke="#2F5D8A" stroke-width="3"/>
+  <circle cx="15" cy="128" r="5" fill="#2F5D8A"/><circle cx="185" cy="128" r="5" fill="#2F5D8A"/>
+  <ellipse cx="78" cy="168" rx="15" ry="8" fill="#6FA8DC" stroke="#2F5D8A" stroke-width="3"/>
+  <ellipse cx="122" cy="168" rx="15" ry="8" fill="#6FA8DC" stroke="#2F5D8A" stroke-width="3"/>
+  <ellipse cx="100" cy="112" rx="64" ry="58" fill="#8CC1EE" stroke="#2F5D8A" stroke-width="4"/>
+  <ellipse cx="100" cy="130" rx="38" ry="26" fill="#DCEEFB"/>
+  <ellipse cx="64" cy="122" rx="8" ry="5" fill="#F7A8B8" opacity=".75"/>
+  <ellipse cx="136" cy="122" rx="8" ry="5" fill="#F7A8B8" opacity=".75"/>
+  <circle cx="80" cy="104" r="11" fill="#fff" stroke="#2F5D8A" stroke-width="2"/>
+  <circle cx="120" cy="104" r="11" fill="#fff" stroke="#2F5D8A" stroke-width="2"/>
+  <circle cx="82" cy="105" r="5.5" fill="#14202B"/><circle cx="122" cy="105" r="5.5" fill="#14202B"/>
+  <circle cx="84" cy="102.5" r="2" fill="#fff"/><circle cx="124" cy="102.5" r="2" fill="#fff"/>
+  <path d="M88 122 Q100 134 112 122" stroke="#14202B" stroke-width="4" stroke-linecap="round" fill="none"/>
+</svg>
