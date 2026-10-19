@@ -1,9 +1,8 @@
 import { Tabs } from 'expo-router';
-import { Platform, StyleSheet } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { GlassTabBar } from '../../components/GlassTabBar';
 import { ProfileHeader } from '../../components/ProfileHeader';
 import { useTheme } from '../../theme';
-import { font } from '../../theme/type';
 
 type IconName = React.ComponentProps<typeof Ionicons>['name'];
 // Sin animación entre pestañas: son pares, no una jerarquía, y se usan decenas de veces al día.
@@ -17,16 +16,14 @@ const icon = (on: IconName, off: IconName) => {
 export default function TabsLayout() {
   const t = useTheme();
   return (
-    <Tabs screenOptions={{
-      tabBarActiveTintColor: t.primary, tabBarInactiveTintColor: t.muted,
-      // iOS: filo fino como la barra del sistema; Android: sin borde y con indicador de elevación suave.
-      tabBarStyle: Platform.select({
-        ios: { backgroundColor: t.card, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: t.border },
-        default: { backgroundColor: t.card, borderTopWidth: 0, elevation: 8, minHeight: 64 },
-      }),
-      tabBarLabelStyle: { fontSize: Platform.OS === 'ios' ? 11 : 12, fontFamily: font.body },
-      animation: 'none',
-    }}>
+    <Tabs
+      tabBar={(props) => <GlassTabBar {...props} />}
+      screenOptions={{
+        tabBarActiveTintColor: t.primary, tabBarInactiveTintColor: t.muted,
+        animation: 'none', // sin animación al cambiar de pestaña
+        sceneStyle: { backgroundColor: t.bg },
+      }}
+    >
       <Tabs.Screen name="index" options={{ title: 'Hoy', tabBarIcon: icon('today', 'today-outline'), header: () => <ProfileHeader title="Mi día" /> }} />
       <Tabs.Screen name="calendario" options={{ title: 'Calendario', tabBarIcon: icon('calendar', 'calendar-outline'), header: () => <ProfileHeader title="Calendario" /> }} />
       <Tabs.Screen name="episodios" options={{ title: 'Síntomas', tabBarIcon: icon('pulse', 'pulse-outline'), header: () => <ProfileHeader title="Mis síntomas" /> }} />

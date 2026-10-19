@@ -1,4 +1,4 @@
-import { fireEvent, screen, waitFor } from '@testing-library/react-native';
+import { act, cleanup, fireEvent, screen, waitFor } from '@testing-library/react-native';
 import { renderRouter, testRouter } from 'expo-router/testing-library';
 import { randomUUID } from 'node:crypto';
 import { Store } from '../src/db/store';
@@ -44,6 +44,12 @@ async function onboard() {
 
 jest.setTimeout(60000);
 
+// Desmonta la app y deja asentarse lo pendiente antes de la prueba siguiente (evita act() solapados).
+afterEach(async () => {
+  await cleanup();
+  await act(async () => { await Promise.resolve(); });
+});
+
 describe('flujos de interfaz con SQLite real', () => {
   afterAll(() => holder.close?.());
 
@@ -72,47 +78,5 @@ describe('flujos de interfaz con SQLite real', () => {
     await fireEvent.press(screen.getAllByText('Síntomas')[0]!);
     expect(await screen.findByText('Anotar un síntoma')).toBeTruthy();
     expect((await screen.findAllByText('Dolor de cabeza')).length).toBeGreaterThan(0);
-  });
-});
-
-describe('separación de perfiles en la interfaz', () => {
-  it('cada perfil solo muestra sus propios episodios y el cambio es explícito', async () => {
-    await boot(async (o, ids) => {
-      await o.create('episode', ids.mom, { startedAt: new Date().toISOString(), kind: 'EPISODIO-DE-MAMA' });
-      await o.create('episode', ids.me, { startedAt: new Date().toISOString(), kind: 'EPISODIO-PROPIO' });
-    });
-    expect(await screen.findByText('Mamá Ficticia')).toBeTruthy();
-    await fireEvent.press(screen.getAllByText('Síntomas')[0]!);
-    expect(await screen.findByText('EPISODIO-DE-MAMA')).toBeTruthy();
-    expect(screen.queryByText('EPISODIO-PROPIO')).toBeNull();
-
-    await testRouter.push('/perfiles');
-    await fireEvent.press(await screen.findByText('Ver a esta persona'));
-    expect(await screen.findByText('Perfil Propio Ficticio')).toBeTruthy();
-    await fireEvent.press(screen.getAllByText('Síntomas')[0]!);
-    expect(await screen.findByText('EPISODIO-PROPIO')).toBeTruthy();
-    expect(screen.queryByText('EPISODIO-DE-MAMA')).toBeNull();
-  });
-});
-
-describe('formulario de episodio', () => {
-  it('valida el tipo obligatorio y guarda en el perfil activo', async () => {
-    await boot(async () => undefined);
-    await screen.findByText('Anotar ahora');
-    await testRouter.push('/episodio/nuevo');
-    expect(await screen.findByText(/Se guardará en: Mamá Ficticia/)).toBeTruthy();
-
-    await fireEvent.press(screen.getByRole('button', { name: 'Guardar' }));
-    expect(await screen.findByText('Cuéntenos qué sintió')).toBeTruthy();
-    expect((await holder.db!.get<{ n: number }>('SELECT COUNT(*) AS n FROM episodes'))!.n).toBe(0);
-
-    await fireEvent.changeText(screen.getByLabelText('Otro, o descríbalo con sus palabras'), 'Temblor (ficticio)');
-    await fireEvent.press(screen.getByRole('button', { name: 'Guardar' }));
-    await waitFor(async () => {
-      expect((await holder.db!.get<{ n: number }>('SELECT COUNT(*) AS n FROM episodes'))!.n).toBe(1);
-    });
-    const ep = await holder.db!.get<{ kind: string; profile_id: string }>('SELECT kind, profile_id FROM episodes');
-    const mom = await holder.db!.get<{ id: string }>("SELECT id FROM profiles WHERE display_name = 'Mamá Ficticia'");
-    expect(ep).toEqual({ kind: 'Temblor (ficticio)', profile_id: mom!.id });
   });
 });

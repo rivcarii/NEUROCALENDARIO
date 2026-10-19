@@ -38,6 +38,10 @@
 - Web móvil: ajustes de plataforma (tap, dvh, overscroll, zoom de iOS, selección, tema claro/oscuro sin parpadeo).
 - Rendimiento: historial paginado; iconos solo de Ionicons (web −40 %).
 
+### Estilo cristal (iOS) y correcciones vistas en el iPhone
+- Barra de pestañas flotante de cristal, cabecera con esquinas continuas, tarjetas y botones más redondeados; raíz de la web a pantalla completa (corrige la franja vacía y las etiquetas cortadas).
+- Las pruebas de interfaz se dividieron en tres archivos (un fallo de aislamiento entre apps montadas en el mismo archivo).
+
 ### Defectos encontrados y corregidos durante el desarrollo
 - Restaurar una copia reutilizaba la ruta de los adjuntos del original: borrar un documento en un perfil podía borrar el archivo del otro. **Ahora se generan rutas nuevas** (con prueba).
 - Una copia sin `data` provocaba una excepción interna en lugar de un error de validación.

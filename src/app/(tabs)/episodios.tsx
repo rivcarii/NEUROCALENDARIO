@@ -25,7 +25,7 @@ export default function Episodios() {
   }, [q, days]);
 
   return (
-    <Screen>
+    <Screen tabs>
       <Button title="Anotar un síntoma" onPress={() => router.push('/episodio/nuevo')} />
       <TextField label="Buscar" value={q} onChangeText={(v) => { setQ(v); setShown(PAGE); }} placeholder="Tipo, contexto u observaciones" returnKeyType="search" />
       <Chips label="¿De cuándo?" options={PERIODS} value={days} onChange={(v) => { setDays(v); setShown(PAGE); }} />

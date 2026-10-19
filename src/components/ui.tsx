@@ -2,9 +2,9 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { useState, type ReactNode } from 'react';
 import { ActivityIndicator, Alert, Platform, Pressable, ScrollView, StyleSheet, TextInput, View, type StyleProp, type TextInputProps, type TextStyle, type ViewStyle } from 'react-native';
 import { Text } from './Text';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { formatDateShort, formatTime, localDateKey, parseDateKey } from '../domain/time';
-import { MIN_TOUCH, cardSurface, platform, radius, space, useIsDark, useTheme } from '../theme';
+import { MIN_TOUCH, TAB_BAR_SPACE, cardSurface, platform, radius, space, useIsDark, useTheme } from '../theme';
 import { font, size } from '../theme/type';
 import { Mascot, type MascotMood } from './Mascot';
 import { PressableScale } from './PressableScale';
@@ -12,13 +12,15 @@ import { PressableScale } from './PressableScale';
 /** Ancho máximo del contenido: en tabletas y navegadores de escritorio no se estira. */
 export const MAX_CONTENT = 640;
 
-export function Screen({ children, scroll = true, footer }: { children: ReactNode; scroll?: boolean; footer?: ReactNode }) {
+export function Screen({ children, scroll = true, footer, tabs = false }: { children: ReactNode; scroll?: boolean; footer?: ReactNode; /** Pantalla con barra de pestañas flotante: deja espacio al final. */ tabs?: boolean }) {
   const t = useTheme();
+  const insets = useSafeAreaInsets();
+  const bottomPad = tabs && Platform.OS !== 'android' ? TAB_BAR_SPACE + insets.bottom : space.xl * 2;
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: t.bg }} edges={['left', 'right', 'bottom']}>
       {scroll ? (
         <ScrollView
-          contentContainerStyle={{ padding: space.lg, gap: space.md, paddingBottom: space.xl * 2, width: '100%', maxWidth: MAX_CONTENT, alignSelf: 'center' }}
+          contentContainerStyle={{ padding: space.lg, gap: space.md, paddingBottom: bottomPad, width: '100%', maxWidth: MAX_CONTENT, alignSelf: 'center' }}
           keyboardShouldPersistTaps="handled"
           keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
           automaticallyAdjustKeyboardInsets // iOS: el teclado no tapa el campo que se escribe

@@ -28,9 +28,10 @@ export const MIN_TOUCH_ANDROID = 48;
  * - Web: se parece a iOS (sombra suave).
  */
 export const platform = {
-  buttonRadius: Platform.OS === 'android' ? 24 : 12,
-  cardRadius: Platform.OS === 'android' ? 16 : 14,
-  inputRadius: Platform.OS === 'android' ? 8 : 10,
+  // iOS 26+/«cristal»: formas concéntricas y cápsulas; Android: Material 3.
+  buttonRadius: 999,
+  cardRadius: Platform.OS === 'android' ? 20 : 26,
+  inputRadius: Platform.OS === 'android' ? 12 : 16,
   /** Tamaño base del texto: 17 en iOS (Dynamic Type), 16 en Android. */
   body: Platform.OS === 'ios' ? 17 : 16,
 } as const;
@@ -41,3 +42,6 @@ export function cardSurface(dark: boolean): ViewStyle {
     ? {}
     : { shadowColor: '#0B1F33', shadowOpacity: 0.07, shadowRadius: 10, shadowOffset: { width: 0, height: 3 } };
 }
+
+/** Espacio que dejan las pantallas con pestañas al final para que la barra flotante no tape el contenido. */
+export const TAB_BAR_SPACE = 112;

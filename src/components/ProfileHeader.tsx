@@ -14,11 +14,11 @@ export function ProfileHeader({ title }: { title: string }) {
   const t = useTheme();
   if (!activeProfile) return null;
   return (
-    <View style={{ backgroundColor: activeProfile.color, paddingTop: insets.top + 6, paddingBottom: 10, paddingHorizontal: space.lg, alignItems: 'center' }}>
+    <View style={{ backgroundColor: activeProfile.color, paddingTop: insets.top + 6, paddingBottom: 14, borderBottomLeftRadius: 28, borderBottomRightRadius: 28, borderCurve: 'continuous', paddingHorizontal: space.lg, alignItems: 'center' }}>
      <View style={{ width: '100%', maxWidth: MAX_CONTENT, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
       <View style={{ flex: 1 }}>
-        <Text style={{ color: t.onHeaderSoft, fontSize: 12 }}>{title}</Text>
-        <Text accessibilityRole="header" style={{ color: t.onHeader, fontSize: 22, fontFamily: font.display }} numberOfLines={1}>
+        <Text style={{ color: t.onHeaderSoft, fontSize: 13, letterSpacing: 0.3 }}>{title}</Text>
+        <Text accessibilityRole="header" style={{ color: t.onHeader, fontSize: 28, lineHeight: 32, letterSpacing: -0.4, fontFamily: font.display }} numberOfLines={1}>
           {activeProfile.displayName}
         </Text>
       </View>

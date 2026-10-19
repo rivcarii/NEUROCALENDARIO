@@ -12,7 +12,7 @@ export default function Medicacion() {
     schedules: await store.list('schedule', profile.id),
   }));
   return (
-    <Screen>
+    <Screen tabs>
       <Button title="Añadir una medicina" onPress={() => router.push('/medicamento/nuevo')} />
       <P muted small>Anote solo lo que le indicó su médico. La app no cambia ni sugiere tratamientos.</P>
       {loading && !data ? <Loading /> : null}

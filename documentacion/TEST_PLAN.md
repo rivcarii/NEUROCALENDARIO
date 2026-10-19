@@ -21,7 +21,7 @@ Resultados de la última ejecución (19-oct-2026, Linux, Node 22). **Todos con d
 | Crear/consultar/editar/eliminar | `crud.test.ts`, e2e | automática |
 | Persistencia tras cerrar y reabrir | `persistence.test.ts` (archivo SQLite real reabierto), e2e (recarga de página) | automática |
 | Migraciones | `persistence.test.ts` (v1, idempotencia, v2 simulada, reversión) | automática |
-| Separación mamá/yo | `security.test.ts`, `ui.test.tsx`, e2e | automática |
+| Separación mamá/yo | `security.test.ts`, `ui.*.test.tsx`, e2e | automática |
 | Prevención de perfil equivocado | referencias cruzadas rechazadas (`security.test.ts`); perfil fijado al abrir el formulario (revisión de código; **no hay prueba automática del cambio de perfil con formulario abierto**) | parcial |
 | Validación de fechas y duración | `crud.test.ts`, `domain.test.ts`, test de zonas horarias/DST | automática |
 | Sin conexión | la app no usa red (`hygiene.test.ts`); e2e sin servidor remoto | automática |

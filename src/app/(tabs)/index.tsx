@@ -38,7 +38,7 @@ export default function Hoy() {
   }
 
   return (
-    <Screen>
+    <Screen tabs>
       <H>{formatDateLong(today)}</H>
       <Card>
         <H level={2}>Anotar ahora</H>

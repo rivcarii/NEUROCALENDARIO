@@ -36,7 +36,7 @@ export default function Calendario() {
   const cells = mode === 'mes' ? monthGrid(y, m - 1) : mode === 'semana' ? weekDays : [];
 
   return (
-    <Screen>
+    <Screen tabs>
       <Chips options={[{ value: 'mes', label: 'Mes' }, { value: 'semana', label: 'Semana' }, { value: 'dia', label: 'Día' }]} value={mode} onChange={setMode} />
       <Row style={{ justifyContent: 'space-between' }}>
         <Button title="◀" kind="secondary" onPress={() => move(-1)} accessibilityHint="Período anterior" />

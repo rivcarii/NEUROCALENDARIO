@@ -25,7 +25,7 @@ export default function Mas() {
   const t = useTheme();
   const { account } = useSession();
   return (
-    <Screen>
+    <Screen tabs>
       {ITEMS.filter((i) => (!i.ownerOnly || account?.role === 'owner') && (!i.webOnly || (isWeb && !isStandalone()))).map((i) => (
         <PressableScale key={i.href} accessibilityRole="button" accessibilityLabel={`${i.title}. ${i.hint}`} onPress={() => router.push(i.href)}
           style={{ minHeight: MIN_TOUCH, backgroundColor: t.card, borderRadius: radius.lg, borderWidth: 1, borderColor: t.border, padding: space.lg, gap: space.sm }}>

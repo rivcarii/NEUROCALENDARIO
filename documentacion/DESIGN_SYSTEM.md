@@ -59,3 +59,11 @@ Común: tamaño de letra del sistema respetado hasta ×1,6; contenido de ancho m
 **Rendimiento**: historial paginado de 40 en 40; solo se empaqueta la fuente de iconos usada (web de 10,4 MB a 6,2 MB).
 
 **Pendiente de comprobar en teléfono real**: sombras/elevación, tamaño de letra y barra de pestañas en iOS y Android nativos; zonas seguras y teclado en Safari/Chrome reales. Solo se verificó en Chromium emulando teléfonos (la plataforma «web» no ejecuta las ramas iOS/Android del código).
+
+## Estilo «cristal» (iOS 26+ / Liquid Glass) y corrección de la web instalada
+A partir de una captura en iPhone se corrigió: etiquetas cortadas en la barra de pestañas, franja vacía bajo la barra (la raíz ahora es `position: fixed; inset: 0`, no `100dvh`) y contenido cortado antes de la barra.
+- **Barra de pestañas flotante en cápsula de cristal** (`components/GlassTabBar.tsx`, `Glass.tsx`): iOS = desenfoque nativo del sistema; web = `backdrop-filter` con borde superior de «luz»; Android = barra Material sólida. El contenido pasa por debajo (`Screen tabs` deja el margen). Con «reducir transparencia» el cristal pasa a sólido.
+- Formas concéntricas: tarjetas de radio 26 (iOS/web), botones y chips en cápsula, cabecera con esquinas inferiores continuas y título grande con tracking negativo.
+- Pestañas sin animación al cambiar; solo el relleno de la activa cambia de color (120 ms).
+- **Sobre «iOS 27»**: no dispongo de la guía oficial de iOS 27; el diseño sigue el lenguaje «Liquid Glass» (iOS 26) y los principios de Apple (materiales, concentricidad, jerarquía). Cuando exista la guía de iOS 27 conviene revisarlo.
+- **Sin verificar en dispositivo**: el cálculo real de las zonas seguras del iPhone (isla dinámica e indicador de inicio) y el aspecto del desenfoque; solo se probó en Chromium emulando un iPhone, sin zonas seguras.
