@@ -38,7 +38,7 @@ function NotaEditor({ id, isNew, pid, initial }: { id: string; isNew: boolean; p
     } catch (e) { setErr(errorMessage(e)); } finally { setBusy(false); }
   }
   async function remove() {
-    if (!(await confirmDestructive('Eliminar nota', 'Se eliminará esta nota.', 'Eliminar'))) return;
+    if (!(await confirmDestructive('¿Eliminar nota?', 'Se eliminará esta nota.', 'Eliminar'))) return;
     try { await store.remove('note', pid, id); bump(); router.back(); } catch (e) { Alert.alert('No se pudo eliminar', errorMessage(e)); }
   }
   return (

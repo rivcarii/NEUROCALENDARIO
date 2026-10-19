@@ -36,7 +36,7 @@ const form = z.object({
 });
 type FormValues = z.infer<typeof form>;
 
-const scale = Array.from({ length: 11 }, (_, i) => ({ value: i, label: String(i) }));
+const scale = Array.from({ length: 11 }, (_, i) => ({ value: i, label: String(i), a11y: `${i} de 10` }));
 
 export default function EpisodioForm() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -103,7 +103,7 @@ export default function EpisodioForm() {
   });
 
   async function remove() {
-    if (!(await confirmDestructive('Eliminar episodio', 'Se eliminará este episodio de forma permanente.', 'Eliminar'))) return;
+    if (!(await confirmDestructive('¿Eliminar episodio?', 'Se eliminará este episodio de forma permanente.', 'Eliminar'))) return;
     try { await store.remove('episode', lockedProfile, id); bump(); router.back(); } catch (e) { Alert.alert('No se pudo eliminar', errorMessage(e)); }
   }
 

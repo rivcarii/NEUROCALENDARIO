@@ -1,7 +1,6 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Text } from 'react-native';
-import { Button, Card, Chips, Empty, ErrorBox, Loading, P, Row, Screen, TextField } from '../../components/ui';
+import { Button, Card, Chips, Empty, ErrorBox, Loading, P, Row, Screen, TextField, TapText } from '../../components/ui';
 import { RECOVERY_LABEL } from '../../domain/labels';
 import { durationMinutes, formatDateTime, formatDuration, localDateKey, addDays, startOfLocalDayIso } from '../../domain/time';
 import { useActive } from '../../services/session';
@@ -32,7 +31,7 @@ export default function Episodios() {
       {data && data.length === 0 ? <Empty title="No hay episodios en este período." hint={q ? 'Pruebe con otra búsqueda.' : 'Use «Nuevo episodio» o el registro rápido de Hoy.'} /> : null}
       {data?.map((e) => (
         <Card key={e.id}>
-          <Text accessibilityRole="button" onPress={() => router.push(`/episodio/${e.id}`)} style={{ color: t.primary, fontSize: 17, fontWeight: '700' }}>{e.kind}</Text>
+          <TapText onPress={() => router.push(`/episodio/${e.id}`)} style={{ color: t.primary, fontSize: 17, fontWeight: '700' }}>{e.kind}</TapText>
           <P>{formatDateTime(e.startedAt)} · {formatDuration(durationMinutes(e.startedAt, e.endedAt))}</P>
           <Row>
             {e.intensity !== null ? <P muted small>Intensidad {e.intensity}/10</P> : null}

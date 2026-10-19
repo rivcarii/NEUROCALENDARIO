@@ -2,7 +2,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { useState, type ReactNode } from 'react';
 import {
   ActivityIndicator, Alert, Platform, Pressable, ScrollView, Text, TextInput, View,
-  type StyleProp, type TextInputProps, type ViewStyle,
+  type StyleProp, type TextInputProps, type TextStyle, type ViewStyle,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { formatDateShort, formatTime, localDateKey, parseDateKey } from '../domain/time';
@@ -59,6 +59,15 @@ export function Button({ title, onPress, kind = 'primary', disabled, loading, ac
   );
 }
 
+/** Texto pulsable con área táctil de al menos 44 px y rol de botón para lectores de pantalla. */
+export function TapText({ onPress, style, children }: { onPress: () => void; style?: StyleProp<TextStyle>; children: ReactNode }) {
+  return (
+    <Pressable accessibilityRole="button" onPress={onPress} style={{ minHeight: 44, justifyContent: 'center' }}>
+      <Text style={style}>{children}</Text>
+    </Pressable>
+  );
+}
+
 export function Row({ children, style }: { children: ReactNode; style?: StyleProp<ViewStyle> }) {
   return <View style={[{ flexDirection: 'row', alignItems: 'center', gap: space.sm, flexWrap: 'wrap' }, style]}>{children}</View>;
 }
@@ -84,7 +93,7 @@ export function TextField({ label, error, hint, ...rest }: TextInputProps & { la
 }
 
 export function Chips<T extends string | number>({ label, options, value, onChange, multi }: {
-  label?: string; options: { value: T; label: string }[]; value: T | T[] | null; onChange: (v: T) => void; multi?: boolean;
+  label?: string; options: { value: T; label: string; a11y?: string }[]; value: T | T[] | null; onChange: (v: T) => void; multi?: boolean;
 }) {
   const t = useTheme();
   const isOn = (v: T) => (multi ? (value as T[]).includes(v) : value === v);
@@ -94,7 +103,7 @@ export function Chips<T extends string | number>({ label, options, value, onChan
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: space.sm }}>
         {options.map((o) => (
           <Pressable key={String(o.value)} onPress={() => onChange(o.value)} accessibilityRole={multi ? 'checkbox' : 'radio'}
-            accessibilityState={{ selected: isOn(o.value), checked: isOn(o.value) }} accessibilityLabel={o.label}
+            accessibilityState={{ selected: isOn(o.value), checked: isOn(o.value) }} accessibilityLabel={o.a11y ?? o.label}
             style={{ minHeight: 40, paddingHorizontal: space.md, borderRadius: 20, justifyContent: 'center', backgroundColor: isOn(o.value) ? t.chipOn : t.chip }}>
             <Text style={{ color: isOn(o.value) ? t.onPrimary : t.text }}>{o.label}</Text>
           </Pressable>
@@ -180,7 +189,7 @@ export function confirmDestructive(title: string, message: string, confirmLabel:
   }
   return new Promise((resolve) => {
     Alert.alert(title, message, [
-      { text: 'Cancelar', style: 'cancel', onPress: () => resolve(false) },
+      { text: 'Conservar', style: 'cancel', onPress: () => resolve(false) },
       { text: confirmLabel, style: 'destructive', onPress: () => resolve(true) },
     ], { cancelable: true, onDismiss: () => resolve(false) });
   });

@@ -33,7 +33,7 @@ export default function PerfilForm() {
 
   async function remove() {
     if (!store || !existing) return;
-    if (!(await confirmDestructive('Eliminar perfil y TODOS sus datos', `Se eliminarán de forma permanente los episodios, medicación, citas, exámenes, documentos y notas de ${existing.displayName}. Haga antes una copia de seguridad si desea conservarlos.`, 'Eliminar todo'))) return;
+    if (!(await confirmDestructive('¿Eliminar perfil y TODOS sus datos?', `Se eliminarán de forma permanente los episodios, medicación, citas, exámenes, documentos y notas de ${existing.displayName}. Haga antes una copia de seguridad si desea conservarlos.`, 'Eliminar todo'))) return;
     try {
       await store.deleteProfile(existing.id);
       try { deleteProfileFiles(existing.id); } catch { /* sin archivos */ }

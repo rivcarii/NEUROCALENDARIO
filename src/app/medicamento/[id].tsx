@@ -55,7 +55,7 @@ export default function MedicamentoForm() {
   });
 
   async function remove() {
-    if (!(await confirmDestructive('Eliminar medicamento', 'Se eliminarán también sus horarios y el registro de tomas. Esta acción no se puede deshacer.', 'Eliminar'))) return;
+    if (!(await confirmDestructive('¿Eliminar medicamento?', 'Se eliminarán también sus horarios y el registro de tomas. Esta acción no se puede deshacer.', 'Eliminar'))) return;
     try { await store.remove('medication', pid, id); bump(); router.back(); } catch (e) { Alert.alert('No se pudo eliminar', errorMessage(e)); }
   }
 
@@ -90,7 +90,7 @@ export default function MedicamentoForm() {
                 <Row>
                   <P small>{s.remindersEnabled ? 'Con recordatorio' : 'Sin recordatorio'}</P>
                   <Button title="Eliminar" kind="secondary" onPress={async () => {
-                    if (await confirmDestructive('Eliminar horario', 'Se eliminará este horario y su registro de tomas.', 'Eliminar')) {
+                    if (await confirmDestructive('¿Eliminar horario?', 'Se eliminará este horario y su registro de tomas.', 'Eliminar')) {
                       try { await store.remove('schedule', pid, s.id); bump(); } catch (e) { Alert.alert('Error', errorMessage(e)); }
                     }
                   }} />

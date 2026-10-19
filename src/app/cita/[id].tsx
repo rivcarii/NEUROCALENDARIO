@@ -48,7 +48,7 @@ function CitaEditor({ id, isNew, pid, initial, fecha }: { id: string; isNew: boo
     } catch (e) { setErr(errorMessage(e)); } finally { setBusy(false); }
   }
   async function remove() {
-    if (!(await confirmDestructive('Eliminar cita', 'Se eliminará esta cita y su recordatorio.', 'Eliminar'))) return;
+    if (!(await confirmDestructive('¿Eliminar cita?', 'Se eliminará esta cita y su recordatorio.', 'Eliminar'))) return;
     try { await store.remove('appointment', pid, id); bump(); router.back(); } catch (e) { Alert.alert('No se pudo eliminar', errorMessage(e)); }
   }
 

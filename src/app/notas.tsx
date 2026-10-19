@@ -1,6 +1,5 @@
 import { Stack, router } from 'expo-router';
-import { Text } from 'react-native';
-import { Button, Card, Empty, ErrorBox, Loading, P, Screen } from '../components/ui';
+import { Button, Card, Empty, ErrorBox, Loading, P, Screen, TapText } from '../components/ui';
 import { formatDateShort } from '../domain/time';
 import { useActive } from '../services/session';
 import { useData } from '../services/useData';
@@ -20,9 +19,9 @@ export default function Notas() {
         {data && data.length === 0 ? <Empty title="No hay notas." /> : null}
         {data?.map((n) => (
           <Card key={n.id}>
-            <Text accessibilityRole="button" onPress={() => router.push(`/nota/${n.id}`)} style={{ color: t.primary, fontWeight: '700' }}>
+            <TapText onPress={() => router.push(`/nota/${n.id}`)} style={{ color: t.primary, fontWeight: '700' }}>
               {formatDateShort(n.noteDate)} · {n.authorRole === 'cuidador' ? 'Nota del cuidador' : 'Nota personal'}
-            </Text>
+            </TapText>
             <P>{n.body.length > 200 ? `${n.body.slice(0, 200)}…` : n.body}</P>
           </Card>
         ))}

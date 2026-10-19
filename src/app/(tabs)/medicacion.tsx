@@ -1,6 +1,5 @@
 import { router } from 'expo-router';
-import { Text } from 'react-native';
-import { Button, Card, Empty, ErrorBox, Loading, P, Row, Screen } from '../../components/ui';
+import { Button, Card, Empty, ErrorBox, Loading, P, Row, Screen, TapText } from '../../components/ui';
 import { useActive } from '../../services/session';
 import { useData } from '../../services/useData';
 import { useTheme } from '../../theme';
@@ -23,7 +22,7 @@ export default function Medicacion() {
         const sch = data.schedules.filter((s) => s.medicationId === m.id);
         return (
           <Card key={m.id}>
-            <Text accessibilityRole="button" onPress={() => router.push(`/medicamento/${m.id}`)} style={{ color: t.primary, fontSize: 17, fontWeight: '700' }}>{m.name}</Text>
+            <TapText onPress={() => router.push(`/medicamento/${m.id}`)} style={{ color: t.primary, fontSize: 17, fontWeight: '700' }}>{m.name}</TapText>
             <P muted small>{[m.doseText, m.form].filter(Boolean).join(' · ') || 'Sin dosis indicada'}</P>
             <Row>
               <P small>{m.active ? 'Activo' : 'Suspendido'}</P>

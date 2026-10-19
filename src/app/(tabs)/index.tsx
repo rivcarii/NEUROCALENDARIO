@@ -1,6 +1,7 @@
+import * as Haptics from 'expo-haptics';
 import { router } from 'expo-router';
 import { Alert, Text, View } from 'react-native';
-import { Button, Card, Empty, ErrorBox, H, Loading, P, Row, Screen, errorMessage } from '../../components/ui';
+import { Button, Card, Empty, ErrorBox, H, Loading, P, Row, Screen, errorMessage, TapText } from '../../components/ui';
 import { loadDay } from '../../domain/day';
 import { durationMinutes, formatDateLong, formatDuration, formatTime, localDateKey } from '../../domain/time';
 import { useActive, useSession } from '../../services/session';
@@ -21,6 +22,7 @@ export default function Hoy() {
         takenAt: status === 'tomada' ? new Date().toISOString() : null,
       });
       bump();
+      void (status === 'tomada' ? Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success) : Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)).catch(() => undefined);
     } catch (e) { Alert.alert('No se pudo guardar', errorMessage(e)); }
   }
 
@@ -28,6 +30,7 @@ export default function Hoy() {
     try {
       await store.create('episode', profile.id, { startedAt: new Date().toISOString(), kind, isQuick: true });
       bump();
+      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => undefined);
     } catch (e) { Alert.alert('No se pudo guardar', errorMessage(e)); }
   }
 
@@ -70,7 +73,7 @@ export default function Hoy() {
           {data.appointments.length === 0 ? <P muted>Sin citas hoy.</P> : null}
           {data.appointments.map((a) => (
             <Card key={a.id}>
-              <Text onPress={() => router.push(`/cita/${a.id}`)} style={{ color: t.primary, fontSize: 16, fontWeight: '600' }}>{formatTime(a.startsAt)} · {a.title}</Text>
+              <TapText onPress={() => router.push(`/cita/${a.id}`)} style={{ color: t.primary, fontSize: 16, fontWeight: '600' }}>{formatTime(a.startsAt)} · {a.title}</TapText>
               {a.location ? <P muted small>{a.location}</P> : null}
             </Card>
           ))}
@@ -79,9 +82,9 @@ export default function Hoy() {
           {data.episodes.length === 0 ? <P muted>Sin episodios registrados hoy.</P> : null}
           {data.episodes.map((e) => (
             <Card key={e.id}>
-              <Text onPress={() => router.push(`/episodio/${e.id}`)} style={{ color: t.primary, fontSize: 16, fontWeight: '600' }}>
+              <TapText onPress={() => router.push(`/episodio/${e.id}`)} style={{ color: t.primary, fontSize: 16, fontWeight: '600' }}>
                 {formatTime(e.startedAt)} · {e.kind}
-              </Text>
+              </TapText>
               <P muted small>Duración: {formatDuration(durationMinutes(e.startedAt, e.endedAt))}{e.intensity !== null ? ` · Intensidad ${e.intensity}/10` : ''}</P>
             </Card>
           ))}

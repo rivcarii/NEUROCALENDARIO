@@ -54,7 +54,7 @@ export default function Ajustes() {
           <TextField label="Escriba ELIMINAR para confirmar" value={wipe} onChangeText={setWipe} autoCapitalize="characters" />
           <Button title="Eliminar todo" kind="danger" disabled={wipe !== 'ELIMINAR'} onPress={async () => {
             if (!store) return;
-            if (!(await confirmDestructive('Eliminar TODO', 'Se borrarán todos los perfiles y documentos. No se puede deshacer.', 'Eliminar todo'))) return;
+            if (!(await confirmDestructive('¿Eliminar todos los datos?', 'Se borrarán todos los perfiles y documentos. No se puede deshacer.', 'Eliminar todo'))) return;
             try {
               for (const p of profiles) { await store.deleteProfile(p.id); try { deleteProfileFiles(p.id); } catch { /* sin archivos */ } }
               await refreshProfiles(); router.replace('/');

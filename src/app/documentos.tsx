@@ -55,7 +55,7 @@ export default function Documentos() {
   }
 
   async function remove(id: string, path: string) {
-    if (!(await confirmDestructive('Eliminar documento', 'Se eliminará el archivo de este dispositivo. Esta acción no se puede deshacer.', 'Eliminar'))) return;
+    if (!(await confirmDestructive('¿Eliminar documento?', 'Se eliminará el archivo de este dispositivo. Esta acción no se puede deshacer.', 'Eliminar'))) return;
     try { await store.remove('document', profile.id, id); try { deleteAttachment(path, profile.id); } catch { /* ya no existe */ } bump(); } catch (e) { Alert.alert('No se pudo eliminar', errorMessage(e)); }
   }
 

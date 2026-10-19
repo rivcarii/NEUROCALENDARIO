@@ -45,7 +45,7 @@ export default function Acceso() {
                 onChange={async (l) => { try { await store.grant(profile.id, a.id, l); bump(); reload(); } catch (e) { Alert.alert('Error', errorMessage(e)); } }} />
               {perm ? (
                 <Row><Button title="Revocar acceso" kind="danger" onPress={async () => {
-                  if (!(await confirmDestructive('Revocar acceso', `${a.displayName} dejará de tener acceso a ${profile.displayName}.`, 'Revocar'))) return;
+                  if (!(await confirmDestructive('¿Revocar acceso?', `${a.displayName} dejará de tener acceso a ${profile.displayName}.`, 'Revocar'))) return;
                   try { await store.revoke(profile.id, a.id); bump(); reload(); } catch (e) { Alert.alert('Error', errorMessage(e)); }
                 }} /></Row>
               ) : null}

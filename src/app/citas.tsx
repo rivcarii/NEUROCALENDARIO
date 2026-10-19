@@ -1,6 +1,5 @@
 import { Stack, router } from 'expo-router';
-import { Text } from 'react-native';
-import { Button, Card, Empty, ErrorBox, H, Loading, P, Screen } from '../components/ui';
+import { Button, Card, Empty, ErrorBox, H, Loading, P, Screen, TapText } from '../components/ui';
 import { formatDateTime } from '../domain/time';
 import { useActive } from '../services/session';
 import { useData } from '../services/useData';
@@ -15,7 +14,7 @@ export default function Citas() {
   const past = data?.filter((a) => !(a.startsAt >= now && a.status === 'programada')) ?? [];
   const item = (a: NonNullable<typeof data>[number]) => (
     <Card key={a.id}>
-      <Text accessibilityRole="button" onPress={() => router.push(`/cita/${a.id}`)} style={{ color: t.primary, fontSize: 17, fontWeight: '700' }}>{a.title}</Text>
+      <TapText onPress={() => router.push(`/cita/${a.id}`)} style={{ color: t.primary, fontSize: 17, fontWeight: '700' }}>{a.title}</TapText>
       <P>{formatDateTime(a.startsAt)} · {a.status}</P>
       {a.provider || a.location ? <P muted small>{[a.provider, a.location].filter(Boolean).join(' · ')}</P> : null}
     </Card>

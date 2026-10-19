@@ -43,7 +43,7 @@ function ExamenEditor({ id, isNew, pid, initial }: { id: string; isNew: boolean;
     } catch (e) { setErr(errorMessage(e)); } finally { setBusy(false); }
   }
   async function remove() {
-    if (!(await confirmDestructive('Eliminar examen', 'Se eliminará este examen. Los documentos vinculados se conservan.', 'Eliminar'))) return;
+    if (!(await confirmDestructive('¿Eliminar examen?', 'Se eliminará este examen. Los documentos vinculados se conservan.', 'Eliminar'))) return;
     try { await store.remove('exam', pid, id); bump(); router.back(); } catch (e) { Alert.alert('No se pudo eliminar', errorMessage(e)); }
   }
 

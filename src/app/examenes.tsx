@@ -1,6 +1,5 @@
 import { Stack, router } from 'expo-router';
-import { Text } from 'react-native';
-import { Button, Card, Empty, ErrorBox, Loading, P, Screen } from '../components/ui';
+import { Button, Card, Empty, ErrorBox, Loading, P, Screen, TapText } from '../components/ui';
 import { formatDateShort } from '../domain/time';
 import { useActive } from '../services/session';
 import { useData } from '../services/useData';
@@ -20,7 +19,7 @@ export default function Examenes() {
         {data && data.length === 0 ? <Empty title="No hay exámenes registrados." /> : null}
         {data?.map((e) => (
           <Card key={e.id}>
-            <Text accessibilityRole="button" onPress={() => router.push(`/examen/${e.id}`)} style={{ color: t.primary, fontSize: 17, fontWeight: '700' }}>{e.name}</Text>
+            <TapText onPress={() => router.push(`/examen/${e.id}`)} style={{ color: t.primary, fontSize: 17, fontWeight: '700' }}>{e.name}</TapText>
             <P>{formatDateShort(e.examDate)} · {e.status === 'pendiente' ? 'Pendiente de resultado' : 'Con resultado'}</P>
             {e.status === 'con_resultado' ? <P muted small>Origen: {e.resultSource === 'informe_medico' ? 'informe médico' : 'declarado por el usuario'}</P> : null}
           </Card>

@@ -33,7 +33,7 @@ await page.getByText(/Se guardará en: Mamá Ficticia/).waitFor();
 await page.getByRole('button', { name: 'Guardar' }).click();
 ok((await body()).includes('Indique el tipo de episodio'), 'validación: tipo obligatorio');
 await page.getByLabel('Otro tipo / descripción breve').fill('Mareo con aura (ficticio)');
-await page.getByRole('radio', { name: '6', exact: true }).first().click();
+await page.getByRole('radio', { name: '6 de 10', exact: true }).first().click();
 await shot('episodio-form');
 await page.getByRole('button', { name: 'Guardar' }).click();
 await page.getByText('Mareo con aura (ficticio)').first().waitFor({ timeout: 10000 });

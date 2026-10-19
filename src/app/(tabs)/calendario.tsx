@@ -1,7 +1,7 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
-import { Button, Card, Chips, ErrorBox, H, Loading, P, Row, Screen } from '../../components/ui';
+import { Button, Card, Chips, ErrorBox, H, Loading, P, Row, Screen, TapText } from '../../components/ui';
 import { loadDay, loadMonthMarks, type DayData } from '../../domain/day';
 import { addDays, DIAS_CORTOS, durationMinutes, formatDateLong, formatDuration, formatTime, localDateKey, monthGrid, monthName, startOfWeek } from '../../domain/time';
 import { useActive } from '../../services/session';
@@ -90,11 +90,11 @@ function DayDetail({ d }: { d: DayData }) {
     <View style={{ gap: 8 }}>
       {empty ? <Card><P muted>Sin registros este día.</P></Card> : null}
       {d.appointments.map((a) => (
-        <Card key={a.id}><Text onPress={() => router.push(`/cita/${a.id}`)} style={{ color: t.success, fontWeight: '700' }}>Cita {formatTime(a.startsAt)} · {a.title}</Text></Card>
+        <Card key={a.id}><TapText onPress={() => router.push(`/cita/${a.id}`)} style={{ color: t.success, fontWeight: '700' }}>Cita {formatTime(a.startsAt)} · {a.title}</TapText></Card>
       ))}
       {d.episodes.map((e) => (
         <Card key={e.id}>
-          <Text onPress={() => router.push(`/episodio/${e.id}`)} style={{ color: t.danger, fontWeight: '700' }}>Episodio {formatTime(e.startedAt)} · {e.kind}</Text>
+          <TapText onPress={() => router.push(`/episodio/${e.id}`)} style={{ color: t.danger, fontWeight: '700' }}>Episodio {formatTime(e.startedAt)} · {e.kind}</TapText>
           <P muted small>Duración: {formatDuration(durationMinutes(e.startedAt, e.endedAt))}</P>
         </Card>
       ))}
@@ -104,10 +104,10 @@ function DayDetail({ d }: { d: DayData }) {
         </Card>
       ))}
       {d.exams.map((x) => (
-        <Card key={x.id}><Text onPress={() => router.push(`/examen/${x.id}`)} style={{ color: t.warn, fontWeight: '700' }}>Examen · {x.name}</Text></Card>
+        <Card key={x.id}><TapText onPress={() => router.push(`/examen/${x.id}`)} style={{ color: t.warn, fontWeight: '700' }}>Examen · {x.name}</TapText></Card>
       ))}
       {d.notes.map((n) => (
-        <Card key={n.id}><Text onPress={() => router.push(`/nota/${n.id}`)} style={{ color: t.text }}>Nota ({n.authorRole}): {n.body.slice(0, 120)}</Text></Card>
+        <Card key={n.id}><TapText onPress={() => router.push(`/nota/${n.id}`)} style={{ color: t.text }}>Nota ({n.authorRole}): {n.body.slice(0, 120)}</TapText></Card>
       ))}
     </View>
   );
