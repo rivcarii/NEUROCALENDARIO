@@ -17,4 +17,4 @@ export const ASSOCIATED_SYMPTOMS = [
 
 export const LEVEL_LABEL = { read: 'Solo lectura', write: 'Lectura y escritura', admin: 'Administrador' } as const;
 export const WEEKDAY_LABEL = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
-export const PROFILE_COLORS = ['#2F5D8A', '#8A2F5D', '#2F8A5D', '#8A5D2F', '#5D2F8A', '#2F7A8A'];
+export const PROFILE_COLORS = ['#2F5D8A', '#8A2F5D', '#1F7A4D', '#8A5D2F', '#5D2F8A', '#2F7A8A'];
