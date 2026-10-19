@@ -33,6 +33,11 @@
 - Publicación como Dulza: la web compilada vive en `docs/` (Pages: main / docs) y el flujo `Publicar web` la regenera en cada cambio de código (versión = paquete + SHA). La documentación se movió a `documentacion/`. Se añadió `404.html` para que recargar una pantalla interna no falle en GitHub Pages.
 - Adaptaciones web: avisos solo con la app abierta, PDF por impresión, respaldo por descarga, sin adjuntos.
 
+### Apariencia iOS / Android y optimización
+- Tarjetas, botones, campos, barra de pestañas y cabeceras con acabado propio de cada plataforma; contenido de ancho máximo; teclado que no tapa los campos; letra del sistema hasta ×1,6.
+- Web móvil: ajustes de plataforma (tap, dvh, overscroll, zoom de iOS, selección, tema claro/oscuro sin parpadeo).
+- Rendimiento: historial paginado; iconos solo de Ionicons (web −40 %).
+
 ### Defectos encontrados y corregidos durante el desarrollo
 - Restaurar una copia reutilizaba la ruta de los adjuntos del original: borrar un documento en un perfil podía borrar el archivo del otro. **Ahora se generan rutas nuevas** (con prueba).
 - Una copia sin `data` provocaba una excepción interna en lugar de un error de validación.

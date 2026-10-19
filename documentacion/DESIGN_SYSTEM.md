@@ -39,3 +39,23 @@ Resultado de aplicar los skills de diseño (crítica y sistema) y de animación 
 | «Reducir movimiento» del sistema | Sin escala ni transición | accesibilidad | `useReduceMotion` |
 
 **Pendiente de comprobar en teléfono** (no se puede juzgar desde código ni navegador): sensación de la escala al pulsar en un Android de gama baja, sincronía de la háptica y que las transiciones de Reanimated funcionen en compilación de producción (Reanimated 4 requiere la nueva arquitectura, ya activada).
+
+## Apariencia por plataforma (iOS · Android · web instalable)
+| Aspecto | iOS | Android (Material 3) | Web instalada |
+|---|---|---|---|
+| Tarjetas | sombra suave + filo fino | elevación 1 (sin borde en claro) | como iOS |
+| Botones | radio 12 | píldora (24) | como iOS |
+| Campos | radio 10 | radio 8 | como iOS |
+| Texto base | 17 (Dynamic Type) | 16 | 17 |
+| Barra de pestañas | filo fino, etiquetas 11 | elevación 8, sin borde, etiquetas 12 | filo |
+| Cabecera de pantallas | botón «atrás» sin texto, sin sombra | flecha estándar con sombra | — |
+| Teclado | el contenido se desplaza solo (`automaticallyAdjustKeyboardInsets`), se cierra arrastrando | se cierra al desplazar | `interactive-widget=resizes-content` |
+| Barra de estado / zona segura | `StatusBar` auto + márgenes seguros | edge-to-edge + márgenes seguros | `viewport-fit=cover`, `theme-color` claro/oscuro |
+
+Común: tamaño de letra del sistema respetado hasta ×1,6; contenido de ancho máximo 640 (tabletas y escritorio no estiran la interfaz); objetivos táctiles ≥44/48.
+
+**Web móvil** (`scripts/build-pwa.mjs`, hoja `nc-mobile`): sin destello gris al tocar, `100dvh`, `overscroll-behavior: none`, sin selección de texto en controles, campos a 16 px (evita el zoom de iOS), `touch-action: manipulation`, fondo según el modo (sin parpadeo blanco), foco visible.
+
+**Rendimiento**: historial paginado de 40 en 40; solo se empaqueta la fuente de iconos usada (web de 10,4 MB a 6,2 MB).
+
+**Pendiente de comprobar en teléfono real**: sombras/elevación, tamaño de letra y barra de pestañas en iOS y Android nativos; zonas seguras y teclado en Safari/Chrome reales. Solo se verificó en Chromium emulando teléfonos (la plataforma «web» no ejecuta las ramas iOS/Android del código).

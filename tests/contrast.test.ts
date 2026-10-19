@@ -1,6 +1,6 @@
 import { PROFILE_COLORS } from '../src/domain/labels';
 
-jest.mock('react-native', () => ({ useColorScheme: () => 'light' }));
+jest.mock('react-native', () => ({ useColorScheme: () => 'light', Platform: { OS: 'ios', select: (o: Record<string, unknown>) => o.ios ?? o.default } }));
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const { light, dark } = require('../src/theme') as typeof import('../src/theme');
 

@@ -25,7 +25,24 @@ const files = [];
 const base = process.env.EXPO_BASE_URL ?? '';
 const indexPath = join(dist, 'index.html');
 let html = readFileSync(indexPath, 'utf8');
+// Ajustes de plataforma móvil (iOS Safari / Android Chrome) para que la web se sienta como una app instalada.
+const mobileCss = `
+  html{-webkit-tap-highlight-color:transparent;-webkit-text-size-adjust:100%;text-size-adjust:100%;overscroll-behavior:none;color-scheme:light dark;background:#F6F8FB}
+  @media (prefers-color-scheme:dark){html{background:#0E141A}}
+  html,body{height:100%}
+  body{height:100dvh;overscroll-behavior:none;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+  #root{height:100dvh}
+  /* los controles no seleccionan su texto al mantener pulsado; el contenido sí */
+  button,[role=button],[role=radio],[role=checkbox],[role=tab],a{touch-action:manipulation;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+  /* iOS hace zoom al enfocar campos de menos de 16 px */
+  input,textarea,select{font-size:16px}
+  input:focus,textarea:focus{outline:2px solid #2F5D8A;outline-offset:0}
+  @media (prefers-color-scheme:dark){input:focus,textarea:focus{outline-color:#7FB0E0}}
+  @media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+`.replace(/\s+/g, ' ').trim();
+
 const head = [
+  `<style id="nc-mobile">${mobileCss}</style>`,
   `<link rel="manifest" href="${base}/manifest.webmanifest">`,
   `<link rel="apple-touch-icon" href="${base}/apple-touch-icon.png">`,
   `<link rel="icon" href="${base}/icon-192.png">`,
@@ -40,7 +57,7 @@ const head = [
 ].join('\n    ');
 html = html
   .replace('<html lang="en">', '<html lang="es">')
-  .replace(/<meta name="viewport"[^>]*>/, '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">')
+  .replace(/<meta name="viewport"[^>]*>/, '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">')
   .replace(/<meta name="theme-color" content="[^"]*">\s*/g, '')
   .replace(/<link rel="icon"[^>]*>/g, '')
   .replace('</head>', `    ${head}\n  </head>`);

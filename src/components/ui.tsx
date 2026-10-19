@@ -1,23 +1,32 @@
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useState, type ReactNode } from 'react';
-import { ActivityIndicator, Alert, Platform, Pressable, ScrollView, TextInput, View, type StyleProp, type TextInputProps, type TextStyle, type ViewStyle } from 'react-native';
+import { ActivityIndicator, Alert, Platform, Pressable, ScrollView, StyleSheet, TextInput, View, type StyleProp, type TextInputProps, type TextStyle, type ViewStyle } from 'react-native';
 import { Text } from './Text';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { formatDateShort, formatTime, localDateKey, parseDateKey } from '../domain/time';
-import { MIN_TOUCH, radius, space, useTheme } from '../theme';
+import { MIN_TOUCH, cardSurface, platform, radius, space, useIsDark, useTheme } from '../theme';
 import { font, size } from '../theme/type';
 import { Mascot, type MascotMood } from './Mascot';
 import { PressableScale } from './PressableScale';
+
+/** Ancho máximo del contenido: en tabletas y navegadores de escritorio no se estira. */
+export const MAX_CONTENT = 640;
 
 export function Screen({ children, scroll = true, footer }: { children: ReactNode; scroll?: boolean; footer?: ReactNode }) {
   const t = useTheme();
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: t.bg }} edges={['left', 'right', 'bottom']}>
       {scroll ? (
-        <ScrollView contentContainerStyle={{ padding: space.lg, gap: space.md, paddingBottom: space.xl * 2 }} keyboardShouldPersistTaps="handled">
+        <ScrollView
+          contentContainerStyle={{ padding: space.lg, gap: space.md, paddingBottom: space.xl * 2, width: '100%', maxWidth: MAX_CONTENT, alignSelf: 'center' }}
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
+          automaticallyAdjustKeyboardInsets // iOS: el teclado no tapa el campo que se escribe
+          contentInsetAdjustmentBehavior="automatic"
+        >
           {children}
         </ScrollView>
-      ) : <View style={{ flex: 1, padding: space.lg, gap: space.md }}>{children}</View>}
+      ) : <View style={{ flex: 1, padding: space.lg, gap: space.md, width: '100%', maxWidth: MAX_CONTENT, alignSelf: 'center' }}>{children}</View>}
       {footer}
     </SafeAreaView>
   );
@@ -25,7 +34,14 @@ export function Screen({ children, scroll = true, footer }: { children: ReactNod
 
 export function Card({ children, style }: { children: ReactNode; style?: StyleProp<ViewStyle> }) {
   const t = useTheme();
-  return <View style={[{ backgroundColor: t.card, borderRadius: radius.lg, borderWidth: 1, borderColor: t.border, padding: space.lg, gap: space.sm }, style]}>{children}</View>;
+  const dark = useIsDark();
+  return (
+    <View style={[{
+      backgroundColor: t.card, borderRadius: platform.cardRadius, padding: space.lg, gap: space.sm,
+      // iOS/web: sombra suave + filo; Android: elevación; modo oscuro: solo filo.
+      borderWidth: Platform.OS === 'android' && !dark ? 0 : StyleSheet.hairlineWidth * 2, borderColor: t.border,
+    }, cardSurface(dark), style]}>{children}</View>
+  );
 }
 
 export function H({ children, level = 1 }: { children: ReactNode; level?: 1 | 2 }) {
@@ -35,7 +51,7 @@ export function H({ children, level = 1 }: { children: ReactNode; level?: 1 | 2 
 
 export function P({ children, muted, small, style }: { children: ReactNode; muted?: boolean; small?: boolean; style?: StyleProp<ViewStyle> }) {
   const t = useTheme();
-  return <Text style={[{ color: muted ? t.muted : t.text, fontSize: small ? size.caption : size.body, lineHeight: small ? 18 : 22 }, style as never]}>{children}</Text>;
+  return <Text style={[{ color: muted ? t.muted : t.text, fontSize: small ? size.caption : platform.body, lineHeight: small ? 18 : Math.round(platform.body * 1.4) }, style as never]}>{children}</Text>;
 }
 
 export function Button({ title, onPress, kind = 'primary', disabled, loading, accessibilityHint }: {
@@ -50,7 +66,7 @@ export function Button({ title, onPress, kind = 'primary', disabled, loading, ac
       accessibilityState={{ disabled: !!disabled || !!loading }}
       disabled={disabled || loading} onPress={onPress}
       style={{
-        minHeight: MIN_TOUCH, borderRadius: radius.md, paddingHorizontal: space.lg, alignItems: 'center', justifyContent: 'center',
+        minHeight: MIN_TOUCH, borderRadius: platform.buttonRadius, paddingHorizontal: space.lg, alignItems: 'center', justifyContent: 'center',
         backgroundColor: bg, borderWidth: kind === 'secondary' ? 1.5 : 0, borderColor: t.primary, flexDirection: 'row', gap: space.sm,
       }}>
       {loading ? <ActivityIndicator color={fg} /> : null}
@@ -80,7 +96,7 @@ export function TextField({ label, error, hint, ...rest }: TextInputProps & { la
       <TextInput
         accessibilityLabel={label} placeholderTextColor={t.muted}
         style={{
-          minHeight: MIN_TOUCH, borderWidth: 1, borderColor: error ? t.danger : t.border, borderRadius: radius.md,
+          minHeight: MIN_TOUCH, borderWidth: 1, borderColor: error ? t.danger : t.border, borderRadius: platform.inputRadius,
           paddingHorizontal: space.md, paddingVertical: space.sm, color: t.text, backgroundColor: t.card, fontSize: size.body, fontFamily: font.body,
           textAlignVertical: rest.multiline ? 'top' : 'center',
         }}

@@ -8,5 +8,5 @@ import { bodyFamilyFor } from '../theme/type';
 export function Text({ style, ...rest }: TextProps) {
   const flat = StyleSheet.flatten(style) ?? {};
   const family = flat.fontFamily ?? bodyFamilyFor(flat.fontWeight);
-  return <RNText {...rest} style={[style, { fontFamily: family, fontWeight: 'normal' }]} />;
+  return <RNText maxFontSizeMultiplier={1.6} {...rest} style={[style, { fontFamily: family, fontWeight: 'normal' }]} />;
 }

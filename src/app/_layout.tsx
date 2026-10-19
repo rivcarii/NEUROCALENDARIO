@@ -2,7 +2,7 @@ import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, View } from 'react-native';
+import { ActivityIndicator, Platform, View } from 'react-native';
 import { Text } from '../components/Text';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Mascot } from '../components/Mascot';
@@ -65,7 +65,7 @@ function Gate() {
   return (
     <>
       <StatusBar style="auto" />
-      <Stack screenOptions={{ headerBackTitle: 'Atrás', headerStyle: { backgroundColor: t.card }, headerTintColor: t.text, headerTitleStyle: { fontFamily: font.displaySemi, fontSize: 18 } }}>
+      <Stack screenOptions={{ headerBackButtonDisplayMode: 'minimal', headerShadowVisible: Platform.OS !== 'ios', headerStyle: { backgroundColor: t.card }, headerTintColor: t.text, headerTitleStyle: { fontFamily: font.displaySemi, fontSize: 18 } }}>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       </Stack>
     </>

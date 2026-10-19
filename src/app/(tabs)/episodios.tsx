@@ -7,6 +7,8 @@ import { useActive } from '../../services/session';
 import { useData } from '../../services/useData';
 import { useTheme } from '../../theme';
 
+/** Se pintan de 40 en 40: el historial largo no frena el teléfono. */
+const PAGE = 40;
 const PERIODS = [
   { value: 7, label: '7 días' }, { value: 30, label: '30 días' }, { value: 90, label: '90 días' }, { value: 0, label: 'Todo' },
 ];
@@ -16,6 +18,7 @@ export default function Episodios() {
   const t = useTheme();
   const [q, setQ] = useState('');
   const [days, setDays] = useState(30);
+  const [shown, setShown] = useState(PAGE);
   const { data, loading, error, reload } = useData(async () => {
     const from = days ? startOfLocalDayIso(addDays(localDateKey(new Date()), -days + 1)) : undefined;
     return store.list('episode', profile.id, { search: q, from });
@@ -24,12 +27,12 @@ export default function Episodios() {
   return (
     <Screen>
       <Button title="Anotar un síntoma" onPress={() => router.push('/episodio/nuevo')} />
-      <TextField label="Buscar" value={q} onChangeText={setQ} placeholder="Tipo, contexto u observaciones" returnKeyType="search" />
-      <Chips label="¿De cuándo?" options={PERIODS} value={days} onChange={setDays} />
+      <TextField label="Buscar" value={q} onChangeText={(v) => { setQ(v); setShown(PAGE); }} placeholder="Tipo, contexto u observaciones" returnKeyType="search" />
+      <Chips label="¿De cuándo?" options={PERIODS} value={days} onChange={(v) => { setDays(v); setShown(PAGE); }} />
       {loading && !data ? <Loading /> : null}
       {error ? <ErrorBox message={error} onRetry={reload} /> : null}
       {data && data.length === 0 ? <Empty title="No hay síntomas anotados en este período." hint={q ? 'Pruebe con otra búsqueda.' : 'Use «Anotar un síntoma» o «Anotar ahora» en Hoy.'} /> : null}
-      {data?.map((e) => (
+      {data?.slice(0, shown).map((e) => (
         <Card key={e.id}>
           <TapText onPress={() => router.push(`/episodio/${e.id}`)} style={{ color: t.primary, fontSize: 17, fontWeight: '700' }}>{e.kind}</TapText>
           <P>{formatDateTime(e.startedAt)} · {formatDuration(durationMinutes(e.startedAt, e.endedAt))}</P>
@@ -40,6 +43,7 @@ export default function Episodios() {
           </Row>
         </Card>
       ))}
+      {data && data.length > shown ? <Button title={`Mostrar más (${data.length - shown})`} kind="secondary" onPress={() => setShown((n) => n + PAGE)} /> : null}
       {data ? <P muted small>{data.length} síntoma(s) en {profile.displayName}</P> : null}
     </Screen>
   );

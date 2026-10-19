@@ -1,5 +1,6 @@
 import { Tabs } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
+import { Platform, StyleSheet } from 'react-native';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { ProfileHeader } from '../../components/ProfileHeader';
 import { useTheme } from '../../theme';
 import { font } from '../../theme/type';
@@ -17,8 +18,14 @@ export default function TabsLayout() {
   const t = useTheme();
   return (
     <Tabs screenOptions={{
-      tabBarActiveTintColor: t.primary, tabBarStyle: { backgroundColor: t.card, minHeight: 60 },
-      tabBarLabelStyle: { fontSize: 12, fontFamily: font.body }, animation: 'none',
+      tabBarActiveTintColor: t.primary, tabBarInactiveTintColor: t.muted,
+      // iOS: filo fino como la barra del sistema; Android: sin borde y con indicador de elevación suave.
+      tabBarStyle: Platform.select({
+        ios: { backgroundColor: t.card, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: t.border },
+        default: { backgroundColor: t.card, borderTopWidth: 0, elevation: 8, minHeight: 64 },
+      }),
+      tabBarLabelStyle: { fontSize: Platform.OS === 'ios' ? 11 : 12, fontFamily: font.body },
+      animation: 'none',
     }}>
       <Tabs.Screen name="index" options={{ title: 'Hoy', tabBarIcon: icon('today', 'today-outline'), header: () => <ProfileHeader title="Mi día" /> }} />
       <Tabs.Screen name="calendario" options={{ title: 'Calendario', tabBarIcon: icon('calendar', 'calendar-outline'), header: () => <ProfileHeader title="Calendario" /> }} />
