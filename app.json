@@ -1,25 +1,39 @@
 {
   "expo": {
-    "name": "scaf",
-    "slug": "scaf",
-    "version": "1.0.0",
+    "name": "NeuroCalendario",
+    "slug": "neurocalendario",
+    "scheme": "neurocalendario",
+    "version": "0.1.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": false,
+      "bundleIdentifier": "app.neurocalendario.local",
+      "infoPlist": {
+        "NSFaceIDUsageDescription": "Se usa para proteger el acceso a la información de salud.",
+        "NSCameraUsageDescription": "Se usa para fotografiar documentos médicos que usted decida adjuntar.",
+        "NSPhotoLibraryUsageDescription": "Se usa para adjuntar imágenes de documentos médicos que usted elija."
+      }
     },
     "android": {
+      "package": "app.neurocalendario.local",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false
+      "allowBackup": false,
+      "permissions": ["POST_NOTIFICATIONS", "SCHEDULE_EXACT_ALARM", "USE_BIOMETRIC"]
     },
-    "web": {
-      "favicon": "./assets/favicon.png"
-    }
+    "plugins": [
+      "expo-router",
+      "expo-sqlite",
+      "expo-secure-store",
+      "expo-local-authentication",
+      ["expo-notifications", { "color": "#2F5D8A" }]
+    ]
   }
 }

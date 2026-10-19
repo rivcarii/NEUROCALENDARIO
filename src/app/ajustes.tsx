@@ -1,0 +1,67 @@
+import { Stack, router } from 'expo-router';
+import { useState } from 'react';
+import { Alert, Switch } from 'react-native';
+import { Button, Card, H, P, Row, Screen, TextField, confirmDestructive, errorMessage } from '../components/ui';
+import { deleteProfileFiles } from '../services/files';
+import { useSession } from '../services/session';
+import { useData } from '../services/useData';
+
+export default function Ajustes() {
+  const { store, profiles, appLockEnabled, setAppLock, refreshProfiles, bump } = useSession();
+  const { data, reload } = useData(async () => ({
+    details: (await store?.getSetting('notif_details')) === '1',
+    status: (await store?.getSetting('reminder_status')) ?? 'pendiente',
+  }));
+  const [wipe, setWipe] = useState('');
+
+  const statusText = (s: string) =>
+    s.startsWith('ok:') ? `${s.slice(3)} recordatorio(s) programado(s)` : s === 'sin_permiso' ? 'Sin permiso de notificaciones: active el permiso en los ajustes del teléfono.' : s === 'error' ? 'Error al programar recordatorios' : 'Aún sin programar';
+
+  return (
+    <>
+      <Stack.Screen options={{ title: 'Privacidad y ajustes' }} />
+      <Screen>
+        <Card>
+          <H level={2}>Bloqueo de la app</H>
+          <Row>
+            <Switch accessibilityLabel="Bloquear con huella, rostro o código" value={appLockEnabled}
+              onValueChange={async (v) => { const r = await setAppLock(v); if (!r.ok && r.message) Alert.alert('No se pudo cambiar', r.message); }} />
+            <P>Pedir huella, rostro o código al abrir</P>
+          </Row>
+          <P muted small>Protege el acceso a la aplicación; no cifra la base de datos. Los datos quedan en el almacenamiento privado de la app, protegido por el bloqueo y el cifrado del propio teléfono. Active también el bloqueo de pantalla y el cifrado del dispositivo.</P>
+        </Card>
+        <Card>
+          <H level={2}>Notificaciones</H>
+          <Row>
+            <Switch accessibilityLabel="Mostrar detalles en notificaciones" value={data?.details ?? false}
+              onValueChange={async (v) => { await store?.setSetting('notif_details', v ? '1' : '0'); bump(); reload(); }} />
+            <P>Mostrar nombre del medicamento o cita en la pantalla bloqueada</P>
+          </Row>
+          <P muted small>Desactivado por defecto: las notificaciones dicen solo «Tiene un recordatorio pendiente».</P>
+          <P small>Estado: {statusText(data?.status ?? 'pendiente')}</P>
+          <P muted small>Los recordatorios son locales y no garantizan atención médica ni sirven como alarma de emergencia. Pueden retrasarse o no entregarse según el modo de ahorro, los permisos o un reinicio del teléfono.</P>
+        </Card>
+        <Card>
+          <H level={2}>Privacidad</H>
+          <P small>• Los datos se guardan solo en este dispositivo.</P>
+          <P small>• No se envía información médica a servicios externos, de análisis ni de inteligencia artificial.</P>
+          <P small>• Los informes y copias salen de la app únicamente cuando usted los comparte.</P>
+          <P small>• La app no genera diagnósticos ni cambia tratamientos.</P>
+        </Card>
+        <Card>
+          <H level={2}>Eliminar todos los datos</H>
+          <P muted small>Borra todos los perfiles y archivos de este dispositivo. Haga antes una copia de seguridad.</P>
+          <TextField label="Escriba ELIMINAR para confirmar" value={wipe} onChangeText={setWipe} autoCapitalize="characters" />
+          <Button title="Eliminar todo" kind="danger" disabled={wipe !== 'ELIMINAR'} onPress={async () => {
+            if (!store) return;
+            if (!(await confirmDestructive('Eliminar TODO', 'Se borrarán todos los perfiles y documentos. No se puede deshacer.', 'Eliminar todo'))) return;
+            try {
+              for (const p of profiles) { await store.deleteProfile(p.id); try { deleteProfileFiles(p.id); } catch { /* sin archivos */ } }
+              await refreshProfiles(); router.replace('/');
+            } catch (e) { Alert.alert('No se pudo eliminar', errorMessage(e)); }
+          }} />
+        </Card>
+      </Screen>
+    </>
+  );
+}

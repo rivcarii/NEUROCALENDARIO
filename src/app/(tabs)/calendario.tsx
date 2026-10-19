@@ -1,0 +1,114 @@
+import { router } from 'expo-router';
+import { useState } from 'react';
+import { Pressable, Text, View } from 'react-native';
+import { Button, Card, Chips, ErrorBox, H, Loading, P, Row, Screen } from '../../components/ui';
+import { loadDay, loadMonthMarks, type DayData } from '../../domain/day';
+import { addDays, DIAS_CORTOS, durationMinutes, formatDateLong, formatDuration, formatTime, localDateKey, monthGrid, monthName, startOfWeek } from '../../domain/time';
+import { useActive } from '../../services/session';
+import { useData } from '../../services/useData';
+import { MIN_TOUCH, useTheme } from '../../theme';
+
+type Mode = 'mes' | 'semana' | 'dia';
+
+export default function Calendario() {
+  const { store, profile } = useActive();
+  const t = useTheme();
+  const today = localDateKey(new Date());
+  const [mode, setMode] = useState<Mode>('mes');
+  const [selected, setSelected] = useState(today);
+  const [y, m] = selected.split('-').map(Number) as [number, number];
+
+  const month = useData(() => loadMonthMarks(store, profile.id, y, m - 1), [y, m]);
+  const day = useData(() => loadDay(store, profile.id, selected), [selected]);
+
+  const step = mode === 'mes' ? 'mes' : mode === 'semana' ? 7 : 1;
+  function move(dir: -1 | 1) {
+    if (step === 'mes') {
+      const d = new Date(y, m - 1 + dir, 1);
+      setSelected(localDateKey(d));
+    } else setSelected(addDays(selected, step * dir));
+  }
+
+  const weekDays = Array.from({ length: 7 }, (_, i) => addDays(startOfWeek(selected), i));
+  const cells = mode === 'mes' ? monthGrid(y, m - 1) : mode === 'semana' ? weekDays : [];
+
+  return (
+    <Screen>
+      <Chips options={[{ value: 'mes', label: 'Mes' }, { value: 'semana', label: 'Semana' }, { value: 'dia', label: 'Día' }]} value={mode} onChange={setMode} />
+      <Row style={{ justifyContent: 'space-between' }}>
+        <Button title="◀" kind="secondary" onPress={() => move(-1)} accessibilityHint="Período anterior" />
+        <H level={2}>{mode === 'dia' ? formatDateLong(selected) : `${monthName(m - 1)} ${y}`}</H>
+        <Button title="▶" kind="secondary" onPress={() => move(1)} accessibilityHint="Período siguiente" />
+      </Row>
+      <Button title="Ir a hoy" kind="secondary" onPress={() => setSelected(today)} />
+
+      {mode !== 'dia' ? (
+        <View>
+          <View style={{ flexDirection: 'row' }}>
+            {DIAS_CORTOS.map((d) => <Text key={d} style={{ flex: 1, textAlign: 'center', color: t.muted, fontWeight: '600' }}>{d}</Text>)}
+          </View>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+            {cells.map((k) => {
+              const mk = month.data?.get(k);
+              const inMonth = mode === 'semana' || Number(k.split('-')[1]) === m;
+              const sel = k === selected;
+              return (
+                <Pressable key={k} accessibilityRole="button"
+                  accessibilityLabel={`${formatDateLong(k)}. ${mk?.episodes ?? 0} episodios, ${mk?.appointments ?? 0} citas`}
+                  onPress={() => setSelected(k)}
+                  style={{ width: `${100 / 7}%`, minHeight: MIN_TOUCH + 8, alignItems: 'center', justifyContent: 'center', borderRadius: 8,
+                    backgroundColor: sel ? t.primary : 'transparent', borderWidth: k === today ? 1.5 : 0, borderColor: t.primary, opacity: inMonth ? 1 : 0.4 }}>
+                  <Text style={{ color: sel ? t.onPrimary : t.text, fontWeight: '600' }}>{Number(k.split('-')[2])}</Text>
+                  <View style={{ flexDirection: 'row', gap: 3, height: 8 }}>
+                    {mk?.episodes ? <View style={{ width: 7, height: 7, borderRadius: 4, backgroundColor: sel ? t.onPrimary : t.danger }} /> : null}
+                    {mk?.appointments ? <View style={{ width: 7, height: 7, borderRadius: 4, backgroundColor: sel ? t.onPrimary : t.success }} /> : null}
+                    {mk?.exams ? <View style={{ width: 7, height: 7, borderRadius: 4, backgroundColor: sel ? t.onPrimary : t.warn }} /> : null}
+                  </View>
+                </Pressable>
+              );
+            })}
+          </View>
+          <P muted small>● rojo: episodios · verde: citas · ámbar: exámenes</P>
+        </View>
+      ) : null}
+      {month.error ? <ErrorBox message={month.error} onRetry={month.reload} /> : null}
+
+      <H level={2}>{formatDateLong(selected)}</H>
+      {day.loading && !day.data ? <Loading /> : null}
+      {day.error ? <ErrorBox message={day.error} onRetry={day.reload} /> : null}
+      {day.data ? <DayDetail d={day.data} /> : null}
+      <Button title="Agregar episodio en este día" kind="secondary" onPress={() => router.push('/episodio/nuevo')} />
+      <Button title="Agregar cita" kind="secondary" onPress={() => router.push(`/cita/nueva?fecha=${selected}`)} />
+    </Screen>
+  );
+}
+
+function DayDetail({ d }: { d: DayData }) {
+  const t = useTheme();
+  const empty = !d.episodes.length && !d.appointments.length && !d.doses.length && !d.exams.length && !d.notes.length;
+  return (
+    <View style={{ gap: 8 }}>
+      {empty ? <Card><P muted>Sin registros este día.</P></Card> : null}
+      {d.appointments.map((a) => (
+        <Card key={a.id}><Text onPress={() => router.push(`/cita/${a.id}`)} style={{ color: t.success, fontWeight: '700' }}>Cita {formatTime(a.startsAt)} · {a.title}</Text></Card>
+      ))}
+      {d.episodes.map((e) => (
+        <Card key={e.id}>
+          <Text onPress={() => router.push(`/episodio/${e.id}`)} style={{ color: t.danger, fontWeight: '700' }}>Episodio {formatTime(e.startedAt)} · {e.kind}</Text>
+          <P muted small>Duración: {formatDuration(durationMinutes(e.startedAt, e.endedAt))}</P>
+        </Card>
+      ))}
+      {d.doses.map((x) => (
+        <Card key={x.dueAt + x.schedule.id}>
+          <P>{formatTime(x.dueAt)} · {x.medication.name} — {x.intake ? x.intake.status : 'sin registrar'}</P>
+        </Card>
+      ))}
+      {d.exams.map((x) => (
+        <Card key={x.id}><Text onPress={() => router.push(`/examen/${x.id}`)} style={{ color: t.warn, fontWeight: '700' }}>Examen · {x.name}</Text></Card>
+      ))}
+      {d.notes.map((n) => (
+        <Card key={n.id}><Text onPress={() => router.push(`/nota/${n.id}`)} style={{ color: t.text }}>Nota ({n.authorRole}): {n.body.slice(0, 120)}</Text></Card>
+      ))}
+    </View>
+  );
+}

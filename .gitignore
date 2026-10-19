@@ -39,3 +39,12 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+
+.env
+.env.*
+!.env.example
+*.pem
+*.p12
+*.jks
+*.keystore
+coverage/
