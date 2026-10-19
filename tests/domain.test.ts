@@ -26,6 +26,22 @@ describe('tiempo', () => {
   });
 });
 
+describe('cambios de hora (horario de verano)', () => {
+  it('la cuadrícula del mes siempre tiene 42 días distintos y consecutivos', () => {
+    for (const [y, m] of [[2026, 2], [2026, 9], [2026, 10], [2026, 3]] as const) {
+      const g = monthGrid(y, m);
+      expect(new Set(g).size).toBe(42);
+      for (let i = 1; i < g.length; i++) expect(addDays(g[i - 1]!, 1)).toBe(g[i]);
+    }
+  });
+  it('addDays y startOfWeek no se desfasan al cruzar un cambio de hora', () => {
+    expect(addDays('2026-03-28', 1)).toBe('2026-03-29');
+    expect(addDays('2026-03-29', 1)).toBe('2026-03-30');
+    expect(addDays('2026-10-24', 2)).toBe('2026-10-26');
+    expect(startOfWeek('2026-03-29')).toBe('2026-03-23');
+  });
+});
+
 describe('estadísticas', () => {
   const mk = (start: string, end: string | null, intensity: number | null, kind = 'Cefalea') =>
     ({ startedAt: start, endedAt: end, intensity, kind }) as never;
@@ -124,10 +140,35 @@ describe('copias de seguridad', () => {
     const docs = await f.owner.list('document', res.profileId);
     const exams = await f.owner.list('exam', res.profileId);
     expect(docs[0]!.linkedId).toBe(exams[0]!.id);
-    expect(disk.has('restored/docs/d.pdf')).toBe(true);
+    expect(disk.has(`restored/${docs[0]!.storagePath}`)).toBe(true);
     // el original no cambió y el otro perfil sigue vacío
     expect(await f.owner.list('episode', f.mom)).toHaveLength(1);
     expect(await f.owner.list('episode', f.me)).toHaveLength(0);
+  });
+
+  it('los adjuntos restaurados usan rutas nuevas e independientes del original', async () => {
+    await seed();
+    const disk = new Map<string, string>([['docs/d.pdf', 'JVBERg==']]);
+    const files: FileAdapter = { readBase64: async (p) => disk.get(p)!, writeBase64: async (p, b) => { disk.set(p, b); } };
+    const backup = await buildBackup(f.owner, f.mom, files);
+    const res = await restoreBackup(f.owner, backup, randomUUID, files);
+    const orig = (await f.owner.list('document', f.mom))[0]!;
+    const copy = (await f.owner.list('document', res.profileId))[0]!;
+    expect(copy.storagePath).not.toBe(orig.storagePath);
+    expect(copy.storagePath).toMatch(new RegExp(`^attachments/${res.profileId}/[0-9a-f-]{36}\\.pdf$`));
+    expect(disk.get(copy.storagePath)).toBe('JVBERg==');
+    // una ruta maliciosa en la copia no se usa
+    const evil = JSON.parse(JSON.stringify(backup));
+    evil.data.document[0].storagePath = '../../../etc/passwd';
+    evil.files = { '../../../etc/passwd': 'JVBERg==' };
+    const r2 = await restoreBackup(f.owner, evil, randomUUID, files);
+    const d2 = (await f.owner.list('document', r2.profileId))[0]!;
+    expect(d2.storagePath).toMatch(/^attachments\/[0-9a-f-]{36}\/[0-9a-f-]{36}\.pdf$/);
+    expect([...disk.keys()].some((k) => k.includes('..'))).toBe(false);
+  });
+
+  it('una copia sin datos da error de validación, no una excepción interna', async () => {
+    await expect(restoreBackup(f.owner, { format: 'neurocalendario-backup', version: 1 }, randomUUID)).rejects.toBeInstanceOf(ValidationError);
   });
 
   it('una copia corrupta no deja perfiles a medias', async () => {

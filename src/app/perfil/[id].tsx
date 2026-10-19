@@ -52,6 +52,7 @@ export default function PerfilForm() {
         <Chips label="Color de identificación" options={PROFILE_COLORS.map((c) => ({ value: c, label: c }))} value={color} onChange={setColor} />
         <Row><Switch accessibilityLabel="Perfil principal" value={primary} onValueChange={setPrimary} /><P>Perfil principal de seguimiento</P></Row>
         <P muted small>Registre datos de otra persona solo con su conocimiento y autorización.</P>
+        {isNew ? <P muted small>Al crearlo pasará a ser el perfil activo. La franja de color de la parte superior siempre indica de quién son los datos que ve.</P> : null}
         <Button title="Guardar" onPress={save} loading={busy} />
         {!isNew && existing ? (
           <>

@@ -15,7 +15,8 @@ export function nodeDriver(file = ':memory:'): { driver: RawDriver; close: () =>
     all: async <T,>(sql: string, params: SqlParam[] = []) => raw.prepare(sql).all(...params) as T[],
     get: async <T,>(sql: string, params: SqlParam[] = []) => raw.prepare(sql).get(...params) as T | undefined,
   };
-  return { driver, close: () => raw.close() };
+  let closed = false;
+  return { driver, close: () => { if (!closed) { closed = true; raw.close(); } } };
 }
 
 export async function openTestDb(file = ':memory:'): Promise<{ db: SqlDb; close: () => void }> {

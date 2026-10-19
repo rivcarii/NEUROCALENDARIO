@@ -59,6 +59,9 @@ export async function restoreBackup(
 ): Promise<{ profileId: string; counts: Record<string, number> }> {
   const p = payload as BackupPayload;
   if (!p || p.format !== BACKUP_FORMAT) throw new ValidationError(['El archivo no es una copia de NeuroCalendario.']);
+  if (typeof p.data !== 'object' || p.data === null || typeof p.profile !== 'object' || p.profile === null) {
+    throw new ValidationError(['La copia está incompleta o dañada.']);
+  }
   if (typeof p.version !== 'number' || p.version > BACKUP_VERSION) {
     throw new ValidationError(['La copia es de una versión más reciente de la app.']);
   }
@@ -72,6 +75,8 @@ export async function restoreBackup(
   const me = store.accountId;
 
   const remap = (v: unknown) => (typeof v === 'string' ? idMap.get(v) ?? null : null);
+  // Los adjuntos restaurados reciben rutas NUEVAS (nunca se reutiliza ni se confía en la ruta de la copia).
+  const fileMoves: { from: string; to: string }[] = [];
   try {
     await store.db.transaction(async (tx) => {
       for (const entity of ORDER) {
@@ -88,7 +93,13 @@ export async function restoreBackup(
           if (entity === 'episode') {
             values.relatedMedicationIds = ((row.relatedMedicationIds as string[]) ?? []).map(remap).filter(Boolean);
           }
-          if (entity === 'document') { values.linkedId = null; values.linkedEntity = null; }
+          if (entity === 'document') {
+            values.linkedId = null; values.linkedEntity = null;
+            const ext = ({ 'application/pdf': 'pdf', 'image/jpeg': 'jpg', 'image/png': 'png' } as Record<string, string>)[String(row.mimeType)] ?? 'bin';
+            const to = `attachments/${profile.id}/${id}.${ext}`;
+            fileMoves.push({ from: String(row.storagePath), to });
+            values.storagePath = to;
+          }
           // valida con el mismo esquema que el uso normal
           const parsed = spec.schema.safeParse(values);
           if (!parsed.success) throw new ValidationError([`Registro no válido en ${entity}: ${parsed.error.issues[0]?.message ?? ''}`]);
@@ -122,7 +133,10 @@ export async function restoreBackup(
       );
     });
     if (files) {
-      for (const [path, b64] of Object.entries(p.files ?? {})) await files.writeBase64(path, b64);
+      for (const { from, to } of fileMoves) {
+        const b64 = Object.prototype.hasOwnProperty.call(p.files ?? {}, from) ? p.files[from] : undefined;
+        if (typeof b64 === 'string') await files.writeBase64(to, b64);
+      }
     }
   } catch (e) {
     await store.deleteProfile(profile.id); // no deja un perfil a medias

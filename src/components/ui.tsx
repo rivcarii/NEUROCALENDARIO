@@ -174,6 +174,10 @@ export function ErrorBox({ message, onRetry }: { message: string; onRetry?: () =
 }
 
 export function confirmDestructive(title: string, message: string, confirmLabel: string): Promise<boolean> {
+  if (Platform.OS === 'web') {
+    // Alert.alert no muestra nada en web (solo se usa en las pruebas de humo en navegador).
+    return Promise.resolve(typeof window !== 'undefined' && window.confirm(`${title}\n\n${message}\n\n[${confirmLabel}]`));
+  }
   return new Promise((resolve) => {
     Alert.alert(title, message, [
       { text: 'Cancelar', style: 'cancel', onPress: () => resolve(false) },

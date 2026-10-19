@@ -8,7 +8,7 @@ export function durationMinutes(startedAt: string, endedAt: string | null): numb
 }
 
 export function formatDuration(minutes: number | null): string {
-  if (minutes === null) return 'en curso / sin fin registrado';
+  if (minutes === null) return 'sin hora de fin';
   if (minutes < 1) return 'menos de 1 min';
   const h = Math.floor(minutes / 60);
   const m = minutes % 60;

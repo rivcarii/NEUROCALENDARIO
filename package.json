@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "main": "expo-router/entry",
   "dependencies": {
+    "@expo/metro-runtime": "~58.0.14",
     "@hookform/resolvers": "^6.0.0",
     "@noble/ciphers": "^2.4.0",
     "@noble/hashes": "^2.4.0",
@@ -24,11 +25,13 @@
     "expo-sqlite": "~58.0.13",
     "expo-status-bar": "~58.0.3",
     "react": "19.3.0",
+    "react-dom": "^19.3.0",
     "react-hook-form": "^7.90.0",
     "react-native": "0.88.0",
     "react-native-safe-area-context": "~5.10.1",
     "react-native-screens": "~4.30.0",
     "react-native-svg": "^15.16.0",
+    "react-native-web": "^0.21.4",
     "zod": "^4.6.7"
   },
   "devDependencies": {
@@ -41,6 +44,7 @@
     "eslint-config-expo": "^58.0.4",
     "jest": "^30.5.2",
     "jest-expo": "~58.0.11",
+    "playwright-core": "^1.56.1",
     "react-test-renderer": "^19.3.0",
     "typescript": "~6.0.3"
   },
@@ -52,7 +56,11 @@
     "test": "jest",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src tests",
-    "check": "npm run typecheck && npm run lint && npm test"
+    "check": "npm run typecheck && npm run lint && npm test",
+    "test:tz": "for tz in UTC America/Bogota Europe/Madrid Pacific/Auckland Asia/Kolkata; do TZ=$tz jest --testPathIgnorePatterns ui.test || exit 1; done",
+    "test:rls": "bash supabase/tests/run.sh",
+    "test:pdf": "bash scripts/verify-report-pdf.sh",
+    "test:e2e": "bash e2e/run.sh"
   },
   "private": true,
   "jest": {
@@ -64,7 +72,7 @@
       "^@/(.*)$": "<rootDir>/src/$1"
     },
     "transformIgnorePatterns": [
-      "/node_modules/(?!(.pnpm/)?((jest-)?react-native|@react-native(-community)?|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@sentry/react-native|native-base|react-native-svg|@noble/.*))"
+      "/node_modules/(?!(.pnpm/)?((jest-)?react-native|@react-native(-community)?|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@sentry/react-native|native-base|react-native-svg|@noble/.*|standard-navigation|@react-navigation/.*))"
     ]
   }
 }

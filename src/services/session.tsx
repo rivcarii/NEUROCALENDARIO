@@ -105,8 +105,11 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     bump: () => setVersion((v) => v + 1),
     setActiveProfile: async (id) => {
       if (!store) return;
-      if (!profiles.some((p) => p.id === id)) return;
+      // Se comprueba contra la base (no contra el estado en memoria) y con permiso del usuario actual.
+      const list = await store.listProfiles();
+      if (!list.some((p) => p.id === id)) return;
       await store.setSetting('active_profile_id', id);
+      setProfiles(list);
       setActiveId(id);
       setVersion((v) => v + 1);
     },
