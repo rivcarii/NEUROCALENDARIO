@@ -313,6 +313,13 @@ export class Store {
       if (!t) throw new ValidationError(['Entidad vinculada no válida']);
       refs.push([t.table, 'linkedId', data.linkedId]);
     }
+    if (entity === 'document') {
+      // El archivo debe estar en la carpeta privada DEL MISMO perfil (evita apuntar a archivos ajenos).
+      const path = String(data.storagePath ?? '');
+      if (!path.startsWith(`attachments/${profileId}/`) || path.includes('..')) {
+        throw new ValidationError(['La ruta del archivo no pertenece a este perfil.']);
+      }
+    }
     for (const [table, field, id] of refs) {
       const row = await ex.get<{ n: number }>(
         `SELECT COUNT(*) AS n FROM ${table} WHERE id = ? AND profile_id = ?`, [id as string, profileId],

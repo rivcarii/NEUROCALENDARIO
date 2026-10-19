@@ -13,8 +13,9 @@ function privateRoot(): Directory {
 
 const SAFE_PATH = /^attachments\/[0-9a-f-]{36}\/[0-9a-f-]{36}\.(pdf|jpg|png)$/;
 
-function resolveStored(storagePath: string): File {
+function resolveStored(storagePath: string, profileId?: string): File {
   if (!SAFE_PATH.test(storagePath)) throw new Error('Ruta de archivo no válida.');
+  if (profileId && !storagePath.startsWith(`attachments/${profileId}/`)) throw new Error('El archivo no pertenece a este perfil.');
   return new File(Paths.document, storagePath);
 }
 
@@ -48,12 +49,12 @@ export async function storeAttachment(sourceUri: string, originalName: string, p
   };
 }
 
-export function attachmentUri(storagePath: string): string {
-  return resolveStored(storagePath).uri;
+export function attachmentUri(storagePath: string, profileId: string): string {
+  return resolveStored(storagePath, profileId).uri;
 }
 
-export function deleteAttachment(storagePath: string): void {
-  const f = resolveStored(storagePath);
+export function deleteAttachment(storagePath: string, profileId: string): void {
+  const f = resolveStored(storagePath, profileId);
   if (f.exists) f.delete();
 }
 

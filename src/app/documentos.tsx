@@ -25,7 +25,7 @@ export default function Documentos() {
       await store.create('document', pid, { ...stored, title: title.trim() || stored.fileName, docDate: localDateKey(new Date()) });
       setTitle(''); bump();
     } catch (e) {
-      if (stored) { try { deleteAttachment(stored.storagePath); } catch { /* ya no existe */ } }
+      if (stored) { try { deleteAttachment(stored.storagePath, pid); } catch { /* ya no existe */ } }
       Alert.alert('No se pudo adjuntar', errorMessage(e));
     }
   }
@@ -51,12 +51,12 @@ export default function Documentos() {
   }
 
   async function open(path: string, mime: string) {
-    try { await Sharing.shareAsync(attachmentUri(path), { mimeType: mime }); } catch (e) { Alert.alert('No se pudo abrir', errorMessage(e)); }
+    try { await Sharing.shareAsync(attachmentUri(path, profile.id), { mimeType: mime }); } catch (e) { Alert.alert('No se pudo abrir', errorMessage(e)); }
   }
 
   async function remove(id: string, path: string) {
     if (!(await confirmDestructive('Eliminar documento', 'Se eliminará el archivo de este dispositivo. Esta acción no se puede deshacer.', 'Eliminar'))) return;
-    try { await store.remove('document', profile.id, id); try { deleteAttachment(path); } catch { /* ya no existe */ } bump(); } catch (e) { Alert.alert('No se pudo eliminar', errorMessage(e)); }
+    try { await store.remove('document', profile.id, id); try { deleteAttachment(path, profile.id); } catch { /* ya no existe */ } bump(); } catch (e) { Alert.alert('No se pudo eliminar', errorMessage(e)); }
   }
 
   return (

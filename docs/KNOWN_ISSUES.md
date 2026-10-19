@@ -24,7 +24,6 @@ La app **está lista para pruebas**, no para uso médico real, hasta completar:
 ## Defectos menores conocidos
 - La pantalla «Hoy» no se actualiza sola al pasar la medianoche con la app abierta (se refresca al volver a ella).
 - Cambiar el perfil activo mientras un formulario está abierto: el guardado se bloquea con un aviso (por diseño); no hay prueba automática de ese caso.
-- Una toma marcada tarde no registra la hora exacta de la toma programada vs real salvo «tomada ahora».
 - Los informes muestran «sin hora de fin» en episodios sin fin; las estadísticas de duración excluyen esos episodios (se indica el denominador).
 - En iOS los adjuntos pueden incluirse en copias de iCloud del dispositivo.
 - 4 avisos de ESLint (uso de `require` en mocks de pruebas y una advertencia del compilador de React sobre `watch()` de react-hook-form).

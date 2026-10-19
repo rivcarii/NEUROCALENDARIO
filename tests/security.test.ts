@@ -27,8 +27,16 @@ describe('separación entre perfiles (mismo propietario)', () => {
     const exMom = await f.owner.create('exam', f.mom, { name: 'E', examDate: '2026-01-01' });
     await expect(f.owner.create('document', f.me, {
       title: 't', fileName: 'a.pdf', mimeType: 'application/pdf', sizeBytes: 5, sha256: 'b'.repeat(64),
-      storagePath: 'p', linkedEntity: 'exam', linkedId: exMom.id,
+      storagePath: `attachments/${f.mom}/p.pdf`, linkedEntity: 'exam', linkedId: exMom.id,
     })).rejects.toBeInstanceOf(ValidationError);
+  });
+
+  it('un documento no puede apuntar a archivos de otro perfil ni salir de su carpeta', async () => {
+    const base = { title: 't', fileName: 'a.pdf', mimeType: 'application/pdf' as const, sizeBytes: 5, sha256: 'b'.repeat(64) };
+    await expect(f.owner.create('document', f.me, { ...base, storagePath: `attachments/${f.mom}/x.pdf` })).rejects.toBeInstanceOf(ValidationError);
+    await expect(f.owner.create('document', f.me, { ...base, storagePath: `attachments/${f.me}/../${f.mom}/x.pdf` })).rejects.toBeInstanceOf(ValidationError);
+    const ok = await f.owner.create('document', f.me, { ...base, storagePath: `attachments/${f.me}/x.pdf` });
+    await expect(f.owner.update('document', f.me, ok.id, { storagePath: `attachments/${f.mom}/x.pdf` })).rejects.toBeInstanceOf(ValidationError);
   });
 
   it('un patch no puede mover un registro a otro perfil ni suplantar autoría', async () => {

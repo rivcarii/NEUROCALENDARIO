@@ -60,7 +60,7 @@ describe('citas, exámenes, notas, documentos', () => {
     await expect(f.owner.create('note', f.mom, { body: '  ', noteDate: '2026-07-03' })).rejects.toBeInstanceOf(ValidationError);
     const d = await f.owner.create('document', f.mom, {
       title: 'Informe', fileName: 'i.pdf', mimeType: 'application/pdf', sizeBytes: 1000,
-      sha256: 'a'.repeat(64), storagePath: 'docs/x.pdf', linkedEntity: 'exam', linkedId: ex.id,
+      sha256: 'a'.repeat(64), storagePath: `attachments/${f.mom}/x.pdf`, linkedEntity: 'exam', linkedId: ex.id,
     });
     // Eliminar el examen desvincula el documento sin dejar referencias rotas
     await f.owner.remove('exam', f.mom, ex.id);
@@ -69,7 +69,7 @@ describe('citas, exámenes, notas, documentos', () => {
   });
 
   it('rechaza tipos de archivo y tamaños no permitidos', async () => {
-    const base = { title: 't', fileName: 'x', sizeBytes: 10, sha256: 'a'.repeat(64), storagePath: 'p' };
+    const base = { title: 't', fileName: 'x', sizeBytes: 10, sha256: 'a'.repeat(64), storagePath: `attachments/${f.mom}/p.pdf` };
     await expect(f.owner.create('document', f.mom, { ...base, mimeType: 'application/x-msdownload' as never })).rejects.toBeInstanceOf(ValidationError);
     await expect(f.owner.create('document', f.mom, { ...base, mimeType: 'application/pdf', sizeBytes: 16 * 1024 * 1024 })).rejects.toBeInstanceOf(ValidationError);
   });

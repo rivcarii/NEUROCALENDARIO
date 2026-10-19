@@ -119,17 +119,17 @@ describe('copias de seguridad', () => {
     await f.owner.create('intake', f.mom, { medicationId: m.id, scheduleId: s.id, scheduledAt: '2026-01-01T08:00:00.000Z', status: 'tomada', takenAt: '2026-01-01T08:05:00.000Z' });
     await f.owner.create('episode', f.mom, { startedAt: '2026-01-02T10:00:00.000Z', endedAt: '2026-01-02T10:10:00.000Z', kind: 'Cefalea (ficticia)', relatedMedicationIds: [m.id], associatedSymptoms: ['náusea'] });
     const ex = await f.owner.create('exam', f.mom, { name: 'Examen ficticio', examDate: '2026-01-03' });
-    await f.owner.create('document', f.mom, { title: 'Doc', fileName: 'd.pdf', mimeType: 'application/pdf', sizeBytes: 4, sha256: 'c'.repeat(64), storagePath: 'docs/d.pdf', linkedEntity: 'exam', linkedId: ex.id });
+    await f.owner.create('document', f.mom, { title: 'Doc', fileName: 'd.pdf', mimeType: 'application/pdf', sizeBytes: 4, sha256: 'c'.repeat(64), storagePath: `attachments/${f.mom}/d.pdf`, linkedEntity: 'exam', linkedId: ex.id });
     await f.owner.create('note', f.mom, { body: 'nota', noteDate: '2026-01-04' });
     await f.owner.create('appointment', f.mom, { title: 'Cita ficticia', startsAt: '2026-02-01T10:00:00.000Z' });
   }
 
   it('exporta y restaura como perfil nuevo con ids remapeados y vínculos intactos', async () => {
     await seed();
-    const disk = new Map<string, string>([['docs/d.pdf', 'JVBERg==']]);
+    const disk = new Map<string, string>([[`attachments/${f.mom}/d.pdf`, 'JVBERg==']]);
     const files: FileAdapter = { readBase64: async (p) => { const v = disk.get(p); if (!v) throw new Error('x'); return v; }, writeBase64: async (p, b) => { disk.set(`restored/${p}`, b); } };
     const backup = await buildBackup(f.owner, f.mom, files);
-    expect(backup.files['docs/d.pdf']).toBe('JVBERg==');
+    expect(backup.files[`attachments/${f.mom}/d.pdf`]).toBe('JVBERg==');
     const res = await restoreBackup(f.owner, JSON.parse(JSON.stringify(backup)), randomUUID, files);
     expect(res.profileId).not.toBe(f.mom);
     expect(res.counts).toMatchObject({ medication: 1, schedule: 1, intake: 1, episode: 1, exam: 1, document: 1, note: 1, appointment: 1 });
@@ -148,7 +148,7 @@ describe('copias de seguridad', () => {
 
   it('los adjuntos restaurados usan rutas nuevas e independientes del original', async () => {
     await seed();
-    const disk = new Map<string, string>([['docs/d.pdf', 'JVBERg==']]);
+    const disk = new Map<string, string>([[`attachments/${f.mom}/d.pdf`, 'JVBERg==']]);
     const files: FileAdapter = { readBase64: async (p) => disk.get(p)!, writeBase64: async (p, b) => { disk.set(p, b); } };
     const backup = await buildBackup(f.owner, f.mom, files);
     const res = await restoreBackup(f.owner, backup, randomUUID, files);

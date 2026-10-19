@@ -8,7 +8,7 @@ Resultados de la última ejecución (19-oct-2026, Linux, Node 22). **Todos con d
 | `npm run lint` | ESLint (expo + React Compiler rules) | ✅ 0 errores, 4 avisos menores |
 | `npm test` | 12 suites Jest | ✅ 67 pasan, 1 omitida (generador de informe de ejemplo, usado por `test:pdf`) |
 | `npm run test:tz` | dominio en UTC, Bogotá, Madrid, Auckland, Kolkata | ✅ |
-| `npm run test:rls` | 10 escenarios de autorización en PostgreSQL 16 | ✅ «TODAS LAS PRUEBAS SUPERADAS» |
+| `npm run test:rls` | 9 bloques de escenarios de autorización en PostgreSQL 16 | ✅ «TODAS LAS PRUEBAS SUPERADAS» |
 | `npm run test:pdf` | informe → PDF (Chromium) → texto (`pdftotext`) | ✅ 10/10 textos obligatorios, 2 páginas |
 | `npm run test:e2e` | 20 comprobaciones de extremo a extremo en Chromium con SQLite real (WASM) | ✅ sin errores de consola |
 | `npx expo export --platform android` | Compila el bundle Hermes | ✅ 4,3 MB |
