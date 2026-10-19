@@ -74,6 +74,7 @@ function UpdateCard() {
     <Card>
       <H level={2}>Versión</H>
       <P small>{APP_BUILD.replace('+', ' · ')}</P>
+      <P muted small>Pantalla: ventana {window.innerWidth}×{window.innerHeight} · dispositivo {screen.width}×{screen.height}</P>
       <Button title="Buscar actualizaciones" kind="secondary" onPress={async () => {
         setMsg('Buscando…');
         setMsg((await checkForUpdate(true)) ? 'Hay una versión nueva: aparecerá un aviso.' : 'Ya tiene la última versión.');

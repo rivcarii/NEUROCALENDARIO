@@ -30,8 +30,8 @@ const mobileCss = `
   html{-webkit-tap-highlight-color:transparent;-webkit-text-size-adjust:100%;text-size-adjust:100%;overscroll-behavior:none;color-scheme:light dark;background:#F6F8FB}
   @media (prefers-color-scheme:dark){html{background:#0E141A}}
   html,body{height:100%}
-  body{position:fixed;inset:0;overscroll-behavior:none;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
-  #root{position:fixed;inset:0;display:flex}
+  body{position:fixed;top:0;left:0;right:0;height:var(--app-h,100%);overscroll-behavior:none;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+  #root{position:fixed;top:0;left:0;right:0;height:var(--app-h,100%);display:flex}
   /* los controles no seleccionan su texto al mantener pulsado; el contenido sí */
   button,[role=button],[role=radio],[role=checkbox],[role=tab],a{touch-action:manipulation;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
   /* iOS hace zoom al enfocar campos de menos de 16 px */
@@ -44,7 +44,12 @@ const mobileCss = `
   @media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
 `.replace(/\s+/g, ' ').trim();
 
+// iOS (app instalada) puede dar a la página menos altura que la pantalla real y dejar una franja vacía abajo:
+// se toma la mayor entre la altura de la ventana y la de la pantalla (solo en vertical e instalada).
+const heightFix = `(function(){var d=document.documentElement;function f(){var h=Math.max(window.innerHeight,d.clientHeight);var sa=(window.matchMedia&&matchMedia('(display-mode: standalone)').matches)||navigator.standalone===true;if(sa&&window.innerHeight>window.innerWidth&&window.screen&&screen.height){h=Math.max(h,screen.height)}d.style.setProperty('--app-h',h+'px')}f();addEventListener('resize',f);addEventListener('orientationchange',function(){setTimeout(f,250)});addEventListener('pageshow',f)})();`;
+
 const head = [
+  `<script>${heightFix}</script>`,
   `<style id="nc-mobile">${mobileCss}</style>`,
   `<link rel="manifest" href="${base}/manifest.webmanifest">`,
   `<link rel="apple-touch-icon" href="${base}/apple-touch-icon.png">`,

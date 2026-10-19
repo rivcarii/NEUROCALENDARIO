@@ -42,6 +42,11 @@
 - Barra de pestañas flotante de cristal, cabecera con esquinas continuas, tarjetas y botones más redondeados; raíz de la web a pantalla completa (corrige la franja vacía y las etiquetas cortadas).
 - Las pruebas de interfaz se dividieron en tres archivos (un fallo de aislamiento entre apps montadas en el mismo archivo).
 
+### Ajustes tras ver la app instalada en el iPhone (2.ª captura)
+- La altura de la web se calcula también con la pantalla real (solo instalada y en vertical) y la barra flotante se acerca al indicador de inicio (zona segura limitada a 34 pt).
+- El texto pequeño de la cabecera baja para quedar fuera de la zona que iOS difumina bajo la barra de estado.
+- Ajustes muestra las medidas de pantalla (ventana y dispositivo) para diagnosticar diferencias en iPhone.
+
 ### Defectos encontrados y corregidos durante el desarrollo
 - Restaurar una copia reutilizaba la ruta de los adjuntos del original: borrar un documento en un perfil podía borrar el archivo del otro. **Ahora se generan rutas nuevas** (con prueba).
 - Una copia sin `data` provocaba una excepción interna en lugar de un error de validación.

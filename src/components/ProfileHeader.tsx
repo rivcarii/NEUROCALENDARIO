@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import { Pressable, View } from 'react-native';
+import { Platform, Pressable, View } from 'react-native';
 import { Text } from './Text';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useSession } from '../services/session';
@@ -14,7 +14,7 @@ export function ProfileHeader({ title }: { title: string }) {
   const t = useTheme();
   if (!activeProfile) return null;
   return (
-    <View style={{ backgroundColor: activeProfile.color, paddingTop: insets.top + 6, paddingBottom: 14, borderBottomLeftRadius: 28, borderBottomRightRadius: 28, borderCurve: 'continuous', paddingHorizontal: space.lg, alignItems: 'center' }}>
+    <View style={{ backgroundColor: activeProfile.color, paddingTop: insets.top + (Platform.OS === 'web' ? 26 : 6), paddingBottom: 16, borderBottomLeftRadius: 28, borderBottomRightRadius: 28, borderCurve: 'continuous', paddingHorizontal: space.lg, alignItems: 'center' }}>
      <View style={{ width: '100%', maxWidth: MAX_CONTENT, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
       <View style={{ flex: 1 }}>
         <Text style={{ color: t.onHeaderSoft, fontSize: 13, letterSpacing: 0.3 }}>{title}</Text>

@@ -15,9 +15,11 @@ import { font } from '../theme/type';
 export function GlassTabBar({ state, descriptors, emitter, navigateToTab, insets: navInsets }: BottomTabBarProps) {
   const t = useTheme();
   const own = useSafeAreaInsets();
-  const insets = { bottom: Math.max(own.bottom, navInsets.bottom) };
+  // La zona segura inferior de un iPhone mide como mucho 34 pt: se limita por si el valor medido sale inflado.
+  const insets = { bottom: Math.min(Math.max(own.bottom, navInsets.bottom), 34) };
   const android = Platform.OS === 'android';
-  const bottom = Math.max(insets.bottom, 8) + (android ? 0 : 6);
+  // Como en iOS 26: la cápsula queda pegada a la zona del indicador de inicio, no muy por encima.
+  const bottom = android ? Math.max(insets.bottom, 8) : Math.max(insets.bottom - 12, 10);
 
   const items = state.routes.map((route, index) => {
     const { options } = descriptors[route.key]!;
