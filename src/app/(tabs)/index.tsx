@@ -1,6 +1,7 @@
 import * as Haptics from 'expo-haptics';
 import { router } from 'expo-router';
-import { Alert, Text, View } from 'react-native';
+import { Alert, View } from 'react-native';
+import { Text } from '../../components/Text';
 import { Button, Card, Empty, ErrorBox, H, Loading, P, Row, Screen, errorMessage, TapText } from '../../components/ui';
 import { loadDay } from '../../domain/day';
 import { durationMinutes, formatDateLong, formatDuration, formatTime, localDateKey } from '../../domain/time';

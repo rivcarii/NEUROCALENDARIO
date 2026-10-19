@@ -1,6 +1,8 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, Text, View } from 'react-native';
+import { View } from 'react-native';
+import { PressableScale } from '../../components/PressableScale';
+import { Text } from '../../components/Text';
 import { Button, Card, Chips, ErrorBox, H, Loading, P, Row, Screen, TapText } from '../../components/ui';
 import { loadDay, loadMonthMarks, type DayData } from '../../domain/day';
 import { addDays, DIAS_CORTOS, durationMinutes, formatDateLong, formatDuration, formatTime, localDateKey, monthGrid, monthName, startOfWeek } from '../../domain/time';
@@ -53,10 +55,11 @@ export default function Calendario() {
               const inMonth = mode === 'semana' || Number(k.split('-')[1]) === m;
               const sel = k === selected;
               return (
-                <Pressable key={k} accessibilityRole="button"
+                <PressableScale key={k} accessibilityRole="button"
                   accessibilityLabel={`${formatDateLong(k)}. ${mk?.episodes ?? 0} episodios, ${mk?.appointments ?? 0} citas`}
                   onPress={() => setSelected(k)}
-                  style={{ width: `${100 / 7}%`, minHeight: MIN_TOUCH + 8, alignItems: 'center', justifyContent: 'center', borderRadius: 8,
+                  containerStyle={{ width: `${100 / 7}%` }}
+                  style={{ width: '100%', minHeight: MIN_TOUCH + 8, alignItems: 'center', justifyContent: 'center', borderRadius: 8,
                     backgroundColor: sel ? t.primary : 'transparent', borderWidth: k === today ? 1.5 : 0, borderColor: t.primary, opacity: inMonth ? 1 : 0.4 }}>
                   <Text style={{ color: sel ? t.onPrimary : t.text, fontWeight: '600' }}>{Number(k.split('-')[2])}</Text>
                   <View style={{ flexDirection: 'row', gap: 3, height: 8 }}>
@@ -64,7 +67,7 @@ export default function Calendario() {
                     {mk?.appointments ? <View style={{ width: 7, height: 7, borderRadius: 4, backgroundColor: sel ? t.onPrimary : t.success }} /> : null}
                     {mk?.exams ? <View style={{ width: 7, height: 7, borderRadius: 4, backgroundColor: sel ? t.onPrimary : t.warn }} /> : null}
                   </View>
-                </Pressable>
+                </PressableScale>
               );
             })}
           </View>

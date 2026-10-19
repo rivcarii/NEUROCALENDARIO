@@ -1,5 +1,5 @@
 import { Stack, router } from 'expo-router';
-import { Text } from 'react-native';
+import { Text } from '../components/Text';
 import { Button, Card, P, Row, Screen } from '../components/ui';
 import { useSession } from '../services/session';
 import { useTheme } from '../theme';

@@ -1,12 +1,12 @@
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useState, type ReactNode } from 'react';
-import {
-  ActivityIndicator, Alert, Platform, Pressable, ScrollView, Text, TextInput, View,
-  type StyleProp, type TextInputProps, type TextStyle, type ViewStyle,
-} from 'react-native';
+import { ActivityIndicator, Alert, Platform, Pressable, ScrollView, TextInput, View, type StyleProp, type TextInputProps, type TextStyle, type ViewStyle } from 'react-native';
+import { Text } from './Text';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { formatDateShort, formatTime, localDateKey, parseDateKey } from '../domain/time';
-import { MIN_TOUCH, space, useTheme } from '../theme';
+import { MIN_TOUCH, radius, space, useTheme } from '../theme';
+import { font, size } from '../theme/type';
+import { PressableScale } from './PressableScale';
 
 export function Screen({ children, scroll = true, footer }: { children: ReactNode; scroll?: boolean; footer?: ReactNode }) {
   const t = useTheme();
@@ -24,17 +24,17 @@ export function Screen({ children, scroll = true, footer }: { children: ReactNod
 
 export function Card({ children, style }: { children: ReactNode; style?: StyleProp<ViewStyle> }) {
   const t = useTheme();
-  return <View style={[{ backgroundColor: t.card, borderRadius: 12, borderWidth: 1, borderColor: t.border, padding: space.lg, gap: space.sm }, style]}>{children}</View>;
+  return <View style={[{ backgroundColor: t.card, borderRadius: radius.lg, borderWidth: 1, borderColor: t.border, padding: space.lg, gap: space.sm }, style]}>{children}</View>;
 }
 
 export function H({ children, level = 1 }: { children: ReactNode; level?: 1 | 2 }) {
   const t = useTheme();
-  return <Text accessibilityRole="header" style={{ color: t.text, fontSize: level === 1 ? 24 : 18, fontWeight: '700' }}>{children}</Text>;
+  return <Text accessibilityRole="header" style={{ color: t.text, fontSize: level === 1 ? size.h1 : size.h2, fontFamily: level === 1 ? font.display : font.displaySemi }}>{children}</Text>;
 }
 
 export function P({ children, muted, small, style }: { children: ReactNode; muted?: boolean; small?: boolean; style?: StyleProp<ViewStyle> }) {
   const t = useTheme();
-  return <Text style={[{ color: muted ? t.muted : t.text, fontSize: small ? 13 : 16, lineHeight: small ? 18 : 22 }, style as never]}>{children}</Text>;
+  return <Text style={[{ color: muted ? t.muted : t.text, fontSize: small ? size.caption : size.body, lineHeight: small ? 18 : 22 }, style as never]}>{children}</Text>;
 }
 
 export function Button({ title, onPress, kind = 'primary', disabled, loading, accessibilityHint }: {
@@ -44,18 +44,17 @@ export function Button({ title, onPress, kind = 'primary', disabled, loading, ac
   const bg = kind === 'primary' ? t.primary : kind === 'danger' ? t.danger : 'transparent';
   const fg = kind === 'secondary' ? t.primary : t.onPrimary;
   return (
-    <Pressable
+    <PressableScale
       accessibilityRole="button" accessibilityLabel={title} accessibilityHint={accessibilityHint}
       accessibilityState={{ disabled: !!disabled || !!loading }}
       disabled={disabled || loading} onPress={onPress}
-      style={({ pressed }) => [{
-        minHeight: MIN_TOUCH, borderRadius: 10, paddingHorizontal: space.lg, alignItems: 'center', justifyContent: 'center',
-        backgroundColor: bg, borderWidth: kind === 'secondary' ? 1.5 : 0, borderColor: t.primary,
-        opacity: disabled ? 0.5 : pressed ? 0.8 : 1, flexDirection: 'row', gap: space.sm,
-      }]}>
+      style={{
+        minHeight: MIN_TOUCH, borderRadius: radius.md, paddingHorizontal: space.lg, alignItems: 'center', justifyContent: 'center',
+        backgroundColor: bg, borderWidth: kind === 'secondary' ? 1.5 : 0, borderColor: t.primary, flexDirection: 'row', gap: space.sm,
+      }}>
       {loading ? <ActivityIndicator color={fg} /> : null}
-      <Text style={{ color: fg, fontSize: 16, fontWeight: '600' }}>{title}</Text>
-    </Pressable>
+      <Text style={{ color: fg, fontSize: size.body, fontWeight: '600' }}>{title}</Text>
+    </PressableScale>
   );
 }
 
@@ -80,8 +79,8 @@ export function TextField({ label, error, hint, ...rest }: TextInputProps & { la
       <TextInput
         accessibilityLabel={label} placeholderTextColor={t.muted}
         style={{
-          minHeight: MIN_TOUCH, borderWidth: 1, borderColor: error ? t.danger : t.border, borderRadius: 10,
-          paddingHorizontal: space.md, paddingVertical: space.sm, color: t.text, backgroundColor: t.card, fontSize: 16,
+          minHeight: MIN_TOUCH, borderWidth: 1, borderColor: error ? t.danger : t.border, borderRadius: radius.md,
+          paddingHorizontal: space.md, paddingVertical: space.sm, color: t.text, backgroundColor: t.card, fontSize: size.body, fontFamily: font.body,
           textAlignVertical: rest.multiline ? 'top' : 'center',
         }}
         {...rest}
@@ -102,11 +101,11 @@ export function Chips<T extends string | number>({ label, options, value, onChan
       {label ? <Text style={{ color: t.text, fontWeight: '600' }}>{label}</Text> : null}
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: space.sm }}>
         {options.map((o) => (
-          <Pressable key={String(o.value)} onPress={() => onChange(o.value)} accessibilityRole={multi ? 'checkbox' : 'radio'}
+          <PressableScale key={String(o.value)} onPress={() => onChange(o.value)} accessibilityRole={multi ? 'checkbox' : 'radio'}
             accessibilityState={{ selected: isOn(o.value), checked: isOn(o.value) }} accessibilityLabel={o.a11y ?? o.label}
-            style={{ minHeight: 40, paddingHorizontal: space.md, borderRadius: 20, justifyContent: 'center', backgroundColor: isOn(o.value) ? t.chipOn : t.chip }}>
+            style={{ minHeight: 44, paddingHorizontal: space.md, borderRadius: radius.pill, justifyContent: 'center', backgroundColor: isOn(o.value) ? t.chipOn : t.chip }}>
             <Text style={{ color: isOn(o.value) ? t.onPrimary : t.text }}>{o.label}</Text>
-          </Pressable>
+          </PressableScale>
         ))}
       </View>
     </View>
@@ -196,9 +195,10 @@ export function confirmDestructive(title: string, message: string, confirmLabel:
 }
 
 export function ProfileBar({ name, color, label = 'Perfil' }: { name: string; color: string; label?: string }) {
+  const t = useTheme();
   return (
     <View accessibilityRole="summary" accessibilityLabel={`${label}: ${name}`} style={{ backgroundColor: color, paddingVertical: 6, paddingHorizontal: space.lg }}>
-      <Text style={{ color: '#fff', fontWeight: '700' }}>{label}: {name}</Text>
+      <Text style={{ color: t.onHeader, fontWeight: '700' }}>{label}: {name}</Text>
     </View>
   );
 }

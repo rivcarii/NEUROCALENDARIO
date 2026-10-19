@@ -17,6 +17,12 @@
 - Textos: confirmaciones como pregunta con la acción como botón («¿Eliminar episodio?» → «Eliminar» / «Conservar»).
 - Háptica ligera al marcar tomas y al registro rápido (`expo-haptics`).
 
+### Diseño y movimiento
+- Tipografías: Fraunces (títulos) + Atkinson Hyperlegible (cuerpo). Ver `docs/DESIGN_SYSTEM.md`.
+- Iconos vectoriales en las pestañas (antes caracteres de texto).
+- Movimiento: escala al pulsar y transición de color con Reanimated; sin animación en pestañas ni listas; respeta «reducir movimiento».
+- Tokens de radio/movimiento; colores fijos sustituidos por tokens.
+
 ### Defectos encontrados y corregidos durante el desarrollo
 - Restaurar una copia reutilizaba la ruta de los adjuntos del original: borrar un documento en un perfil podía borrar el archivo del otro. **Ahora se generan rutas nuevas** (con prueba).
 - Una copia sin `data` provocaba una excepción interna en lugar de un error de validación.

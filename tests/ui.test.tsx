@@ -20,6 +20,9 @@ jest.mock('expo-local-authentication', () => ({
   authenticateAsync: jest.fn().mockResolvedValue({ success: true }),
 }));
 jest.mock('@react-native-community/datetimepicker', () => 'DateTimePicker');
+jest.mock('expo-font', () => ({
+  useFonts: () => [true, null], isLoaded: () => true, isLoading: () => false, loadAsync: async () => undefined,
+}));
 
 async function boot(seed?: (owner: Store, ids: { mom: string; me: string }) => Promise<void>) {
   const db = await freshDb();

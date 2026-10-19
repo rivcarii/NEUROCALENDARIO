@@ -1,12 +1,15 @@
+import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Text, View } from 'react-native';
+import { ActivityIndicator, View } from 'react-native';
+import { Text } from '../components/Text';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Button, Card, H, P, Screen, TextField } from '../components/ui';
 import { configureNotifications, rescheduleAll } from '../services/notifications';
 import { SessionProvider, useSession } from '../services/session';
 import { useTheme } from '../theme';
+import { font, fontFiles } from '../theme/type';
 
 export default function RootLayout() {
   return (
@@ -21,6 +24,8 @@ export default function RootLayout() {
 function Gate() {
   const s = useSession();
   const t = useTheme();
+  // Si una fuente falla, la app sigue con la tipografía del sistema.
+  const [fontsLoaded, fontsError] = useFonts(fontFiles);
   useEffect(() => { configureNotifications(); }, []);
 
   // Mantiene sincronizados los recordatorios locales con los datos persistidos.
@@ -39,7 +44,7 @@ function Gate() {
     return () => clearTimeout(id);
   }, [s.status, s.store, s.version]);
 
-  if (s.status === 'loading') {
+  if (s.status === 'loading' || (!fontsLoaded && !fontsError)) {
     return <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: t.bg }}><ActivityIndicator size="large" color={t.primary} accessibilityLabel="Abriendo" /></View>;
   }
   if (s.status === 'error') {
@@ -57,7 +62,7 @@ function Gate() {
   return (
     <>
       <StatusBar style="auto" />
-      <Stack screenOptions={{ headerBackTitle: 'Atrás', headerStyle: { backgroundColor: t.card }, headerTintColor: t.text }}>
+      <Stack screenOptions={{ headerBackTitle: 'Atrás', headerStyle: { backgroundColor: t.card }, headerTintColor: t.text, headerTitleStyle: { fontFamily: font.displaySemi, fontSize: 18 } }}>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       </Stack>
     </>
@@ -66,6 +71,7 @@ function Gate() {
 
 function Onboarding() {
   const { onboard } = useSession();
+  const t = useTheme();
   const [owner, setOwner] = useState('');
   const [person, setPerson] = useState('');
   const [rel, setRel] = useState('Mamá');
@@ -81,7 +87,7 @@ function Onboarding() {
         <TextField label="Parentesco o relación" value={rel} onChangeText={setRel} />
       </Card>
       <P muted small>Use esta aplicación solo con datos de personas que le hayan autorizado a registrarlos. Cada perfil tiene su propio historial y nunca se mezclan.</P>
-      {err ? <Text accessibilityRole="alert" style={{ color: '#B3261E' }}>{err}</Text> : null}
+      {err ? <Text accessibilityRole="alert" style={{ color: t.danger }}>{err}</Text> : null}
       <Button
         title="Comenzar" loading={busy} disabled={!owner.trim() || !person.trim()}
         onPress={async () => {
