@@ -48,3 +48,6 @@ yarn-error.*
 *.jks
 *.keystore
 coverage/
+
+# La web compilada (docs/) incluye assets/node_modules/... (SQLite WASM, fuentes, iconos): deben versionarse.
+!/docs/**/node_modules/
