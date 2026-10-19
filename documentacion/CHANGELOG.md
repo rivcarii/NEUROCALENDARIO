@@ -48,7 +48,7 @@
 - Ajustes muestra las medidas de pantalla (ventana y dispositivo) para diagnosticar diferencias en iPhone.
 
 ### Profundidad, entrada escalonada y barra corregida (3.ª captura del iPhone)
-- La barra de pestañas se recortaba (etiquetas cortadas y franja vacía): ahora es una capa propia con indicador deslizante; raíz con `100lvh`.
+- La barra de pestañas se recortaba (etiquetas cortadas y franja vacía): ahora es una capa propia con indicador deslizante; raíz sin `100lvh` (que sobrepasaba la pantalla visible): altura medida y limitada a la ventana + 34 px; cápsula siempre sobre la zona del indicador de inicio.
 - Cabecera con degradado y círculos, tarjeta principal con «mazo» detrás, títulos de sección con icono, entrada escalonada una vez por sesión.
 
 ### Defectos encontrados y corregidos durante el desarrollo

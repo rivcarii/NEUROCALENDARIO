@@ -41,8 +41,8 @@ export function GlassTabBar() {
   const android = Platform.OS === 'android';
   // La zona segura inferior de un iPhone mide como mucho 34 pt: se limita por si el valor medido sale inflado.
   const inset = Math.min(own.bottom, 34);
-  // Como en iOS 26: la cápsula queda pegada a la zona del indicador de inicio.
-  const bottom = android ? 0 : Math.max(inset - 12, 10);
+  // Como en iOS 26: la cápsula queda justo encima de la zona del indicador de inicio (nunca por debajo: así no la recortan las esquinas).
+  const bottom = android ? 0 : Math.max(inset, 16);
   const index = Math.max(0, TABS.findIndex((x) => x.path === path));
   const itemW = rowW / TABS.length;
 

@@ -86,4 +86,4 @@ A partir de una captura en iPhone se corrigió: etiquetas cortadas en la barra d
 
 **Rendimiento:** solo `transform`/`opacity`; ninguna propiedad de diseño (layout) se anima; sin `transition: all`; el cristal es estático. Verificado: el indicador usa `translateX` con duración 220 ms (en el DOM) y las entradas son animaciones CSS de Reanimated. **Pendiente en teléfono:** fluidez real en un iPhone/Android modestos y sensación del indicador.
 
-**Barra de pestañas:** ahora es una capa propia sobre el grupo de pestañas (no dentro del navegador, cuyo contenedor la recortaba en iOS); la altura de la raíz usa `max(--app-h, 100lvh)`.
+**Barra de pestañas:** ahora es una capa propia sobre el grupo de pestañas (no dentro del navegador, cuyo contenedor la recortaba en iOS); la altura de la raíz usa `--app-h` (medida, tope ventana + 34 px).
