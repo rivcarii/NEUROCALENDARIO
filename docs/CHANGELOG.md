@@ -12,6 +12,11 @@
 - Esquema Supabase con RLS y bucket privado (sin cliente de sincronización).
 - Pruebas: unitarias, seguridad, UI, RLS (PostgreSQL real), PDF, E2E en navegador.
 
+### Revisión con skills (accesibilidad, textos, háptica)
+- Accesibilidad (WCAG 2.1 AA): textos pulsables sin rol ni área táctil → `TapText` (≥44 px, rol de botón); chips de intensidad se anuncian «6 de 10».
+- Textos: confirmaciones como pregunta con la acción como botón («¿Eliminar episodio?» → «Eliminar» / «Conservar»).
+- Háptica ligera al marcar tomas y al registro rápido (`expo-haptics`).
+
 ### Defectos encontrados y corregidos durante el desarrollo
 - Restaurar una copia reutilizaba la ruta de los adjuntos del original: borrar un documento en un perfil podía borrar el archivo del otro. **Ahora se generan rutas nuevas** (con prueba).
 - Una copia sin `data` provocaba una excepción interna en lugar de un error de validación.
