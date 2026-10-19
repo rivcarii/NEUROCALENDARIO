@@ -18,4 +18,5 @@
 - Tras crear un perfil nuevo no pasaba a ser el activo (comparaba con una lista obsoleta en memoria). Detectado por el E2E.
 - La política de Storage permitía claves como `<perfil>/../<otro>/x.pdf`; ahora exige ruta estricta (detectado por la prueba RLS).
 - `Alert.alert` no mostraba confirmaciones en web; se usa `window.confirm` allí.
+- Un documento podía apuntar a la ruta de un archivo de OTRO perfil (y «Abrir» lo habría compartido). Ahora la ruta debe estar en la carpeta del propio perfil, validado en la capa de datos y en el servicio de archivos (con prueba).
 - Color de perfil verde con contraste insuficiente (4,3:1) → oscurecido (guardado por prueba).

@@ -309,9 +309,9 @@ export class Store {
       for (const m of (data.relatedMedicationIds as string[] | undefined) ?? []) refs.push(['medications', 'relatedMedicationIds', m]);
     }
     if (entity === 'document' && data.linkedId && data.linkedEntity) {
-      const t = (ENTITIES as Record<string, { table: string }>)[data.linkedEntity as string];
-      if (!t) throw new ValidationError(['Entidad vinculada no válida']);
-      refs.push([t.table, 'linkedId', data.linkedId]);
+      const key = String(data.linkedEntity);
+      if (!Object.hasOwn(ENTITIES, key)) throw new ValidationError(['Entidad vinculada no válida']);
+      refs.push([ENTITIES[key as EntityName].table, 'linkedId', data.linkedId]);
     }
     if (entity === 'document') {
       // El archivo debe estar en la carpeta privada DEL MISMO perfil (evita apuntar a archivos ajenos).

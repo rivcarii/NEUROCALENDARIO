@@ -35,6 +35,7 @@ describe('separación entre perfiles (mismo propietario)', () => {
     const base = { title: 't', fileName: 'a.pdf', mimeType: 'application/pdf' as const, sizeBytes: 5, sha256: 'b'.repeat(64) };
     await expect(f.owner.create('document', f.me, { ...base, storagePath: `attachments/${f.mom}/x.pdf` })).rejects.toBeInstanceOf(ValidationError);
     await expect(f.owner.create('document', f.me, { ...base, storagePath: `attachments/${f.me}/../${f.mom}/x.pdf` })).rejects.toBeInstanceOf(ValidationError);
+    await expect(f.owner.create('document', f.me, { ...base, storagePath: `attachments/${f.me}/x.pdf`, linkedEntity: 'constructor', linkedId: 'x' })).rejects.toBeInstanceOf(ValidationError);
     const ok = await f.owner.create('document', f.me, { ...base, storagePath: `attachments/${f.me}/x.pdf` });
     await expect(f.owner.update('document', f.me, ok.id, { storagePath: `attachments/${f.mom}/x.pdf` })).rejects.toBeInstanceOf(ValidationError);
   });

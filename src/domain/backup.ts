@@ -26,6 +26,9 @@ export interface BackupPayload {
   missingFiles: string[];
 }
 
+const safeIso = (v: unknown, fallback: string): string =>
+  typeof v === 'string' && /^\d{4}-\d{2}-\d{2}T/.test(v) && !Number.isNaN(Date.parse(v)) ? new Date(v).toISOString() : fallback;
+
 const ORDER: EntityName[] = ['medication', 'schedule', 'episode', 'intake', 'appointment', 'exam', 'note', 'document'];
 
 /** Reúne todos los datos de UN perfil (requiere permiso de lectura). */
@@ -106,7 +109,7 @@ export async function restoreBackup(
           const data = parsed.data as Record<string, unknown>;
           const names = ['id', 'profile_id', 'created_at', 'updated_at', 'created_by', 'updated_by', ...cols.map(snake)];
           const params: SqlParam[] = [
-            id, profile.id, String(row.createdAt ?? now), now, me, me,
+            id, profile.id, safeIso(row.createdAt, now), now, me, me,
             ...cols.map((c) => {
               const t = (spec.columns as Record<string, ColType>)[c]!;
               const v = data[c];
