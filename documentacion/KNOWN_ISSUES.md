@@ -2,7 +2,7 @@
 
 ## Antes de usar datos reales
 La app **está lista para pruebas**, no para uso médico real, hasta completar:
-- [ ] La lista de comprobación manual de `docs/TEST_PLAN.md` (notificaciones, adjuntos, PDF, copia/restauración, bloqueo) en SU teléfono.
+- [ ] La lista de comprobación manual de `documentacion/TEST_PLAN.md` (notificaciones, adjuntos, PDF, copia/restauración, bloqueo) en SU teléfono.
 - [ ] Bloqueo de pantalla y cifrado del teléfono activos; copia de seguridad restaurada con éxito al menos una vez.
 - [ ] Consentimiento de la persona cuyos datos se registran (mamá).
 
@@ -16,7 +16,7 @@ La app **está lista para pruebas**, no para uso médico real, hasta completar:
 | Idioma | Solo español. |
 
 ## Versión web instalable (PWA)
-- Publicación en GitHub Pages: requiere activar una vez *Settings → Pages → Source: GitHub Actions*. **No verificado en GitHub** (solo la compilación y las pruebas locales).
+- Publicación en GitHub Pages: requiere elegir una vez *Settings → Pages → Deploy from a branch → main → /docs*. Verificada con un simulador local de Pages (subcarpeta `/NEUROCALENDARIO/`, `404.html`, service worker); **no verificada en GitHub real**.
 - Limitaciones frente a la app nativa: avisos solo con la app abierta, sin adjuntos, PDF por impresión del navegador, respaldo sin adjuntos, sin bloqueo biométrico real.
 - iPhone: solo Safari puede instalarla; Apple puede borrar los datos de sitios web no usados durante varias semanas si la app **no** está agregada a la pantalla de inicio. Haga respaldos.
 - Avisos con la app cerrada en la web requerirían notificaciones push (p. ej. Firebase Cloud Messaging, que ya usa su proyecto Dulza): no implementado.
@@ -36,4 +36,4 @@ La app **está lista para pruebas**, no para uso médico real, hasta completar:
 - 4 avisos de ESLint (uso de `require` en mocks de pruebas y una advertencia del compilador de React sobre `watch()` de react-hook-form).
 
 ## Riesgos de seguridad residuales
-Ver `docs/SECURITY.md` (SQLite sin cifrar, cuentas locales sin autenticación, RLS probado solo en Postgres local, archivos compartidos fuera de control).
+Ver `documentacion/SECURITY.md` (SQLite sin cifrar, cuentas locales sin autenticación, RLS probado solo en Postgres local, archivos compartidos fuera de control).

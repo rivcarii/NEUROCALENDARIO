@@ -95,4 +95,6 @@ self.addEventListener('fetch', (event) => {
 writeFileSync(join(dist, 'sw.js'), sw);
 writeFileSync(join(dist, 'version.json'), JSON.stringify({ version: build }) + '\n');
 writeFileSync(join(dist, '.nojekyll'), '');
+// GitHub Pages devuelve 404.html en rutas que no son archivos (p. ej. al recargar /ajustes): se usa la misma app.
+writeFileSync(join(dist, '404.html'), readFileSync(indexPath));
 console.log(`PWA lista: ${files.length} archivos, versión ${build}`);

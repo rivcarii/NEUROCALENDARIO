@@ -6,7 +6,7 @@ const ROOT = join(__dirname, '..');
 
 function walk(dir: string, out: string[] = []): string[] {
   for (const e of readdirSync(dir)) {
-    if (['node_modules', '.git', '.expo', 'dist', 'coverage'].includes(e)) continue;
+    if (['node_modules', '.git', '.expo', 'dist', 'docs', 'coverage'].includes(e)) continue;
     const p = join(dir, e);
     if (statSync(p).isDirectory()) walk(p, out);
     else out.push(p);

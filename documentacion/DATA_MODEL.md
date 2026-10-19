@@ -32,4 +32,4 @@ Toda fila clínica tiene: `id` (UUID estable), `profile_id` (FK con `ON DELETE C
 `src/db/migrations.ts`: versión en `PRAGMA user_version`, cada migración en su transacción; rechaza bases más nuevas que la app. Probado: idempotencia, migración v1→v2 conservando datos y reversión de una migración fallida.
 
 ## Servidor (opcional)
-`supabase/migrations/0001_neurocalendario.sql`: `profiles`, `profile_members`, `records` (JSONB genérico), bucket privado `documents`. RLS activado y forzado en todas. Ver `docs/SECURITY.md`.
+`supabase/migrations/0001_neurocalendario.sql`: `profiles`, `profile_members`, `records` (JSONB genérico), bucket privado `documents`. RLS activado y forzado en todas. Ver `documentacion/SECURITY.md`.

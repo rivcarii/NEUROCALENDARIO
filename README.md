@@ -2,7 +2,7 @@
 
 Aplicación móvil (Expo / React Native, en español) para el **seguimiento neurológico personal y familiar**: episodios y síntomas, medicación y tomas, citas, exámenes, documentos, notas, estadísticas e informes PDF. Los datos se guardan **solo en el dispositivo** (SQLite) y funcionan sin conexión.
 
-> **Estado: versión de pruebas (0.1.0).** No introduzca datos médicos reales hasta haber completado la lista de comprobación de [`docs/KNOWN_ISSUES.md`](docs/KNOWN_ISSUES.md#antes-de-usar-datos-reales). La app no diagnostica, no sustituye la atención sanitaria y no es un sistema de emergencias.
+> **Estado: versión de pruebas (0.1.0).** No introduzca datos médicos reales hasta haber completado la lista de comprobación de [`documentacion/KNOWN_ISSUES.md`](documentacion/KNOWN_ISSUES.md#antes-de-usar-datos-reales). La app no diagnostica, no sustituye la atención sanitaria y no es un sistema de emergencias.
 
 ## Qué incluye (verificado)
 
@@ -22,7 +22,7 @@ Aplicación móvil (Expo / React Native, en español) para el **seguimiento neur
 | Cuentas familiares y permisos (modelo local) | ✅ local · ❌ acceso desde otro dispositivo |
 | Sincronización entre dispositivos | ❌ **no implementada** (solo esquema servidor + RLS probados) |
 
-Detalle completo y limitaciones: [`docs/KNOWN_ISSUES.md`](docs/KNOWN_ISSUES.md).
+Detalle completo y limitaciones: [`documentacion/KNOWN_ISSUES.md`](documentacion/KNOWN_ISSUES.md).
 
 ## Requisitos
 
@@ -53,13 +53,13 @@ npm run test:pwa    # web instalable: service worker, sin internet y aviso «Hay
 
 La app se publica como **web instalable (PWA)** en GitHub Pages: se instala abriendo un enlace y no hace falta terminal ni tienda.
 
-1. **Una sola vez** (quien administra el repositorio): *Settings → Pages → Build and deployment → Source: **GitHub Actions***. Con el siguiente cambio a `main`, el flujo `Publicar versión web` compila y publica en `https://rivcarii.github.io/NEUROCALENDARIO/`.
+1. **Una sola vez** (quien administra el repositorio): *Settings → Pages → Build and deployment → Source: **Deploy from a branch** → Branch: **main** / carpeta **/docs** → Save* (la misma opción que Dulza, pero eligiendo `/docs` en lugar de `/(root)`). En uno o dos minutos queda en `https://rivcarii.github.io/NEUROCALENDARIO/`. Si en cambio se elige `/(root)`, solo se verá el README: la app compilada está en `docs/`.
 2. **En el teléfono**, abra ese enlace.
    - **iPhone**: en **Safari** → Compartir → **Agregar a pantalla de inicio**.
    - **Android**: en Chrome → menú ⋮ → **Instalar app** (o **Más → Instalar en este teléfono** dentro de la app).
-3. **Actualizaciones**: cada cambio en `main` publica una versión nueva. La app instalada la detecta al abrirse, al volver a primer plano y cada 10 minutos, y muestra la ventana **«Hay una versión nueva de NeuroCalendario» → Actualizar ahora / Más tarde**. Los datos no se tocan. También puede forzarlo en *Más → Privacidad y ajustes → Buscar actualizaciones*.
+3. **Actualizaciones**: cada cambio de código en `main` compila y guarda la web en `docs/` (flujo `Publicar web`), y eso publica una versión nueva. La app instalada la detecta al abrirse, al volver a primer plano y cada 10 minutos, y muestra la ventana **«Hay una versión nueva de NeuroCalendario» → Actualizar ahora / Más tarde**. Los datos no se tocan. También puede forzarlo en *Más → Privacidad y ajustes → Buscar actualizaciones*.
 
-Probar la web en su computadora: `npm run web`, o publicar localmente con `./scripts/build-web.sh` (carpeta `dist/`).
+Probar la web en su computadora: `npm run web`. Para publicar a mano: `EXPO_BASE_URL=/NEUROCALENDARIO ./scripts/build-web.sh docs` y luego commit y push de `docs/`. La documentación del proyecto está en `documentacion/`.
 
 **Qué cambia en la versión instalada desde el navegador** (la app compilada de Android/iPhone sí lo tiene completo):
 - Los **avisos** de medicinas y citas solo suenan **con la app abierta** (un navegador no puede programar avisos con la app cerrada).
@@ -87,4 +87,4 @@ Probar la web en su computadora: `npm run web`, o publicar localmente con `./scr
 
 ## Documentación
 
-[`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) · [`docs/DATA_MODEL.md`](docs/DATA_MODEL.md) · [`docs/SECURITY.md`](docs/SECURITY.md) · [`docs/PRIVACY.md`](docs/PRIVACY.md) · [`docs/TEST_PLAN.md`](docs/TEST_PLAN.md) · [`docs/CHANGELOG.md`](docs/CHANGELOG.md) · [`docs/KNOWN_ISSUES.md`](docs/KNOWN_ISSUES.md)
+[`documentacion/ARCHITECTURE.md`](documentacion/ARCHITECTURE.md) · [`documentacion/DATA_MODEL.md`](documentacion/DATA_MODEL.md) · [`documentacion/SECURITY.md`](documentacion/SECURITY.md) · [`documentacion/PRIVACY.md`](documentacion/PRIVACY.md) · [`documentacion/TEST_PLAN.md`](documentacion/TEST_PLAN.md) · [`documentacion/CHANGELOG.md`](documentacion/CHANGELOG.md) · [`documentacion/KNOWN_ISSUES.md`](documentacion/KNOWN_ISSUES.md)

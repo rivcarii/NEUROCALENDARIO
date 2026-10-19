@@ -18,19 +18,19 @@
 - Háptica ligera al marcar tomas y al registro rápido (`expo-haptics`).
 
 ### Diseño y movimiento
-- Tipografías: Fraunces (títulos) + Atkinson Hyperlegible (cuerpo). Ver `docs/DESIGN_SYSTEM.md`.
+- Tipografías: Fraunces (títulos) + Atkinson Hyperlegible (cuerpo). Ver `documentacion/DESIGN_SYSTEM.md`.
 - Iconos vectoriales en las pestañas (antes caracteres de texto).
 - Movimiento: escala al pulsar y transición de color con Reanimated; sin animación en pestañas ni listas; respeta «reducir movimiento».
 - Tokens de radio/movimiento; colores fijos sustituidos por tokens.
 
 ### Lenguaje cercano y mascota
-- Términos técnicos sustituidos por los que usan los pacientes (ver `docs/LENGUAJE.md`): «episodio» → «síntoma», «intensidad subjetiva» → «¿qué tan fuerte fue?», «medicación/pauta/prescrito» → «medicinas/horarios/recetada», «tomada/omitida» → «la tomé/no la tomé», «informe PDF» → «resumen para el médico», «perfil» → «persona», «copia de seguridad/restaurar» → «respaldo/recuperar»…
-- Mascota **Nuri** (neurona amable): bienvenida, listas vacías y «todo al día»; iconos de la app y pantalla de inicio. Ver `docs/MASCOTA.md`.
+- Términos técnicos sustituidos por los que usan los pacientes (ver `documentacion/LENGUAJE.md`): «episodio» → «síntoma», «intensidad subjetiva» → «¿qué tan fuerte fue?», «medicación/pauta/prescrito» → «medicinas/horarios/recetada», «tomada/omitida» → «la tomé/no la tomé», «informe PDF» → «resumen para el médico», «perfil» → «persona», «copia de seguridad/restaurar» → «respaldo/recuperar»…
+- Mascota **Nuri** (neurona amable): bienvenida, listas vacías y «todo al día»; iconos de la app y pantalla de inicio. Ver `documentacion/MASCOTA.md`.
 
 ### Instalación como en Dulza
 - Web instalable (PWA) publicada en GitHub Pages con manifiesto, iconos de Nuri, service worker y funcionamiento sin internet.
 - Aviso «Hay una versión nueva de NeuroCalendario» (Actualizar ahora / Más tarde) en cada publicación; «Buscar actualizaciones» en Ajustes; pantalla «Instalar en este teléfono».
-- Flujo de GitHub Actions que publica en cada push a `main` (versión = paquete + SHA).
+- Publicación como Dulza: la web compilada vive en `docs/` (Pages: main / docs) y el flujo `Publicar web` la regenera en cada cambio de código (versión = paquete + SHA). La documentación se movió a `documentacion/`. Se añadió `404.html` para que recargar una pantalla interna no falle en GitHub Pages.
 - Adaptaciones web: avisos solo con la app abierta, PDF por impresión, respaldo por descarga, sin adjuntos.
 
 ### Defectos encontrados y corregidos durante el desarrollo
