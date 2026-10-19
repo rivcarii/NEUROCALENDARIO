@@ -15,6 +15,13 @@ La app **está lista para pruebas**, no para uso médico real, hasta completar:
 | Iconos y *splash* | Ahora son de Nuri (generados con `scripts/make-icons.mjs`); no se han visto en un teléfono real (recorte del icono adaptativo de Android). |
 | Idioma | Solo español. |
 
+## Versión web instalable (PWA)
+- Publicación en GitHub Pages: requiere activar una vez *Settings → Pages → Source: GitHub Actions*. **No verificado en GitHub** (solo la compilación y las pruebas locales).
+- Limitaciones frente a la app nativa: avisos solo con la app abierta, sin adjuntos, PDF por impresión del navegador, respaldo sin adjuntos, sin bloqueo biométrico real.
+- iPhone: solo Safari puede instalarla; Apple puede borrar los datos de sitios web no usados durante varias semanas si la app **no** está agregada a la pantalla de inicio. Haga respaldos.
+- Avisos con la app cerrada en la web requerirían notificaciones push (p. ej. Firebase Cloud Messaging, que ya usa su proyecto Dulza): no implementado.
+- Si en el futuro se activa la sincronización, la nube prevista puede ser **Firebase** (como en Dulza) en lugar de Supabase; el esquema Supabase actual es solo una opción probada.
+
 ## Parcialmente verificado (necesita teléfono)
 - **Notificaciones**: la lógica de programación está probada con un simulador; no se comprobó la entrega real. Android 12+ puede requerir permiso de «alarmas y recordatorios»; el ahorro de batería puede retrasarlas; tras reiniciar el teléfono debe comprobarse. iOS limita a 64 pendientes (la app programa 60).
 - **expo-sqlite nativo**: la lógica corre en Node (`node:sqlite`) y en navegador (WASM, `expo-sqlite`); el motor nativo de Android/iOS no se ejecutó aquí.

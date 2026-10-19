@@ -47,7 +47,9 @@ describe('higiene del repositorio', () => {
     for (const f of srcFiles) {
       const txt = readFileSync(f, 'utf8');
       expect(`${f}:${/service_role/i.test(txt)}`).toBe(`${f}:false`);
-      expect(`${f}:${/\b(fetch|XMLHttpRequest|axios)\s*\(/.test(txt)}`).toBe(`${f}:false`);
+      // Única excepción: updates.ts consulta version.json del propio sitio (GET sin datos) para avisar de versiones nuevas.
+      const net = txt.replace(/fetch\(`\$\{BASE\}\/version\.json\?t=\$\{Date\.now\(\)\}`, \{ cache: 'no-store' \}\)/g, '');
+      expect(`${f}:${/\b(fetch|XMLHttpRequest|axios)\s*\(/.test(net)}`).toBe(`${f}:false`);
       expect(`${f}:${/https?:\/\//.test(txt)}`).toBe(`${f}:false`);
     }
   });

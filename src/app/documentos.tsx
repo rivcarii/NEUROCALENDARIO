@@ -3,7 +3,7 @@ import * as ImagePicker from 'expo-image-picker';
 import * as Sharing from 'expo-sharing';
 import { Stack } from 'expo-router';
 import { useState } from 'react';
-import { Alert } from 'react-native';
+import { Alert, Platform } from 'react-native';
 import { Button, Card, Empty, ErrorBox, Loading, P, ProfileBar, Row, Screen, TextField, confirmDestructive, errorMessage } from '../components/ui';
 import { formatDateShort, localDateKey } from '../domain/time';
 import { attachmentUri, deleteAttachment, storeAttachment } from '../services/files';
@@ -16,6 +16,7 @@ export default function Documentos() {
   const [title, setTitle] = useState('');
   const [busy, setBusy] = useState(false);
   const { data, loading, error, reload } = useData(() => store.list('document', profile.id));
+  const web = Platform.OS === 'web';
 
   async function add(source: { uri: string; name: string }) {
     const pid = profile.id;
@@ -64,11 +65,17 @@ export default function Documentos() {
       <Stack.Screen options={{ title: 'Documentos' }} />
       <ProfileBar name={profile.displayName} color={profile.color} label="Se guardará en" />
       <Screen>
-        <TextField label="Título del documento (opcional)" value={title} onChangeText={setTitle} />
-        <Row>
-          <Button title="Elegir un PDF o una foto" onPress={pickFile} loading={busy} />
-          <Button title="Fotografiar" kind="secondary" onPress={takePhoto} disabled={busy} />
-        </Row>
+        {web ? (
+          <Empty title="Los documentos no se pueden adjuntar desde el navegador." hint="Instale la app de Android/iPhone para guardar PDF y fotos de forma privada." />
+        ) : (
+          <>
+            <TextField label="Título del documento (opcional)" value={title} onChangeText={setTitle} />
+            <Row>
+              <Button title="Elegir un PDF o una foto" onPress={pickFile} loading={busy} />
+              <Button title="Fotografiar" kind="secondary" onPress={takePhoto} disabled={busy} />
+            </Row>
+          </>
+        )}
         <P muted small>Solo PDF, JPG y PNG de hasta 15 MB. Se guardan dentro de la app (no en la galería) y no se envían a ningún servidor.</P>
         {loading && !data ? <Loading /> : null}
         {error ? <ErrorBox message={error} onRetry={reload} /> : null}

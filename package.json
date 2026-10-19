@@ -1,6 +1,6 @@
 {
   "name": "neurocalendario",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "main": "expo-router/entry",
   "dependencies": {
     "@expo-google-fonts/atkinson-hyperlegible": "^0.4.1",
@@ -68,7 +68,8 @@
     "test:tz": "for tz in UTC America/Bogota Europe/Madrid Pacific/Auckland Asia/Kolkata; do TZ=$tz jest --testPathIgnorePatterns ui.test || exit 1; done",
     "test:rls": "bash supabase/tests/run.sh",
     "test:pdf": "bash scripts/verify-report-pdf.sh",
-    "test:e2e": "bash e2e/run.sh"
+    "test:e2e": "bash e2e/run.sh",
+    "test:pwa": "bash e2e/pwa.sh"
   },
   "private": true,
   "jest": {

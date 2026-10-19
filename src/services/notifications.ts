@@ -26,6 +26,8 @@ export async function ensurePermission(): Promise<boolean> {
 export interface RescheduleResult {
   scheduled: number;
   permission: boolean;
+  /** La plataforma no puede programar avisos con la app cerrada (versión web). */
+  unsupported?: boolean;
 }
 
 /**
@@ -34,6 +36,7 @@ export interface RescheduleResult {
  * emergencia: pueden retrasarse o no entregarse (modo ahorro, permisos, reinicio).
  */
 export async function rescheduleAll(store: Store, showDetails: boolean, now = new Date()): Promise<RescheduleResult> {
+  if (Platform.OS === 'web') return { scheduled: 0, permission: true, unsupported: true };
   await Notifications.cancelAllScheduledNotificationsAsync();
   const profiles = await store.listProfiles();
   for (const p of profiles) await store.db.run('DELETE FROM reminders WHERE profile_id = ?', [p.id]);

@@ -3,7 +3,7 @@ import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import { Stack } from 'expo-router';
 import { useState } from 'react';
-import { Alert, Switch } from 'react-native';
+import { Alert, Platform, Switch } from 'react-native';
 import { Button, Card, Chips, DateTimeField, P, ProfileBar, Row, Screen, errorMessage } from '../components/ui';
 import { buildReportHtml, DISCLAIMER, type ReportSections } from '../domain/report';
 import { addDays, localDateKey } from '../domain/time';
@@ -41,6 +41,12 @@ export default function Informes() {
         episodes: episodes as never, medications: medications as never, schedules: schedules as never, intakes: intakes as never,
         appointments: appointments as never, exams: exams as never, notes: notes as never,
       });
+      if (Platform.OS === 'web') {
+        // En el navegador no se puede crear el archivo directamente: se abre la ventana de impresión (Guardar como PDF).
+        await store.logReport(profile.id, from, to, Object.entries(sections).filter(([, v]) => v).map(([k]) => k));
+        await Print.printAsync({ html });
+        return;
+      }
       const { uri } = await Print.printToFileAsync({ html, width: 595, height: 842 });
       const stamp = new Date().toISOString().slice(0, 10);
       const safeName = profile.displayName.replace(/[^\p{L}\p{N}]+/gu, '_').slice(0, 30);
@@ -75,6 +81,7 @@ export default function Informes() {
         </Card>
         <P muted small>{DISCLAIMER}</P>
         <P muted small>El PDF se crea en su teléfono. Al compartirlo, usted decide con quién. Quien lo reciba ya no estará protegido por esta aplicación.</P>
+        {Platform.OS === 'web' ? <P muted small>En el navegador se abrirá la ventana de impresión: elija «Guardar como PDF» como impresora.</P> : null}
         <Button title="Crear y compartir PDF" onPress={generate} loading={busy} />
       </Screen>
     </>

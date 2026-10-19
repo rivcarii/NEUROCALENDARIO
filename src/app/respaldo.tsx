@@ -3,7 +3,7 @@ import { File, Paths } from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import { Stack } from 'expo-router';
 import { useState } from 'react';
-import { Alert } from 'react-native';
+import { Alert, Platform } from 'react-native';
 import { Button, Card, H, P, ProfileBar, Screen, TextField, errorMessage } from '../components/ui';
 import { buildBackup, decryptBackup, encryptBackup, isEncryptedBackup, MIN_PASSPHRASE, restoreBackup, type BackupPayload } from '../domain/backup';
 import { expoFileAdapter } from '../services/files';
@@ -24,9 +24,21 @@ export default function Respaldo() {
     setBusy('export');
     try {
       await new Promise((r) => setTimeout(r, 50)); // deja pintar el indicador
-      const payload = await buildBackup(store, profile.id, expoFileAdapter);
+      const web = Platform.OS === 'web';
+      const payload = await buildBackup(store, profile.id, web ? undefined : expoFileAdapter);
       const enc = encryptBackup(payload, pass);
       const stamp = new Date().toISOString().slice(0, 10);
+      if (web) {
+        // Descarga directa desde el navegador (va a «Descargas»).
+        const url = URL.createObjectURL(new Blob([JSON.stringify(enc)], { type: 'application/octet-stream' }));
+        const a = document.createElement('a');
+        a.href = url; a.download = `NeuroCalendario_${stamp}.ncbackup`;
+        document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 10000);
+        await store.auditExport(profile.id, 'backup', 'completa (web, sin adjuntos)');
+        setPass(''); setPass2('');
+        return;
+      }
       const out = new File(Paths.cache, `NeuroCalendario_${stamp}.ncbackup`);
       if (out.exists) out.delete();
       out.create();
@@ -44,7 +56,7 @@ export default function Respaldo() {
       const r = await DocumentPicker.getDocumentAsync({ type: '*/*', copyToCacheDirectory: true });
       const a = r.assets?.[0];
       if (r.canceled || !a) return;
-      const text = await new File(a.uri).text();
+      const text = Platform.OS === 'web' && a.file ? await a.file.text() : await new File(a.uri).text();
       let parsed: unknown;
       try { parsed = JSON.parse(text); } catch { throw new Error('El archivo no es una copia válida.'); }
       let payload: BackupPayload;
@@ -53,7 +65,7 @@ export default function Respaldo() {
         await new Promise((res) => setTimeout(res, 50));
         payload = decryptBackup(parsed, rpass);
       } else payload = parsed as BackupPayload;
-      const res = await restoreBackup(store, payload, newId, expoFileAdapter);
+      const res = await restoreBackup(store, payload, newId, Platform.OS === 'web' ? undefined : expoFileAdapter);
       await refreshProfiles();
       setRpass('');
       Alert.alert('Respaldo recuperado', `Se creó un perfil nuevo con ${Object.values(res.counts).reduce((x, y) => x + y, 0)} registros. Sus perfiles existentes no se modificaron.`);

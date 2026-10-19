@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Alert, Switch } from 'react-native';
 import { Button, Card, H, P, Row, Screen, TextField, confirmDestructive, errorMessage } from '../components/ui';
 import { deleteProfileFiles } from '../services/files';
+import { APP_BUILD, checkForUpdate, updatesSupported } from '../services/updates';
 import { useSession } from '../services/session';
 import { useData } from '../services/useData';
 
@@ -15,7 +16,7 @@ export default function Ajustes() {
   const [wipe, setWipe] = useState('');
 
   const statusText = (s: string) =>
-    s.startsWith('ok:') ? `${s.slice(3)} recordatorio(s) programado(s)` : s === 'sin_permiso' ? 'Sin permiso de notificaciones: active el permiso en los ajustes del teléfono.' : s === 'error' ? 'Error al programar recordatorios' : 'Aún sin programar';
+    s.startsWith('ok:') ? `${s.slice(3)} recordatorio(s) programado(s)` : s === 'web' ? 'Versión web: los avisos solo suenan con la app abierta. Para avisos con la app cerrada instale la app de Android/iPhone.' : s === 'sin_permiso' ? 'Sin permiso de notificaciones: active el permiso en los ajustes del teléfono.' : s === 'error' ? 'Error al programar recordatorios' : 'Aún sin programar';
 
   return (
     <>
@@ -41,6 +42,7 @@ export default function Ajustes() {
           <P small>Estado: {statusText(data?.status ?? 'pendiente')}</P>
           <P muted small>Los avisos no garantizan atención médica ni sirven como alarma de emergencia. Pueden retrasarse o no llegar si el teléfono está en ahorro de batería o sin permisos.</P>
         </Card>
+        {updatesSupported() ? <UpdateCard /> : null}
         <Card>
           <H level={2}>Privacidad</H>
           <P small>• Sus datos se guardan solo en este teléfono.</P>
@@ -63,5 +65,20 @@ export default function Ajustes() {
         </Card>
       </Screen>
     </>
+  );
+}
+
+function UpdateCard() {
+  const [msg, setMsg] = useState<string | null>(null);
+  return (
+    <Card>
+      <H level={2}>Versión</H>
+      <P small>{APP_BUILD.replace('+', ' · ')}</P>
+      <Button title="Buscar actualizaciones" kind="secondary" onPress={async () => {
+        setMsg('Buscando…');
+        setMsg((await checkForUpdate(true)) ? 'Hay una versión nueva: aparecerá un aviso.' : 'Ya tiene la última versión.');
+      }} />
+      {msg ? <P muted small>{msg}</P> : null}
+    </Card>
   );
 }

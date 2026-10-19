@@ -11,6 +11,7 @@ Resultados de la última ejecución (19-oct-2026, Linux, Node 22). **Todos con d
 | `npm run test:rls` | 9 bloques de escenarios de autorización en PostgreSQL 16 | ✅ «TODAS LAS PRUEBAS SUPERADAS» |
 | `npm run test:pdf` | informe → PDF (Chromium) → texto (`pdftotext`) | ✅ 10/10 textos obligatorios, 2 páginas |
 | `npm run test:e2e` | 20 comprobaciones de extremo a extremo en Chromium con SQLite real (WASM) | ✅ sin errores de consola |
+| `npm run test:pwa` | web instalable: service worker, caché, sin internet, aviso de versión nueva, «Más tarde», actualizar y conservar datos | ✅ 9 comprobaciones |
 | `npx expo export --platform android` | Compila el bundle Hermes | ✅ 4,3 MB |
 
 ## Requisitos de la especificación → evidencia

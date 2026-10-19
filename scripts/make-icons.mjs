@@ -25,6 +25,11 @@ const shots = [
   // icono temático monocromo (silueta)
   ['android-icon-monochrome.png', 1024, mascot(60, 'filter:brightness(0)'), true],
   ['splash-icon.png', 1024, mascot(80), true],
+  // PWA (instalación desde el navegador)
+  ['../public/icon-192.png', 192, `<div style="width:100%;height:100%;background:linear-gradient(160deg,#E6F4FE,#B9D8F4)">${mascot(78)}</div>`, false],
+  ['../public/icon-512.png', 512, `<div style="width:100%;height:100%;background:linear-gradient(160deg,#E6F4FE,#B9D8F4)">${mascot(78)}</div>`, false],
+  ['../public/icon-maskable-512.png', 512, `<div style="width:100%;height:100%;background:linear-gradient(160deg,#E6F4FE,#B9D8F4)">${mascot(58)}</div>`, false],
+  ['../public/apple-touch-icon.png', 180, `<div style="width:100%;height:100%;background:linear-gradient(160deg,#E6F4FE,#B9D8F4)">${mascot(78)}</div>`, false],
   ['favicon.png', 256, `<div style="width:100%;height:100%;background:#E6F4FE">${mascot(88)}</div>`, false],
 ];
 for (const [file, size, body, transparent] of shots) {

@@ -2,7 +2,7 @@
 
 ## Resumen
 - Los datos de salud se guardan **solo en el dispositivo**. La app no tiene servidor, analítica, publicidad ni inteligencia artificial.
-- El código propio de la app no realiza llamadas de red (comprobado por prueba automática sobre `src/`); no se solicita token de notificaciones push ni se usa ningún servicio remoto.
+- El código propio de la app no envía datos por red (comprobado por prueba automática sobre `src/`). La única petición es, en la versión web instalable, descargar `version.json` del propio sitio (un GET sin datos) para avisar de versiones nuevas. No se solicita token de notificaciones push ni se usa ningún servicio remoto.
 - Los datos salen del teléfono únicamente cuando **usted** comparte un informe PDF, un documento o una copia de seguridad.
 
 ## Datos tratados

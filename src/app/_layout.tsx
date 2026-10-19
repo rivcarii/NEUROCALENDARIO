@@ -6,6 +6,7 @@ import { ActivityIndicator, View } from 'react-native';
 import { Text } from '../components/Text';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Mascot } from '../components/Mascot';
+import { UpdatePrompt } from '../components/UpdatePrompt';
 import { Button, Card, H, P, Screen, TextField } from '../components/ui';
 import { configureNotifications, rescheduleAll } from '../services/notifications';
 import { SessionProvider, useSession } from '../services/session';
@@ -17,6 +18,7 @@ export default function RootLayout() {
     <SafeAreaProvider>
       <SessionProvider>
         <Gate />
+        <UpdatePrompt />
       </SessionProvider>
     </SafeAreaProvider>
   );
@@ -37,7 +39,7 @@ function Gate() {
       try {
         const details = (await store.getSetting('notif_details')) === '1';
         const r = await rescheduleAll(store, details);
-        await store.setSetting('reminder_status', r.permission ? `ok:${r.scheduled}` : 'sin_permiso');
+        await store.setSetting('reminder_status', r.unsupported ? 'web' : r.permission ? `ok:${r.scheduled}` : 'sin_permiso');
       } catch {
         await store.setSetting('reminder_status', 'error').catch(() => undefined);
       }

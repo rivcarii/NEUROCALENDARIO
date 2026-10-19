@@ -46,20 +46,29 @@ npm run test:tz     # las pruebas de dominio en 5 zonas horarias
 npm run test:rls    # políticas de PostgreSQL/Supabase contra un Postgres temporal
 npm run test:pdf    # genera un informe, lo imprime a PDF con Chromium y comprueba su texto
 npm run test:e2e    # recorrido completo en Chromium con SQLite real (WASM) y capturas
+npm run test:pwa    # web instalable: service worker, sin internet y aviso «Hay una versión nueva»
 ```
 
-## Instalar en el teléfono
+## Instalar en el teléfono (igual que Dulza)
 
-**A. Expo Go (más rápido, solo pruebas).** `npx expo start`, instale *Expo Go* y escanee el QR. Limitaciones: las notificaciones y el bloqueo biométrico pueden comportarse distinto que en una compilación propia.
+La app se publica como **web instalable (PWA)** en GitHub Pages: se instala abriendo un enlace y no hace falta terminal ni tienda.
 
-**B. APK de Android para instalar (recomendado para probar de verdad).** Requiere cuenta gratuita de Expo y ejecutar usted los comandos (la compilación en la nube la hace EAS):
+1. **Una sola vez** (quien administra el repositorio): *Settings → Pages → Build and deployment → Source: **GitHub Actions***. Con el siguiente cambio a `main`, el flujo `Publicar versión web` compila y publica en `https://rivcarii.github.io/NEUROCALENDARIO/`.
+2. **En el teléfono**, abra ese enlace.
+   - **iPhone**: en **Safari** → Compartir → **Agregar a pantalla de inicio**.
+   - **Android**: en Chrome → menú ⋮ → **Instalar app** (o **Más → Instalar en este teléfono** dentro de la app).
+3. **Actualizaciones**: cada cambio en `main` publica una versión nueva. La app instalada la detecta al abrirse, al volver a primer plano y cada 10 minutos, y muestra la ventana **«Hay una versión nueva de NeuroCalendario» → Actualizar ahora / Más tarde**. Los datos no se tocan. También puede forzarlo en *Más → Privacidad y ajustes → Buscar actualizaciones*.
 
-```bash
-npx eas-cli@latest login
-npx eas-cli@latest build --platform android --profile preview   # genera un .apk descargable
-```
+Probar la web en su computadora: `npm run web`, o publicar localmente con `./scripts/build-web.sh` (carpeta `dist/`).
 
-Abra el enlace del APK en el teléfono y permita «instalar apps desconocidas» para el navegador. En iPhone se necesita cuenta de desarrollador de Apple (de pago) o TestFlight.
+**Qué cambia en la versión instalada desde el navegador** (la app compilada de Android/iPhone sí lo tiene completo):
+- Los **avisos** de medicinas y citas solo suenan **con la app abierta** (un navegador no puede programar avisos con la app cerrada).
+- No se pueden **adjuntar documentos ni fotos**.
+- El **resumen para el médico** se guarda desde la ventana de impresión («Guardar como PDF»).
+- El **respaldo** se descarga a «Descargas» y no incluye adjuntos.
+- Cada dispositivo tiene sus propios datos (se pasan con el respaldo).
+
+**App nativa (opcional, para avisos con la app cerrada y adjuntos):** `npx eas-cli@latest build --platform android --profile preview` genera un APK con enlace de descarga (cuenta gratuita de Expo).
 
 ## Crear perfiles
 
