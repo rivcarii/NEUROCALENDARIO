@@ -9,10 +9,13 @@ import { Mascot } from '../../components/Mascot';
 import { PressableScale } from '../../components/PressableScale';
 import { Reveal } from '../../components/Reveal';
 import { Ring } from '../../components/Ring';
+import { Gauge, LevelStrip } from '../../components/Status';
 import { SymptomDeck } from '../../components/SymptomDeck';
 import { UndoToast, type ToastAction } from '../../components/UndoToast';
 import { Button, Card, Empty, ErrorBox, H, Loading, P, Row, Screen, errorMessage, TapText, SectionTitle } from '../../components/ui';
-import { loadDay, type Dose } from '../../domain/day';
+import { analyzePeriod, dayStatus } from '../../domain/analysis';
+import { loadAnalysisInput, loadDay, type Dose } from '../../domain/day';
+import { addDays, monthName } from '../../domain/time';
 import { INTAKE_LABEL } from '../../domain/labels';
 import { durationMinutes, formatDateLong, formatDuration, formatTime, localDateKey } from '../../domain/time';
 import { useActive, useSession } from '../../services/session';
@@ -40,6 +43,13 @@ export default function Hoy() {
   const t = useTheme();
   const today = localDateKey(new Date());
   const { data, loading, error, reload } = useData(() => loadDay(store, profile.id, today), [today]);
+  // Análisis automático: últimos 7 días (semana móvil) y estado de hoy; el del mes se ofrece los primeros días del mes.
+  const week = useData(async () => {
+    const input = await loadAnalysisInput(store, profile.id);
+    const now = new Date();
+    const a = analyzePeriod(input, addDays(today, -6), today, now);
+    return { a, todayStatus: dayStatus(today, input, today) };
+  }, [today]);
   const [toast, setToast] = useState<Toast | null>(null);
   const closeToast = useCallback(() => setToast(null), []);
   // Marca inmediata (antes de que termine de guardar y recargar): así se ve en el acto que «sí se marcó».
@@ -142,6 +152,24 @@ export default function Hoy() {
                 </P>
               </View>
             </View>
+          </Card>
+        </Reveal>
+      ) : null}
+
+      {week.data ? (
+        <Reveal id="hoy" index={1}>
+          <Card>
+            <H level={2}>Estado de hoy</H>
+            <Gauge value={week.data.todayStatus.score} level={week.data.todayStatus.level} title="Estado de hoy" />
+            {week.data.todayStatus.level === 'sin_datos' ? <P muted small>Aún no hay síntomas ni tomas anotadas hoy. Cuando las anote, el medidor se llena solo.</P> : null}
+            <View style={{ height: 4 }} />
+            <H level={2}>Su semana</H>
+            <LevelStrip size={34} cells={week.data.a.current.daily.map((d) => ({ key: d.dateKey, label: String(Number(d.dateKey.slice(8))), level: d.level }))} />
+            <P small>{week.data.a.findings[0]?.title}</P>
+            <Row>
+              <Button title="Ver análisis de la semana" kind="secondary" onPress={() => router.push('/analisis')} />
+              {new Date().getDate() <= 3 ? <Button title={`Resumen de ${monthName((new Date().getMonth() + 11) % 12).toLowerCase()}`} kind="secondary" onPress={() => router.push(`/analisis?modo=mes&ancla=${addDays(today.slice(0, 8) + '01', -1)}`)} /> : null}
+            </Row>
           </Card>
         </Reveal>
       ) : null}

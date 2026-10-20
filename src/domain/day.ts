@@ -66,3 +66,14 @@ export async function loadMonthMarks(store: Store, profileId: string, year: numb
   for (const n of notes) get(n.noteDate).notes++;
   return marks;
 }
+
+/** Todo lo necesario para el análisis y el semáforo de un perfil (una sola lectura). */
+export async function loadAnalysisInput(store: Store, profileId: string): Promise<import('./analysis').AnalysisInput> {
+  const [episodes, medications, schedules, intakes] = await Promise.all([
+    store.list('episode', profileId),
+    store.list('medication', profileId),
+    store.list('schedule', profileId),
+    store.list('intake', profileId),
+  ]);
+  return { episodes, medications, schedules, intakes };
+}

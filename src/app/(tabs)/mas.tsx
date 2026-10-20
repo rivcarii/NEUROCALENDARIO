@@ -12,6 +12,7 @@ const ITEMS: { title: string; hint: string; href: string; ownerOnly?: boolean; w
   { title: 'Estudios y resultados', hint: 'Estudios pedidos y sus resultados', href: '/examenes' },
   { title: 'Documentos', hint: 'PDF y fotos en almacenamiento privado', href: '/documentos' },
   { title: 'Notas', hint: 'Notas personales y del cuidador', href: '/notas' },
+  { title: 'Análisis semanal y mensual', hint: 'Semáforo, escala de dolor y qué comentar al médico', href: '/analisis' },
   { title: 'Cómo he estado', hint: 'Cuántas veces, cuánto duran y qué tan fuertes', href: '/estadisticas' },
   { title: 'Resumen para el médico', hint: 'Para llevar a su cita', href: '/informes' },
   { title: 'Personas', hint: 'Cambiar de persona o añadir otra', href: '/perfiles' },

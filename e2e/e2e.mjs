@@ -8,6 +8,8 @@ const errors = [];
 page.on('pageerror', (e) => errors.push('pageerror: ' + e.message));
 page.on('console', (m) => { if (m.type() === 'error') errors.push('console: ' + m.text().slice(0, 300)); });
 page.on('dialog', (d) => d.accept());
+page.on('requestfailed', (r) => errors.push('requestfailed: ' + r.url().slice(-80)));
+page.on('response', (r) => { if (r.status() >= 400) errors.push('http' + r.status() + ': ' + r.url().slice(-80)); });
 let n = 0;
 const shot = (name) => page.screenshot({ path: `${SHOTS}/s${String(++n).padStart(2, '0')}-${name}.png` });
 const ok = (c, msg) => { console.log((c ? 'OK   ' : 'FALLA') + ' ' + msg); if (!c) process.exitCode = 1; };
@@ -142,6 +144,31 @@ ok(true, 'cuenta familiar creada y permiso de lectura concedido');
 await page.getByRole('button', { name: 'Revocar acceso' }).click();
 await page.locator('text=Acceso a «Mamá Ficticia»: sin acceso >> visible=true').first().waitFor();
 ok(true, 'permiso revocado');
+
+// semáforo, análisis y PDF real en el navegador
+await page.goto(BASE, { waitUntil: 'networkidle' });
+await page.getByText('Anotar ahora').first().waitFor({ timeout: 20000 });
+ok((await body()).includes('Estado de hoy') && (await body()).includes('Su semana'), 'Hoy muestra estado de hoy y semáforo de la semana');
+await page.locator('text="Calendario" >> visible=true').first().click();
+await page.getByRole('button', { name: /Día difícil|Con molestias|Tranquilo/ }).first().waitFor({ timeout: 15000 });
+await shot('calendario-semaforo');
+ok(true, 'el calendario pinta cada día con su color de semáforo');
+await page.locator('text="Más" >> visible=true').first().click();
+await page.getByText('Análisis semanal y mensual', { exact: true }).click();
+await page.getByText('Qué encontramos').waitFor();
+await shot('analisis-semana');
+await page.getByRole('radio', { name: 'Mes' }).click();
+await page.getByText('Escala de dolor (0–10)').waitFor();
+ok(true, 'análisis semanal y mensual con escala de dolor y hallazgos');
+await page.getByRole('button', { name: 'Crear informe PDF de este período' }).click();
+await page.getByRole('button', { name: 'Crear y compartir PDF' }).waitFor();
+const [dl] = await Promise.all([page.waitForEvent('download', { timeout: 30000 }).catch(async (e) => { await shot('pdf-fallo'); console.log('ERRORES:', errors.join(' | ')); console.log((await body()).slice(-300)); throw e; }), page.getByRole('button', { name: 'Crear y compartir PDF' }).click()]);
+const pdfPath = `${SHOTS}/informe-e2e.pdf`;
+await dl.saveAs(pdfPath);
+const head = (await import('node:fs')).readFileSync(pdfPath).subarray(0, 5).toString();
+ok(head === '%PDF-' && dl.suggestedFilename().endsWith('.pdf'), 'el PDF se genera y se descarga en el navegador (' + dl.suggestedFilename() + ')');
+await page.getByText(/El PDF está listo/).waitFor();
+await shot('pdf-listo');
 
 // eliminación con confirmación
 await page.goto(BASE, { waitUntil: 'networkidle' });
