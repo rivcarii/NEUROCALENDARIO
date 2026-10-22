@@ -3,8 +3,8 @@ import * as ImagePicker from 'expo-image-picker';
 import * as Sharing from 'expo-sharing';
 import { Stack } from 'expo-router';
 import { useState } from 'react';
-import { Alert, Platform } from 'react-native';
-import { Button, Card, Empty, ErrorBox, Loading, P, ProfileBar, Row, Screen, TextField, confirmDestructive, errorMessage } from '../components/ui';
+import { Platform } from 'react-native';
+import { Button, Card, Empty, ErrorBox, Loading, P, ProfileBar, Row, Screen, TextField, confirmDestructive, errorMessage, notify } from '../components/ui';
 import { formatDateShort, localDateKey } from '../domain/time';
 import { attachmentUri, deleteAttachment, storeAttachment } from '../services/files';
 import { useActive, useSession } from '../services/session';
@@ -27,7 +27,7 @@ export default function Documentos() {
       setTitle(''); bump();
     } catch (e) {
       if (stored) { try { deleteAttachment(stored.storagePath, pid); } catch { /* ya no existe */ } }
-      Alert.alert('No se pudo añadir', errorMessage(e));
+      notify('No se pudo añadir', errorMessage(e));
     }
   }
 
@@ -44,7 +44,7 @@ export default function Documentos() {
     setBusy(true);
     try {
       const perm = await ImagePicker.requestCameraPermissionsAsync();
-      if (!perm.granted) { Alert.alert('Permiso necesario', 'Active el permiso de cámara para fotografiar documentos.'); return; }
+      if (!perm.granted) { notify('Permiso necesario', 'Active el permiso de cámara para fotografiar documentos.'); return; }
       const r = await ImagePicker.launchCameraAsync({ mediaTypes: ['images'], quality: 0.8 });
       const a = r.assets?.[0];
       if (!r.canceled && a) await add({ uri: a.uri, name: a.fileName ?? 'foto.jpg' });
@@ -52,12 +52,12 @@ export default function Documentos() {
   }
 
   async function open(path: string, mime: string) {
-    try { await Sharing.shareAsync(attachmentUri(path, profile.id), { mimeType: mime }); } catch (e) { Alert.alert('No se pudo abrir', errorMessage(e)); }
+    try { await Sharing.shareAsync(attachmentUri(path, profile.id), { mimeType: mime }); } catch (e) { notify('No se pudo abrir', errorMessage(e)); }
   }
 
   async function remove(id: string, path: string) {
     if (!(await confirmDestructive('¿Eliminar documento?', 'Se eliminará el archivo de este dispositivo. Esta acción no se puede deshacer.', 'Eliminar'))) return;
-    try { await store.remove('document', profile.id, id); try { deleteAttachment(path, profile.id); } catch { /* ya no existe */ } bump(); } catch (e) { Alert.alert('No se pudo eliminar', errorMessage(e)); }
+    try { await store.remove('document', profile.id, id); try { deleteAttachment(path, profile.id); } catch { /* ya no existe */ } bump(); } catch (e) { notify('No se pudo eliminar', errorMessage(e)); }
   }
 
   return (

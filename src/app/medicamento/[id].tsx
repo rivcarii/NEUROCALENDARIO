@@ -2,11 +2,10 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Stack, router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import { Alert, Switch } from 'react-native';
 import { z } from 'zod';
-import { Button, Card, Chips, DateTimeField, ErrorBox, H, Loading, P, ProfileBar, Row, Screen, TextField, confirmDestructive, errorMessage } from '../../components/ui';
+import { Button, Card, Chips, DateTimeField, ErrorBox, H, Loading, P, ProfileBar, Row, Screen, TextField, confirmDestructive, errorMessage, notify, Toggle } from '../../components/ui';
 import { WEEKDAY_LABEL } from '../../domain/labels';
-import { localDateKey } from '../../domain/time';
+import { formatDateShort, localDateKey } from '../../domain/time';
 import { useActive, useSession } from '../../services/session';
 import { useData } from '../../services/useData';
 
@@ -39,7 +38,7 @@ export default function MedicamentoForm() {
   }, [data?.med, reset]);
 
   const save = handleSubmit(async (f) => {
-    if (activeProfile?.id !== pid) { Alert.alert('Perfil cambiado', 'No se guardó nada para evitar mezclar datos.'); return; }
+    if (activeProfile?.id !== pid) { notify('Perfil cambiado', 'No se guardó nada para evitar mezclar datos.'); return; }
     setBusy(true);
     try {
       if (isNew) {
@@ -51,12 +50,12 @@ export default function MedicamentoForm() {
         bump();
         router.back();
       }
-    } catch (e) { Alert.alert('No se pudo guardar', errorMessage(e)); } finally { setBusy(false); }
+    } catch (e) { notify('No se pudo guardar', errorMessage(e)); } finally { setBusy(false); }
   });
 
   async function remove() {
     if (!(await confirmDestructive('¿Borrar esta medicina?', 'También se borrarán sus horarios y el registro de lo que tomó. No se puede deshacer.', 'Eliminar'))) return;
-    try { await store.remove('medication', pid, id); bump(); router.back(); } catch (e) { Alert.alert('No se pudo eliminar', errorMessage(e)); }
+    try { await store.remove('medication', pid, id); bump(); router.back(); } catch (e) { notify('No se pudo eliminar', errorMessage(e)); }
   }
 
   if (loading && !data) return <Loading />;
@@ -73,7 +72,7 @@ export default function MedicamentoForm() {
         <Controller control={control} name="form" render={({ field }) => <TextField label="Forma" value={field.value} onChangeText={field.onChange} placeholder="Pastilla, jarabe, gotas…" />} />
         <Controller control={control} name="prescriber" render={({ field }) => <TextField label="Recetada por" value={field.value} onChangeText={field.onChange} />} />
         <Controller control={control} name="active" render={({ field }) => (
-          <Row><Switch accessibilityLabel="Medicamento activo" value={field.value} onValueChange={field.onChange} /><P>{field.value ? 'Activo' : 'Pausada (sin avisos)'}</P></Row>
+          <Row><Toggle accessibilityLabel="Medicamento activo" value={field.value} onValueChange={field.onChange} /><P>{field.value ? 'Activo' : 'Pausada (sin avisos)'}</P></Row>
         )} />
         <Controller control={control} name="notes" render={({ field }) => <TextField label="Notas" value={field.value} onChangeText={field.onChange} multiline numberOfLines={3} />} />
         <Button title="Guardar" onPress={save} loading={busy} />
@@ -85,13 +84,13 @@ export default function MedicamentoForm() {
             {data.schedules.map((s) => (
               <Card key={s.id}>
                 <P>{s.times.join(' · ')}</P>
-                <P muted small>{s.daysOfWeek ? s.daysOfWeek.map((d) => WEEKDAY_LABEL[d]).join(', ') : 'Todos los días'} · desde {s.startDate}{s.endDate ? ` hasta ${s.endDate}` : ''}</P>
+                <P muted small>{s.daysOfWeek ? s.daysOfWeek.map((d) => WEEKDAY_LABEL[d]).join(', ') : 'Todos los días'} · desde {formatDateShort(s.startDate)}{s.endDate ? ` hasta ${formatDateShort(s.endDate)}` : ''}</P>
                 {s.instructions ? <P muted small>{s.instructions}</P> : null}
                 <Row>
                   <P small>{s.remindersEnabled ? 'Con aviso' : 'Sin aviso'}</P>
                   <Button title="Eliminar" kind="secondary" onPress={async () => {
                     if (await confirmDestructive('¿Eliminar horario?', 'Se eliminará este horario y su registro de tomas.', 'Eliminar')) {
-                      try { await store.remove('schedule', pid, s.id); bump(); } catch (e) { Alert.alert('Error', errorMessage(e)); }
+                      try { await store.remove('schedule', pid, s.id); bump(); } catch (e) { notify('Error', errorMessage(e)); }
                     }
                   }} />
                 </Row>
@@ -130,7 +129,7 @@ function ScheduleAdder({ medicationId, profileId }: { medicationId: string; prof
         try {
           await store.create('schedule', profileId, { medicationId, times: list, daysOfWeek: days.length ? days : null, startDate: start, instructions: instr });
           bump(); setInstr('');
-        } catch (e) { Alert.alert('No se pudo guardar', errorMessage(e)); } finally { setBusy(false); }
+        } catch (e) { notify('No se pudo guardar', errorMessage(e)); } finally { setBusy(false); }
       }} />
     </Card>
   );

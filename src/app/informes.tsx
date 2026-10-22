@@ -3,8 +3,8 @@ import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import { Stack, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
-import { Alert, Platform, Switch } from 'react-native';
-import { Button, Card, Chips, DateTimeField, ErrorBox, P, ProfileBar, Row, Screen, errorMessage } from '../components/ui';
+import { Platform } from 'react-native';
+import { Button, Card, Chips, DateTimeField, ErrorBox, P, ProfileBar, Row, Screen, errorMessage, notify, Toggle } from '../components/ui';
 import { buildReportDoc, DISCLAIMER, type ReportSections } from '../domain/reportDoc';
 import { buildReportHtml } from '../domain/reportHtml';
 import { addDays, localDateKey } from '../domain/time';
@@ -37,8 +37,8 @@ export default function Informes() {
   }
 
   async function generate() {
-    if (from > to) { Alert.alert('Período no válido', 'La fecha inicial no puede ser posterior a la final.'); return; }
-    if (!Object.values(sections).some(Boolean)) { Alert.alert('Seleccione contenido', 'Elija al menos una sección.'); return; }
+    if (from > to) { notify('Período no válido', 'La fecha inicial no puede ser posterior a la final.'); return; }
+    if (!Object.values(sections).some(Boolean)) { notify('Seleccione contenido', 'Elija al menos una sección.'); return; }
     setBusy(true); setErr(null);
     try {
       const [episodes, medications, schedules, intakes, appointments, exams, notes] = await Promise.all(
@@ -70,8 +70,8 @@ export default function Informes() {
       new File(uri).move(out);
       await store.logReport(profile.id, from, to, used);
       if (await Sharing.isAvailableAsync()) await Sharing.shareAsync(out.uri, { mimeType: 'application/pdf', dialogTitle: 'Resumen de seguimiento', UTI: 'com.adobe.pdf' });
-      else Alert.alert('Resumen listo', `Archivo: ${out.uri}`);
-    } catch (e) { setErr(errorMessage(e)); Alert.alert('No se pudo crear el resumen', errorMessage(e)); } finally { setBusy(false); }
+      else notify('Resumen listo', `Archivo: ${out.uri}`);
+    } catch (e) { setErr(errorMessage(e)); notify('No se pudo crear el resumen', errorMessage(e)); } finally { setBusy(false); }
   }
 
   return (
@@ -89,7 +89,7 @@ export default function Informes() {
         <Card>
           {KEYS.map((k) => (
             <Row key={k}>
-              <Switch accessibilityLabel={LABELS[k]} value={sections[k] ?? false} onValueChange={(v) => { setSections({ ...sections, [k]: v }); setWeb(null); }} />
+              <Toggle accessibilityLabel={LABELS[k]} value={sections[k] ?? false} onValueChange={(v) => { setSections({ ...sections, [k]: v }); setWeb(null); }} />
               <P style={{ flex: 1 } as never}>{LABELS[k]}</P>
             </Row>
           ))}

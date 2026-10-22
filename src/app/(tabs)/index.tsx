@@ -2,7 +2,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import * as Haptics from 'expo-haptics';
 import { router } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
-import { Alert, View } from 'react-native';
+import { View } from 'react-native';
 import { Text } from '../../components/Text';
 import { Deck } from '../../components/Deck';
 import { NeuroArt } from '../../components/NeuroArt';
@@ -12,7 +12,7 @@ import { Ring } from '../../components/Ring';
 import { Gauge, LevelStrip } from '../../components/Status';
 import { SymptomDeck } from '../../components/SymptomDeck';
 import { UndoToast, type ToastAction } from '../../components/UndoToast';
-import { Button, Card, Empty, ErrorBox, H, Loading, P, Row, Screen, errorMessage, TapText, SectionTitle } from '../../components/ui';
+import { Button, Card, Empty, ErrorBox, H, Loading, P, Row, Screen, errorMessage, TapText, SectionTitle, notify } from '../../components/ui';
 import { analyzePeriod, dayStatus } from '../../domain/analysis';
 import { loadAnalysisInput, loadDay, type Dose } from '../../domain/day';
 import { addDays, monthName } from '../../domain/time';
@@ -74,11 +74,11 @@ export default function Hoy() {
       void (status === 'tomada' ? Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success) : Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)).catch(() => undefined);
       show(status === 'tomada' ? `Anotado: tomó ${name}` : `Anotado: no tomó ${name}`, [{
         label: 'Deshacer',
-        onPress: () => { void store.remove('intake', profile.id, rec.id).then(() => { setMarked((m) => { const { [key]: _x, ...rest } = m; return rest; }); bump(); closeToast(); }).catch((e) => Alert.alert('No se pudo deshacer', errorMessage(e))); },
+        onPress: () => { void store.remove('intake', profile.id, rec.id).then(() => { setMarked((m) => { const { [key]: _x, ...rest } = m; return rest; }); bump(); closeToast(); }).catch((e) => notify('No se pudo deshacer', errorMessage(e))); },
       }]);
     } catch (e) {
       setMarked((m) => { const { [key]: _x, ...rest } = m; return rest; });
-      Alert.alert('No se pudo guardar', errorMessage(e));
+      notify('No se pudo guardar', errorMessage(e));
     }
   }
 
@@ -88,14 +88,14 @@ export default function Hoy() {
       setFlash(kind);
       bump();
       void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => undefined);
-      const setIntensity = (n: number) => { void store.update('episode', profile.id, ep.id, { intensity: n }).then(() => { bump(); closeToast(); }).catch((e) => Alert.alert('No se pudo guardar', errorMessage(e))); };
+      const setIntensity = (n: number) => { void store.update('episode', profile.id, ep.id, { intensity: n }).then(() => { bump(); closeToast(); }).catch((e) => notify('No se pudo guardar', errorMessage(e))); };
       show(`Anotado: ${kind}. ¿Qué tan fuerte fue?`, [
         { label: 'Leve', onPress: () => setIntensity(3) },
         { label: 'Media', onPress: () => setIntensity(6) },
         { label: 'Fuerte', onPress: () => setIntensity(9) },
-        { label: 'Deshacer', onPress: () => { void store.remove('episode', profile.id, ep.id).then(() => { bump(); closeToast(); }).catch((e) => Alert.alert('No se pudo deshacer', errorMessage(e))); } },
+        { label: 'Deshacer', onPress: () => { void store.remove('episode', profile.id, ep.id).then(() => { bump(); closeToast(); }).catch((e) => notify('No se pudo deshacer', errorMessage(e))); } },
       ]);
-    } catch (e) { Alert.alert('No se pudo guardar', errorMessage(e)); }
+    } catch (e) { notify('No se pudo guardar', errorMessage(e)); }
   }
 
   const doses = data?.doses ?? [];

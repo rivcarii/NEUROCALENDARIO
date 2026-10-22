@@ -1,7 +1,6 @@
 import { Stack, router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
-import { Alert } from 'react-native';
-import { Button, Chips, DateTimeField, ErrorBox, Loading, P, ProfileBar, Screen, TextField, confirmDestructive, errorMessage } from '../../components/ui';
+import { Button, Chips, DateTimeField, ErrorBox, Loading, P, ProfileBar, Screen, TextField, confirmDestructive, errorMessage, notify } from '../../components/ui';
 import { isoToLocalDateKey, formatTime, localDateKey, localToIso } from '../../domain/time';
 import type { Appointment } from '../../db/types';
 import { useActive, useSession } from '../../services/session';
@@ -39,7 +38,7 @@ function CitaEditor({ id, isNew, pid, initial, fecha }: { id: string; isNew: boo
   const [err, setErr] = useState<string | undefined>();
 
   async function save() {
-    if (activeProfile?.id !== pid) { Alert.alert('Perfil cambiado', 'No se guardó nada para evitar mezclar datos.'); return; }
+    if (activeProfile?.id !== pid) { notify('Perfil cambiado', 'No se guardó nada para evitar mezclar datos.'); return; }
     setBusy(true); setErr(undefined);
     try {
       const payload = { title, startsAt: localToIso(date, time), provider, location, notes, status, remindMinutesBefore: remind < 0 ? null : remind };
@@ -49,7 +48,7 @@ function CitaEditor({ id, isNew, pid, initial, fecha }: { id: string; isNew: boo
   }
   async function remove() {
     if (!(await confirmDestructive('¿Eliminar cita?', 'Se eliminará esta cita y su recordatorio.', 'Eliminar'))) return;
-    try { await store.remove('appointment', pid, id); bump(); router.back(); } catch (e) { Alert.alert('No se pudo eliminar', errorMessage(e)); }
+    try { await store.remove('appointment', pid, id); bump(); router.back(); } catch (e) { notify('No se pudo eliminar', errorMessage(e)); }
   }
 
   return (

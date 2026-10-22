@@ -1,12 +1,15 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useState, type ReactNode } from 'react';
-import { ActivityIndicator, Alert, Platform, Pressable, ScrollView, StyleSheet, TextInput, View, type StyleProp, type TextInputProps, type TextStyle, type ViewStyle } from 'react-native';
+import { ActivityIndicator, Alert, Platform, Pressable, ScrollView, StyleSheet, Switch, TextInput, View, type SwitchProps, type StyleProp, type TextInputProps, type TextStyle, type ViewStyle } from 'react-native';
 import { Text } from './Text';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { formatDateShort, formatTime, localDateKey, parseDateKey } from '../domain/time';
 import { MIN_TOUCH, TAB_BAR_SPACE, cardSurface, platform, radius, space, useIsDark, useTheme } from '../theme';
-import { font, size } from '../theme/type';
+import { SYSTEM_FONT, font, size } from '../theme/type';
+
+/** Relleno de campos de formulario (como `tertiarySystemFill` de iOS). */
+const fieldFill = (dark: boolean) => (dark ? '#7676803D' : '#7676801C');
 import Animated from 'react-native-reanimated';
 import { NeuroIcon } from './Brand';
 import { NeuroArt, type NeuroArtKind } from './NeuroArt';
@@ -98,14 +101,16 @@ export function Row({ children, style }: { children: ReactNode; style?: StylePro
 
 export function TextField({ label, error, hint, ...rest }: TextInputProps & { label: string; error?: string; hint?: string }) {
   const t = useTheme();
+  const dark = useIsDark();
   return (
     <View style={{ gap: 4 }}>
       <Text style={{ color: t.text, fontWeight: '600' }}>{label}</Text>
       <TextInput
         accessibilityLabel={label} placeholderTextColor={t.muted}
         style={{
-          minHeight: MIN_TOUCH, borderWidth: 1, borderColor: error ? t.danger : t.border, borderRadius: platform.inputRadius,
-          paddingHorizontal: space.md, paddingVertical: space.sm, color: t.text, backgroundColor: t.card, fontSize: size.body, fontFamily: font.body,
+          // Campo «relleno» de iOS: gris translúcido que se ve igual sobre fondo gris o sobre tarjeta blanca.
+          minHeight: MIN_TOUCH, borderWidth: error ? 1.5 : 0, borderColor: t.danger, borderRadius: platform.inputRadius, borderCurve: 'continuous',
+          paddingHorizontal: space.md, paddingVertical: space.sm, color: t.text, backgroundColor: fieldFill(dark), fontSize: size.body, fontFamily: SYSTEM_FONT,
           textAlignVertical: rest.multiline ? 'top' : 'center',
         }}
         {...rest}
@@ -144,6 +149,7 @@ export function DateTimeField({ label, date, time, onChange, withTime = true, op
   onChange: (date: string | null, time: string | null) => void;
 }) {
   const t = useTheme();
+  const dark = useIsDark();
   const [mode, setMode] = useState<'date' | 'time' | null>(null);
   const base = date ? parseDateKey(date) : new Date();
   if (time) { const [h, m] = time.split(':').map(Number); base.setHours(h ?? 0, m ?? 0); }
@@ -153,13 +159,13 @@ export function DateTimeField({ label, date, time, onChange, withTime = true, op
       <Text style={{ color: t.text, fontWeight: '600' }}>{label}</Text>
       <Row>
         <Pressable accessibilityRole="button" accessibilityLabel={`${label}: fecha`} onPress={() => show('date')}
-          style={{ minHeight: MIN_TOUCH, borderWidth: 1, borderColor: error ? t.danger : t.border, borderRadius: 10, paddingHorizontal: space.md, justifyContent: 'center', backgroundColor: t.card }}>
-          <Text style={{ color: t.text, fontSize: 16 }}>{date ? formatDateShort(date) : 'Elegir fecha'}</Text>
+          style={{ minHeight: MIN_TOUCH, borderWidth: error ? 1.5 : 0, borderColor: t.danger, borderRadius: 10, paddingHorizontal: space.md, justifyContent: 'center', backgroundColor: fieldFill(dark), borderCurve: 'continuous' }}>
+          <Text style={{ color: date ? t.primary : t.muted, fontSize: 17, fontWeight: '500' }}>{date ? formatDateShort(date) : 'Elegir fecha'}</Text>
         </Pressable>
         {withTime ? (
           <Pressable accessibilityRole="button" accessibilityLabel={`${label}: hora`} onPress={() => show('time')}
-            style={{ minHeight: MIN_TOUCH, borderWidth: 1, borderColor: error ? t.danger : t.border, borderRadius: 10, paddingHorizontal: space.md, justifyContent: 'center', backgroundColor: t.card }}>
-            <Text style={{ color: t.text, fontSize: 16 }}>{time ?? 'Hora'}</Text>
+            style={{ minHeight: MIN_TOUCH, borderWidth: error ? 1.5 : 0, borderColor: t.danger, borderRadius: 10, paddingHorizontal: space.md, justifyContent: 'center', backgroundColor: fieldFill(dark), borderCurve: 'continuous' }}>
+            <Text style={{ color: time ? t.primary : t.muted, fontSize: 17, fontWeight: '500' }}>{time ?? 'Hora'}</Text>
           </Pressable>
         ) : null}
         {optional && date ? <Button title="Quitar" kind="secondary" onPress={() => onChange(null, null)} /> : null}
@@ -208,6 +214,15 @@ export function ErrorBox({ message, onRetry }: { message: string; onRetry?: () =
   );
 }
 
+/** Aviso simple que funciona en todas las plataformas (en web `Alert.alert` no muestra nada). */
+export function notify(title: string, message?: string): void {
+  if (Platform.OS === 'web') {
+    if (typeof window !== 'undefined' && typeof window.alert === 'function') window.alert(message ? `${title}\n\n${message}` : title);
+    return;
+  }
+  Alert.alert(title, message);
+}
+
 export function confirmDestructive(title: string, message: string, confirmLabel: string): Promise<boolean> {
   if (Platform.OS === 'web') {
     // Alert.alert no muestra nada en web (solo se usa en las pruebas de humo en navegador).
@@ -221,11 +236,18 @@ export function confirmDestructive(title: string, message: string, confirmLabel:
   });
 }
 
+/** Indica de quién son los datos en pantallas secundarias (pastilla con iniciales, estilo Apple). */
 export function ProfileBar({ name, color, label = 'Perfil' }: { name: string; color: string; label?: string }) {
   const t = useTheme();
+  const ini = name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]!.toUpperCase()).join('');
   return (
-    <View accessibilityRole="summary" accessibilityLabel={`${label}: ${name}`} style={{ backgroundColor: color, paddingVertical: 6, paddingHorizontal: space.lg }}>
-      <Text style={{ color: '#FFFFFF', fontWeight: '700' }}>{label}: {name}</Text>
+    <View accessibilityRole="summary" accessibilityLabel={`${label}: ${name}`} style={{ backgroundColor: t.bg, paddingHorizontal: space.lg, paddingTop: space.sm, alignItems: 'center' }}>
+      <View style={{ width: '100%', maxWidth: MAX_CONTENT, flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+        <View style={{ width: 26, height: 26, borderRadius: 13, backgroundColor: color, alignItems: 'center', justifyContent: 'center' }}>
+          <Text style={{ color: '#FFFFFF', fontSize: 11, fontWeight: '700' }}>{ini}</Text>
+        </View>
+        <Text style={{ color: t.muted, fontSize: 14 }}>{label}: <Text style={{ color: t.text, fontWeight: '600', fontSize: 14 }}>{name}</Text></Text>
+      </View>
     </View>
   );
 }
@@ -281,5 +303,19 @@ export function Segmented<T extends string | number>({ options, value, onChange 
         );
       })}
     </View>
+  );
+}
+
+/** Interruptor con los colores de iOS (en web, el de serie es verde azulado de Material). */
+export function Toggle(props: SwitchProps) {
+  const dark = useIsDark();
+  return (
+    <Switch
+      trackColor={{ true: '#34C759', false: dark ? '#39393D' : '#E9E9EA' }}
+      thumbColor="#FFFFFF"
+      ios_backgroundColor={dark ? '#39393D' : '#E9E9EA'}
+      {...({ activeThumbColor: '#FFFFFF' } as object)}
+      {...props}
+    />
   );
 }

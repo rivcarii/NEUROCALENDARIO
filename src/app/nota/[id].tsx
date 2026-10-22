@@ -1,7 +1,6 @@
 import { Stack, router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
-import { Alert } from 'react-native';
-import { Button, Chips, DateTimeField, ErrorBox, Loading, P, ProfileBar, Screen, TextField, confirmDestructive, errorMessage } from '../../components/ui';
+import { Button, Chips, DateTimeField, ErrorBox, Loading, P, ProfileBar, Screen, TextField, confirmDestructive, errorMessage, notify } from '../../components/ui';
 import { localDateKey } from '../../domain/time';
 import type { Note } from '../../db/types';
 import { useActive, useSession } from '../../services/session';
@@ -29,7 +28,7 @@ function NotaEditor({ id, isNew, pid, initial }: { id: string; isNew: boolean; p
   const [busy, setBusy] = useState(false);
 
   async function save() {
-    if (activeProfile?.id !== pid) { Alert.alert('Perfil cambiado', 'No se guardó nada para evitar mezclar datos.'); return; }
+    if (activeProfile?.id !== pid) { notify('Perfil cambiado', 'No se guardó nada para evitar mezclar datos.'); return; }
     setBusy(true); setErr(undefined);
     try {
       const payload = { body, noteDate: date, authorRole: role };
@@ -39,7 +38,7 @@ function NotaEditor({ id, isNew, pid, initial }: { id: string; isNew: boolean; p
   }
   async function remove() {
     if (!(await confirmDestructive('¿Eliminar nota?', 'Se eliminará esta nota.', 'Eliminar'))) return;
-    try { await store.remove('note', pid, id); bump(); router.back(); } catch (e) { Alert.alert('No se pudo eliminar', errorMessage(e)); }
+    try { await store.remove('note', pid, id); bump(); router.back(); } catch (e) { notify('No se pudo eliminar', errorMessage(e)); }
   }
   return (
     <>

@@ -173,6 +173,31 @@ ok(head === '%PDF-' && dl.suggestedFilename().endsWith('.pdf'), 'el PDF se gener
 await page.getByText(/El PDF está listo/).waitFor();
 await shot('pdf-listo');
 
+// respaldo cifrado: crear (descarga) y recuperar como persona nueva
+await page.goto(BASE, { waitUntil: 'networkidle' });
+await page.getByText('Anotar ahora').first().waitFor({ timeout: 20000 });
+await page.locator('text="Más" >> visible=true').first().click();
+await page.getByText('Respaldo de sus datos', { exact: true }).click();
+await page.getByRole('button', { name: 'Crear y guardar respaldo' }).waitFor();
+await page.getByLabel('Contraseña del respaldo').first().fill('corta');
+await page.getByLabel('Repita la contraseña').fill('corta');
+await page.getByRole('button', { name: 'Crear y guardar respaldo' }).click();
+await page.getByText(/La contraseña es muy corta/).waitFor();
+ok(true, 'respaldo: avisa en pantalla si la contraseña es corta');
+await page.getByLabel('Contraseña del respaldo').first().fill('clave-ficticia-123');
+await page.getByLabel('Repita la contraseña').fill('clave-ficticia-123');
+const [bk] = await Promise.all([page.waitForEvent('download', { timeout: 60000 }), page.getByRole('button', { name: 'Crear y guardar respaldo' }).click()]);
+const bkPath = `${SHOTS}/respaldo-e2e.ncbackup`;
+await bk.saveAs(bkPath);
+await page.getByText(/Respaldo creado/).waitFor();
+await shot('respaldo');
+ok(bk.suggestedFilename().endsWith('.ncbackup'), 'respaldo creado y descargado (' + bk.suggestedFilename() + ')');
+await page.getByLabel('Contraseña del respaldo').nth(1).fill('clave-ficticia-123');
+const [chooser] = await Promise.all([page.waitForEvent('filechooser', { timeout: 15000 }), page.getByRole('button', { name: 'Elegir el archivo y recuperar' }).click()]);
+await chooser.setFiles(bkPath);
+await page.getByText(/Respaldo recuperado/).first().waitFor({ timeout: 60000 });
+ok(true, 'respaldo recuperado como persona nueva');
+
 // eliminación con confirmación
 await page.goto(BASE, { waitUntil: 'networkidle' });
 await page.getByText('Anotar ahora').first().waitFor({ timeout: 20000 });
@@ -192,5 +217,21 @@ await page.locator('text="Síntomas" >> visible=true').first().click();
 await page.locator('text=Mareo con aura (ficticio) >> visible=true').first().waitFor();
 ok(true, 'eliminar un perfil no afecta los datos del otro');
 
+// recorrido visual de pantallas secundarias (solo capturas)
+for (const name of ['Mis citas', 'Estudios y resultados', 'Notas', 'Personas', 'Privacidad y ajustes', 'Resumen para el médico', 'Acceso familiar', 'Acerca de y avisos']) {
+  await page.goto(BASE, { waitUntil: 'networkidle' });
+  await page.getByText('Anotar ahora').first().waitFor({ timeout: 20000 });
+  await page.locator('text="Más" >> visible=true').first().click();
+  await page.getByText(name, { exact: true }).click();
+  await page.waitForTimeout(900);
+  await shot('tour-' + name.split(' ')[0].toLowerCase());
+}
+await page.goto(BASE, { waitUntil: 'networkidle' });
+await page.getByText('Anotar ahora').first().waitFor({ timeout: 20000 });
+for (const tab of ['Síntomas', 'Medicinas']) {
+  await page.locator(`text="${tab}" >> visible=true`).first().click();
+  await page.waitForTimeout(900);
+  await shot('tour-tab-' + tab.toLowerCase());
+}
 console.log('ERRORES DE CONSOLA:', errors.length ? '\n' + errors.slice(0, 10).join('\n') : 'ninguno');
 await browser.close();

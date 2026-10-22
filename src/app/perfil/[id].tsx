@@ -1,7 +1,6 @@
 import { Stack, router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
-import { Alert, Switch } from 'react-native';
-import { Button, Chips, P, Row, Screen, TextField, confirmDestructive, errorMessage } from '../../components/ui';
+import { Button, Chips, P, Row, Screen, TextField, confirmDestructive, errorMessage, notify, Toggle } from '../../components/ui';
 import { PROFILE_COLORS } from '../../domain/labels';
 import { deleteProfileFiles } from '../../services/files';
 import { useSession } from '../../services/session';
@@ -39,7 +38,7 @@ export default function PerfilForm() {
       try { deleteProfileFiles(existing.id); } catch { /* sin archivos */ }
       await refreshProfiles();
       router.replace('/');
-    } catch (e) { Alert.alert('No se pudo eliminar', errorMessage(e)); }
+    } catch (e) { notify('No se pudo eliminar', errorMessage(e)); }
   }
 
   return (
@@ -50,7 +49,7 @@ export default function PerfilForm() {
         <TextField label="¿Qué es suya esa persona? (mamá, yo…)" value={rel} onChangeText={setRel} />
         <TextField label="Año de nacimiento (opcional)" value={year} onChangeText={setYear} keyboardType="number-pad" />
         <Chips label="Color de identificación" options={PROFILE_COLORS.map((c) => ({ value: c, label: c }))} value={color} onChange={setColor} />
-        <Row><Switch accessibilityLabel="Perfil principal" value={primary} onValueChange={setPrimary} /><P>Persona principal de seguimiento</P></Row>
+        <Row><Toggle accessibilityLabel="Perfil principal" value={primary} onValueChange={setPrimary} /><P>Persona principal de seguimiento</P></Row>
         <P muted small>Registre datos de otra persona solo con su conocimiento y autorización.</P>
         {isNew ? <P muted small>Al crearlo pasará a ser el perfil activo. La franja de color de la parte superior siempre indica de quién son los datos que ve.</P> : null}
         <Button title="Guardar" onPress={save} loading={busy} />

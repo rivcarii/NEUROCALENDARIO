@@ -1,7 +1,6 @@
 import { Stack, router } from 'expo-router';
 import { useState } from 'react';
-import { Alert, Switch } from 'react-native';
-import { Button, Card, H, P, Row, Screen, TextField, confirmDestructive, errorMessage } from '../components/ui';
+import { Button, Card, H, P, Row, Screen, TextField, confirmDestructive, errorMessage, notify, Toggle } from '../components/ui';
 import { deleteProfileFiles } from '../services/files';
 import { APP_BUILD, checkForUpdate, updatesSupported } from '../services/updates';
 import { useSession } from '../services/session';
@@ -25,8 +24,8 @@ export default function Ajustes() {
         <Card>
           <H level={2}>Bloqueo de la app</H>
           <Row>
-            <Switch accessibilityLabel="Bloquear con huella, rostro o código" value={appLockEnabled}
-              onValueChange={async (v) => { const r = await setAppLock(v); if (!r.ok && r.message) Alert.alert('No se pudo cambiar', r.message); }} />
+            <Toggle accessibilityLabel="Bloquear con huella, rostro o código" value={appLockEnabled}
+              onValueChange={async (v) => { const r = await setAppLock(v); if (!r.ok && r.message) notify('No se pudo cambiar', r.message); }} />
             <P>Pedir huella, rostro o código al abrir</P>
           </Row>
           <P muted small>Protege la entrada a la aplicación. Sus datos quedan guardados solo en este teléfono; active también el bloqueo de pantalla del teléfono para mayor seguridad.</P>
@@ -34,7 +33,7 @@ export default function Ajustes() {
         <Card>
           <H level={2}>Avisos</H>
           <Row>
-            <Switch accessibilityLabel="Mostrar detalles en notificaciones" value={data?.details ?? false}
+            <Toggle accessibilityLabel="Mostrar detalles en notificaciones" value={data?.details ?? false}
               onValueChange={async (v) => { await store?.setSetting('notif_details', v ? '1' : '0'); bump(); reload(); }} />
             <P>Mostrar el nombre de la medicina o la cita en la pantalla bloqueada</P>
           </Row>
@@ -60,7 +59,7 @@ export default function Ajustes() {
             try {
               for (const p of profiles) { await store.deleteProfile(p.id); try { deleteProfileFiles(p.id); } catch { /* sin archivos */ } }
               await refreshProfiles(); router.replace('/');
-            } catch (e) { Alert.alert('No se pudo eliminar', errorMessage(e)); }
+            } catch (e) { notify('No se pudo eliminar', errorMessage(e)); }
           }} />
         </Card>
       </Screen>

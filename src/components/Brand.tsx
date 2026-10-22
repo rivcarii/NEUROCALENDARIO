@@ -1,3 +1,4 @@
+import { useId } from 'react';
 import { View } from 'react-native';
 import Svg, { Defs, LinearGradient, Path, Stop } from 'react-native-svg';
 import { Text } from './Text';
@@ -12,7 +13,8 @@ import { useTheme } from '../theme';
 export function Isotipo({ size = 40, variant = 'tile', color }: { size?: number; variant?: 'tile' | 'color' | 'mono'; color?: string }) {
   const ink = variant === 'tile' ? '#FFFFFF' : color ?? BRAND.indigo;
   const accent = variant === 'tile' ? '#FFFFFF' : variant === 'color' ? BRAND.teal : ink;
-  const id = `nc-g-${variant}`;
+  // id único por instancia: en web varios SVG con el mismo id de degradado se pisan (y el icono sale sin fondo)
+  const id = `nc-g-${useId().replace(/[^a-zA-Z0-9]/g, '')}`;
   return (
     <Svg width={size} height={size} viewBox="0 0 100 100" accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
       {variant === 'tile' ? (

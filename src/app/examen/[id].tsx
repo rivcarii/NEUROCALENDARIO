@@ -1,7 +1,6 @@
 import { Stack, router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
-import { Alert } from 'react-native';
-import { Button, Chips, DateTimeField, ErrorBox, Loading, P, ProfileBar, Screen, TextField, confirmDestructive, errorMessage } from '../../components/ui';
+import { Button, Chips, DateTimeField, ErrorBox, Loading, P, ProfileBar, Screen, TextField, confirmDestructive, errorMessage, notify } from '../../components/ui';
 import { localDateKey } from '../../domain/time';
 import type { Exam } from '../../db/types';
 import { useActive, useSession } from '../../services/session';
@@ -34,7 +33,7 @@ function ExamenEditor({ id, isNew, pid, initial }: { id: string; isNew: boolean;
   const [busy, setBusy] = useState(false);
 
   async function save() {
-    if (activeProfile?.id !== pid) { Alert.alert('Perfil cambiado', 'No se guardó nada para evitar mezclar datos.'); return; }
+    if (activeProfile?.id !== pid) { notify('Perfil cambiado', 'No se guardó nada para evitar mezclar datos.'); return; }
     setBusy(true); setErr(undefined);
     try {
       const payload = { name, kind, examDate: date, status, resultText: result, resultSource: source, requestedBy, notes };
@@ -44,7 +43,7 @@ function ExamenEditor({ id, isNew, pid, initial }: { id: string; isNew: boolean;
   }
   async function remove() {
     if (!(await confirmDestructive('¿Borrar este estudio?', 'Se borrará este estudio. Los documentos que adjuntó se conservan.', 'Eliminar'))) return;
-    try { await store.remove('exam', pid, id); bump(); router.back(); } catch (e) { Alert.alert('No se pudo eliminar', errorMessage(e)); }
+    try { await store.remove('exam', pid, id); bump(); router.back(); } catch (e) { notify('No se pudo eliminar', errorMessage(e)); }
   }
 
   return (

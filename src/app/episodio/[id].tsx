@@ -2,10 +2,9 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Stack, router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import { Alert } from 'react-native';
 import { Text } from '../../components/Text';
 import { z } from 'zod';
-import { Button, Card, Chips, DateTimeField, ErrorBox, Loading, P, ProfileBar, Screen, TextField, confirmDestructive, errorMessage } from '../../components/ui';
+import { Button, Card, Chips, DateTimeField, ErrorBox, Loading, P, ProfileBar, Screen, TextField, confirmDestructive, errorMessage, notify } from '../../components/ui';
 import { ASSOCIATED_SYMPTOMS, EPISODE_KINDS, RECOVERY_LABEL } from '../../domain/labels';
 import { RECOVERY } from '../../domain/schemas';
 import { durationMinutes, formatDuration, isoToLocalDateKey, localToIso, formatTime } from '../../domain/time';
@@ -80,7 +79,7 @@ export default function EpisodioForm() {
 
   const onSubmit = handleSubmit(async (f) => {
     if (activeProfile?.id !== lockedProfile) {
-      Alert.alert('Perfil cambiado', 'El perfil activo cambió mientras editaba. No se guardó nada para evitar mezclar datos. Vuelva a abrir el formulario.');
+      notify('Perfil cambiado', 'El perfil activo cambió mientras editaba. No se guardó nada para evitar mezclar datos. Vuelva a abrir el formulario.');
       return;
     }
     setBusy(true);
@@ -99,13 +98,13 @@ export default function EpisodioForm() {
       bump();
       router.back();
     } catch (e) {
-      Alert.alert('No se pudo guardar', errorMessage(e));
+      notify('No se pudo guardar', errorMessage(e));
     } finally { setBusy(false); }
   });
 
   async function remove() {
     if (!(await confirmDestructive('¿Borrar este síntoma?', 'Se borrará de forma permanente. No se puede deshacer.', 'Eliminar'))) return;
-    try { await store.remove('episode', lockedProfile, id); bump(); router.back(); } catch (e) { Alert.alert('No se pudo eliminar', errorMessage(e)); }
+    try { await store.remove('episode', lockedProfile, id); bump(); router.back(); } catch (e) { notify('No se pudo eliminar', errorMessage(e)); }
   }
 
   if (loading && !data) return <Loading />;
