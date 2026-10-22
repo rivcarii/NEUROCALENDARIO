@@ -3,6 +3,7 @@
 // porque la app compara su versión con la de version.json para avisar de actualizaciones.
 import { readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
+import { createHash } from 'node:crypto';
 
 const dist = process.argv[2] ?? 'dist';
 const build = process.env.EXPO_PUBLIC_APP_BUILD;
@@ -23,6 +24,13 @@ const files = [];
 
 // index.html de la SPA: manifiesto, iconos y metadatos de instalación (con «output: single» Expo no usa +html).
 const base = process.env.EXPO_BASE_URL ?? '';
+// Huella de los iconos: si cambia el logo, cambia la URL y navegadores/teléfonos no reutilizan el icono viejo de su caché.
+const ICONS = ['apple-touch-icon.png', 'icon-192.png', 'icon-512.png', 'icon-maskable-512.png'];
+const iconV = createHash('sha1').update(Buffer.concat(ICONS.map((f) => readFileSync(join(dist, f))))).digest('hex').slice(0, 8);
+const manifestPath = join(dist, 'manifest.webmanifest');
+const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
+manifest.icons = manifest.icons.map((i) => ({ ...i, src: `${i.src.split('?')[0]}?v=${iconV}` }));
+writeFileSync(manifestPath, JSON.stringify(manifest, null, 2) + '\n');
 const indexPath = join(dist, 'index.html');
 let html = readFileSync(indexPath, 'utf8');
 // Ajustes de plataforma móvil (iOS Safari / Android Chrome) para que la web se sienta como una app instalada.
@@ -51,9 +59,9 @@ const heightFix = `(function(){var d=document.documentElement;function f(){var h
 const head = [
   `<script>${heightFix}</script>`,
   `<style id="nc-mobile">${mobileCss}</style>`,
-  `<link rel="manifest" href="${base}/manifest.webmanifest">`,
-  `<link rel="apple-touch-icon" href="${base}/apple-touch-icon.png">`,
-  `<link rel="icon" href="${base}/icon-192.png">`,
+  `<link rel="manifest" href="${base}/manifest.webmanifest?v=${iconV}">`,
+  `<link rel="apple-touch-icon" href="${base}/apple-touch-icon.png?v=${iconV}">`,
+  `<link rel="icon" href="${base}/icon-192.png?v=${iconV}">`,
   '<meta name="theme-color" media="(prefers-color-scheme: light)" content="#F2F2F7">',
   '<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000000">',
   '<meta name="description" content="Diario y calendario de síntomas, medicinas y citas.">',
@@ -114,7 +122,9 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(caches.match(new URL('index.html', SCOPE).href).then((r) => r || fetch(req)));
     return;
   }
-  event.respondWith(caches.match(req).then((hit) => hit || fetch(req)));
+  // iconos y manifiesto llevan ?v=<huella>: se buscan en la caché sin la consulta
+  const ignoreSearch = /\\.(png|webmanifest)$/.test(url.pathname);
+  event.respondWith(caches.match(req, { ignoreSearch }).then((hit) => hit || fetch(req)));
 });
 `;
 writeFileSync(join(dist, 'sw.js'), sw);
