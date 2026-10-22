@@ -66,7 +66,7 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint src tests",
     "check": "npm run typecheck && npm run lint && npm test",
-    "test:tz": "for tz in UTC America/Bogota Europe/Madrid Pacific/Auckland Asia/Kolkata; do TZ=$tz jest --testPathIgnorePatterns tests/ui || exit 1; done",
+    "test:tz": "for tz in UTC America/Bogota Europe/Madrid Pacific/Auckland Asia/Kolkata; do TZ=$tz jest --testPathIgnorePatterns tests/ui push-worker || exit 1; done",
     "test:rls": "bash supabase/tests/run.sh",
     "test:pdf": "bash scripts/verify-report-pdf.sh",
     "test:e2e": "bash e2e/run.sh",
@@ -76,7 +76,8 @@
   "jest": {
     "preset": "jest-expo",
     "testPathIgnorePatterns": [
-      "/node_modules/"
+      "/node_modules/",
+      "<rootDir>/push-worker/"
     ],
     "moduleNameMapper": {
       "^@/(.*)$": "<rootDir>/src/$1"

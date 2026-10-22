@@ -9,6 +9,7 @@ import { NeuroArt } from '../components/NeuroArt';
 import { UpdatePrompt } from '../components/UpdatePrompt';
 import { Button, Card, H, P, Screen, TextField } from '../components/ui';
 import { configureNotifications, rescheduleAll } from '../services/notifications';
+import { syncPush } from '../services/push';
 import { SessionProvider, useSession } from '../services/session';
 import { useTheme } from '../theme';
 import { SYSTEM_FONT } from '../theme/type';
@@ -37,6 +38,8 @@ function Gate() {
       try {
         const details = (await store.getSetting('notif_details')) === '1';
         const r = await rescheduleAll(store, details);
+        // Versión web: reenvía al servicio de avisos las horas de los próximos recordatorios (si están activados).
+        if (r.unsupported) await syncPush(store, details).catch(() => undefined);
         await store.setSetting('reminder_status', r.unsupported ? 'web' : r.permission ? `ok:${r.scheduled}` : 'sin_permiso');
       } catch {
         await store.setSetting('reminder_status', 'error').catch(() => undefined);

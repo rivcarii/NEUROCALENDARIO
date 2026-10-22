@@ -108,6 +108,33 @@ self.addEventListener('activate', (event) => {
   );
 });
 
+// Avisos con la app cerrada (Web Push). El servicio solo manda un identificador; el texto se busca aquí, en el dispositivo.
+self.addEventListener('push', (event) => {
+  let data = {};
+  try { data = event.data ? event.data.json() : {}; } catch (e) { data = {}; }
+  event.waitUntil((async () => {
+    let title = 'NeuroCalendario';
+    let body = 'Tiene un recordatorio pendiente.';
+    if (data.ref === 'prueba') body = 'Aviso de prueba: los recordatorios llegan a este teléfono.';
+    else {
+      try {
+        const c = await caches.open('ncpush-textos');
+        const r = await c.match(new URL('__push-texts.json', SCOPE).href);
+        const t = r ? (await r.json())[data.ref] : null;
+        if (t) { title = t.title; body = t.body; }
+      } catch (e) { /* texto genérico */ }
+    }
+    await self.registration.showNotification(title, { body, icon: new URL('icon-192.png', SCOPE).href, badge: new URL('icon-192.png', SCOPE).href, tag: data.ref || 'nc', data: { url: SCOPE } });
+  })());
+});
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  event.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((ws) => {
+    for (const w of ws) if ('focus' in w) return w.focus();
+    return self.clients.openWindow(SCOPE);
+  }));
+});
+
 // La app decide cuándo activar la versión nueva (cuando la persona pulsa «Actualizar ahora»).
 self.addEventListener('message', (event) => { if (event.data === 'skipWaiting') self.skipWaiting(); });
 

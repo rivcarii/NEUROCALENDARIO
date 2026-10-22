@@ -49,9 +49,22 @@ describe('higiene del repositorio', () => {
       expect(`${f}:${/service_role/i.test(txt)}`).toBe(`${f}:false`);
       // Única excepción: updates.ts consulta version.json del propio sitio (GET sin datos) para avisar de versiones nuevas.
       const net = txt.replace(/fetch\(`\$\{BASE\}\/version\.json\?t=\$\{Date\.now\(\)\}`, \{ cache: 'no-store' \}\)/g, '');
+      // Segunda excepción: push.ts habla SOLO con el servicio de avisos propio (PUSH_URL) — ver prueba siguiente.
+      if (f.endsWith(join('services', 'push.ts'))) continue;
       expect(`${f}:${/\b(fetch|XMLHttpRequest|axios)\s*\(/.test(net)}`).toBe(`${f}:false`);
       expect(`${f}:${/https?:\/\//.test(txt)}`).toBe(`${f}:false`);
     }
+  });
+
+  it('los avisos web solo envían horas e identificadores opacos al servicio propio', () => {
+    const txt = readFileSync(join(ROOT, 'src', 'services', 'push.ts'), 'utf8');
+    const calls = txt.match(/fetch\(([^,)]+)/g) ?? [];
+    expect(calls.length).toBeGreaterThan(0);
+    for (const c of calls) expect(c).toMatch(/fetch\(`\$\{PUSH_URL\}/);
+    expect(txt).not.toMatch(/https?:\/\//);
+    // lo único que viaja por aviso es { at, ref }; el texto se guarda en el dispositivo
+    expect(txt).toMatch(/return \{ at: Date\.parse\(p\.r\.fireAt\), ref \};/);
+    expect(txt).toMatch(/post\('\/sync', \{ subscription: \{ endpoint: json\.endpoint, keys: json\.keys \}, due \}\)/);
   });
 
   it('el código no escribe en logs (evita datos médicos en registros)', () => {

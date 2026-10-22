@@ -1,0 +1,21 @@
+# Servicio de avisos de NeuroCalendario (Cloudflare Workers, plan gratuito).
+# Se publica desde GitHub Actions (.github/workflows/publicar-web.yml) con los secretos CLOUDFLARE_API_TOKEN y CLOUDFLARE_ACCOUNT_ID.
+name = "neurocalendario-push"
+main = "src/index.js"
+compatibility_date = "2025-06-01"
+workers_dev = true
+
+[vars]
+# Orígenes que pueden registrar avisos (la app publicada y el servidor local de pruebas).
+ALLOWED_ORIGINS = "https://rivcarii.github.io,http://localhost:8197"
+# «sub» de VAPID: identifica al remitente ante Apple/Google/Mozilla (sin correo personal).
+VAPID_SUBJECT = "https://rivcarii.github.io/NEUROCALENDARIO/"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "neurocalendario-push"
+database_id = "a52c367b-e7ab-4e68-a4f9-1f89d84c53a1"
+
+# Revisa cada minuto si hay avisos que enviar.
+[triggers]
+crons = ["* * * * *"]

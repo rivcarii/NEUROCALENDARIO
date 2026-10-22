@@ -23,3 +23,6 @@ Por defecto muestran solo «Tiene un recordatorio pendiente/de cita». El usuari
 
 ## Esta app no es
 Un dispositivo médico, un servicio de diagnóstico ni de emergencias. Los informes y estadísticas son descriptivos.
+
+## Avisos web (opcional)
+Si se activan los avisos en la versión web, el servicio de avisos de NeuroCalendario (Cloudflare) recibe solo la dirección push del navegador y las horas de los recordatorios con identificadores opacos. Ningún dato de salud ni nombre sale del teléfono. Detalles en `AVISOS.md`.

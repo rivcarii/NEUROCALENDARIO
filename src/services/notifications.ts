@@ -2,7 +2,8 @@
 import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
 import type { Store } from '../db/store';
-import { notificationContent, planReminders, type PlannedReminder } from '../domain/reminders';
+import { notificationContent } from '../domain/reminders';
+import { collectPlanned } from './planner';
 import { newId } from './ids';
 
 const CHANNEL = 'recordatorios';
@@ -38,22 +39,9 @@ export interface RescheduleResult {
 export async function rescheduleAll(store: Store, showDetails: boolean, now = new Date()): Promise<RescheduleResult> {
   if (Platform.OS === 'web') return { scheduled: 0, permission: true, unsupported: true };
   await Notifications.cancelAllScheduledNotificationsAsync();
-  const profiles = await store.listProfiles();
-  for (const p of profiles) await store.db.run('DELETE FROM reminders WHERE profile_id = ?', [p.id]);
+  for (const p of await store.listProfiles()) await store.db.run('DELETE FROM reminders WHERE profile_id = ?', [p.id]);
 
-  const perProfile: { profileId: string; r: PlannedReminder; label: string }[] = [];
-  for (const p of profiles) {
-    const [medications, schedules, appointments] = await Promise.all([
-      store.list('medication', p.id), store.list('schedule', p.id), store.list('appointment', p.id),
-    ]);
-    const names = new Map(medications.map((m) => [m.id, m.name]));
-    const schedMed = new Map(schedules.map((s) => [s.id, names.get(s.medicationId) ?? '']));
-    const aptTitle = new Map(appointments.map((a) => [a.id, a.title]));
-    for (const r of planReminders({ now, medications, schedules, appointments })) {
-      perProfile.push({ profileId: p.id, r, label: (r.kind === 'cita' ? aptTitle.get(r.refId) : schedMed.get(r.refId)) ?? '' });
-    }
-  }
-  perProfile.sort((a, b) => a.r.fireAt.localeCompare(b.r.fireAt));
+  const perProfile = await collectPlanned(store, now);
   const batch = perProfile.slice(0, 60);
   if (batch.length === 0) return { scheduled: 0, permission: true };
 

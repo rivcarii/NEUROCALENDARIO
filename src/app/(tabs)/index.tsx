@@ -18,6 +18,7 @@ import { loadAnalysisInput, loadDay, type Dose } from '../../domain/day';
 import { addDays, monthName } from '../../domain/time';
 import { INTAKE_LABEL } from '../../domain/labels';
 import { durationMinutes, formatDateLong, formatDuration, formatTime, localDateKey } from '../../domain/time';
+import { pushState, type PushState } from '../../services/push';
 import { useActive, useSession } from '../../services/session';
 import { useData } from '../../services/useData';
 import { platform, space, useTheme } from '../../theme';
@@ -50,6 +51,8 @@ export default function Hoy() {
     const a = analyzePeriod(input, addDays(today, -6), today, now);
     return { a, todayStatus: dayStatus(today, input, today) };
   }, [today]);
+  const [push, setPush] = useState<PushState | null>(null);
+  useEffect(() => { void pushState().then(setPush).catch(() => undefined); }, []);
   const [toast, setToast] = useState<Toast | null>(null);
   const closeToast = useCallback(() => setToast(null), []);
   // Marca inmediata (antes de que termine de guardar y recargar): así se ve en el acto que «sí se marcó».
@@ -172,6 +175,16 @@ export default function Hoy() {
             </Row>
           </Card>
         </Reveal>
+      ) : null}
+
+      {push === 'apagado' || push === 'instalar_ios' ? (
+        <Card style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+          <View style={{ flex: 1, gap: 2 }}>
+            <Text style={{ color: t.text, fontWeight: '600' }}>Recibir avisos en este teléfono</Text>
+            <P muted small>{push === 'instalar_ios' ? 'Primero agregue la app a la pantalla de inicio.' : 'Medicinas y citas, aunque la app esté cerrada.'}</P>
+          </View>
+          <Button title={push === 'instalar_ios' ? 'Cómo' : 'Activar'} kind="secondary" onPress={() => router.push(push === 'instalar_ios' ? '/instalar' : '/ajustes')} />
+        </Card>
       ) : null}
 
       {next ? (

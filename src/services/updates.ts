@@ -108,8 +108,11 @@ export function startUpdates(): void {
     setInterval(() => void checkForUpdate(), CHECK_MS);
   }).catch(() => undefined);
   let reloaded = false;
+  // Primera visita: el service worker toma el control sin que haya versión anterior; recargar ahí borraría lo
+  // que la persona esté escribiendo (p. ej. la bienvenida). Solo se recarga al cambiar de una versión a otra.
+  const hadController = !!navigator.serviceWorker.controller;
   navigator.serviceWorker.addEventListener('controllerchange', () => {
-    if (reloaded) return;
+    if (reloaded || !hadController) return;
     reloaded = true;
     location.reload();
   });

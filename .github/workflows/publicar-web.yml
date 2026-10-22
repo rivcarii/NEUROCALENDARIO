@@ -16,13 +16,31 @@ concurrency:
 jobs:
   publicar:
     runs-on: ubuntu-latest
+    env:
+      # Servicio de avisos (push-worker/). Secretos del repositorio: Settings → Secrets and variables → Actions.
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: { node-version: 22, cache: npm }
       - run: npm ci --legacy-peer-deps
       - run: npm run typecheck && npm test -- --forceExit
+      - name: Probar el cifrado de los avisos
+        run: cd push-worker && npm ci && npm test
+      - name: Publicar el servicio de avisos (Cloudflare Workers)
+        id: push
+        if: ${{ env.CLOUDFLARE_API_TOKEN != '' }}
+        run: |
+          cd push-worker
+          npx --yes wrangler@4 d1 execute neurocalendario-push --remote --file schema.sql
+          npx --yes wrangler@4 deploy | tee deploy.log
+          url=$(grep -oE 'https://[a-zA-Z0-9.-]+\.workers\.dev' deploy.log | head -1)
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+          echo "Servicio de avisos: $url"
       - name: Compilar la web instalable en docs/
+        env:
+          EXPO_PUBLIC_PUSH_URL: ${{ steps.push.outputs.url }}
         run: EXPO_BASE_URL=/${{ github.event.repository.name }} ./scripts/build-web.sh docs
       - name: Guardar docs/ en main
         run: |

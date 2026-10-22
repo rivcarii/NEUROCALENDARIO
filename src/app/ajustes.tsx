@@ -1,10 +1,12 @@
 import { Stack, router } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { Platform } from 'react-native';
 import { Button, Card, H, P, Row, Screen, TextField, confirmDestructive, errorMessage, notify, Toggle } from '../components/ui';
 import { deleteProfileFiles } from '../services/files';
 import { APP_BUILD, checkForUpdate, updatesSupported } from '../services/updates';
 import { useSession } from '../services/session';
 import { useData } from '../services/useData';
+import { disablePush, enablePush, pushState, syncPush, testPush, type PushState } from '../services/push';
 
 export default function Ajustes() {
   const { store, profiles, appLockEnabled, setAppLock, refreshProfiles, bump } = useSession();
@@ -15,7 +17,7 @@ export default function Ajustes() {
   const [wipe, setWipe] = useState('');
 
   const statusText = (s: string) =>
-    s.startsWith('ok:') ? `${s.slice(3)} recordatorio(s) programado(s)` : s === 'web' ? 'Versión web: los avisos solo suenan con la app abierta. Para avisos con la app cerrada instale la app de Android/iPhone.' : s === 'sin_permiso' ? 'Sin permiso de notificaciones: active el permiso en los ajustes del teléfono.' : s === 'error' ? 'Error al programar recordatorios' : 'Aún sin programar';
+    s.startsWith('ok:') ? `${s.slice(3)} recordatorio(s) programado(s)` : s === 'web' ? 'Versión web: use «Avisos en este teléfono» (abajo) para recibirlos con la app cerrada.' : s === 'sin_permiso' ? 'Sin permiso de notificaciones: active el permiso en los ajustes del teléfono.' : s === 'error' ? 'Error al programar recordatorios' : 'Aún sin programar';
 
   return (
     <>
@@ -34,18 +36,20 @@ export default function Ajustes() {
           <H level={2}>Avisos</H>
           <Row>
             <Toggle accessibilityLabel="Mostrar detalles en notificaciones" value={data?.details ?? false}
-              onValueChange={async (v) => { await store?.setSetting('notif_details', v ? '1' : '0'); bump(); reload(); }} />
+              onValueChange={async (v) => { await store?.setSetting('notif_details', v ? '1' : '0'); bump(); reload(); if (store && Platform.OS === 'web') void syncPush(store, v).catch(() => undefined); }} />
             <P>Mostrar el nombre de la medicina o la cita en la pantalla bloqueada</P>
           </Row>
           <P muted small>Apagado por defecto: el aviso dice solo «Tiene un recordatorio pendiente», para que nadie vea sus datos.</P>
           <P small>Estado: {statusText(data?.status ?? 'pendiente')}</P>
           <P muted small>Los avisos no garantizan atención médica ni sirven como alarma de emergencia. Pueden retrasarse o no llegar si el teléfono está en ahorro de batería o sin permisos.</P>
         </Card>
+        {Platform.OS === 'web' ? <PushCard details={data?.details ?? false} /> : null}
         {updatesSupported() ? <UpdateCard /> : null}
         <Card>
           <H level={2}>Privacidad</H>
           <P small>• Sus datos se guardan solo en este teléfono.</P>
           <P small>• Su información de salud no se envía a ningún servicio externo ni a inteligencia artificial.</P>
+          <P small>• Si activa los avisos en el teléfono (versión web), al servicio de avisos de NeuroCalendario solo llegan la dirección de avisos del teléfono y las HORAS de los recordatorios; el nombre de medicinas y citas se queda aquí.</P>
           <P small>• Los resúmenes y respaldos salen de la app solo cuando usted los comparte.</P>
           <P small>• La app no genera diagnósticos ni cambia tratamientos.</P>
         </Card>
@@ -79,6 +83,52 @@ function UpdateCard() {
         setMsg((await checkForUpdate(true)) ? 'Hay una versión nueva: aparecerá un aviso.' : 'Ya tiene la última versión.');
       }} />
       {msg ? <P muted small>{msg}</P> : null}
+    </Card>
+  );
+}
+
+const PUSH_TEXT: Record<PushState, string> = {
+  no_web: '',
+  sin_servidor: 'El servicio de avisos aún no está configurado en esta publicación.',
+  no_soportado: 'Este navegador no puede recibir avisos con la app cerrada.',
+  instalar_ios: 'En iPhone/iPad los avisos solo funcionan con la app agregada a la pantalla de inicio (Safari → Compartir → Agregar a pantalla de inicio) y abierta desde ese icono. Requiere iOS 16.4 o posterior.',
+  denegado: 'Los avisos están bloqueados. Actívelos en Ajustes del teléfono → Notificaciones → NeuroCalendario (o en los permisos del sitio en Android).',
+  apagado: 'Desactivados en este teléfono.',
+  activo: 'Activados: llegarán aunque la app esté cerrada.',
+};
+
+/** Avisos con la app cerrada (Web Push). */
+function PushCard({ details }: { details: boolean }) {
+  const { store } = useSession();
+  const [state, setState] = useState<PushState | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState<string | null>(null);
+  const refresh = () => { void pushState().then(setState); };
+  useEffect(refresh, []);
+  const run = async (fn: () => Promise<string>) => {
+    setBusy(true); setMsg(null);
+    try { setMsg(await fn()); } catch (e) { setMsg(errorMessage(e)); } finally { setBusy(false); refresh(); }
+  };
+  if (!state || state === 'no_web') return null;
+  return (
+    <Card>
+      <H level={2}>Avisos en este teléfono</H>
+      <P small>{PUSH_TEXT[state]}</P>
+      {state === 'apagado' ? (
+        <Button title="Activar avisos" loading={busy} onPress={() => run(async () => {
+          if (!store) return '';
+          const n = await enablePush(store, details);
+          return `Listo. ${n} aviso(s) programado(s) para los próximos días.`;
+        })} />
+      ) : null}
+      {state === 'activo' ? (
+        <>
+          <Button title="Enviar un aviso de prueba" kind="secondary" loading={busy} onPress={() => run(async () => { await testPush(); return 'Prueba enviada: debería llegar en unos segundos (puede cerrar la app para comprobarlo).'; })} />
+          <Button title="Desactivar avisos en este teléfono" kind="secondary" disabled={busy} onPress={() => run(async () => { await disablePush(); return 'Avisos desactivados en este teléfono.'; })} />
+        </>
+      ) : null}
+      {msg ? <P small>{msg}</P> : null}
+      <P muted small>Los avisos se revisan cada minuto y pueden llegar con algo de retraso. Si cambia horarios de medicinas o citas, se actualizan solos al abrir la app.</P>
     </Card>
   );
 }

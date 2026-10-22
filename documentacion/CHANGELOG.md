@@ -1,6 +1,7 @@
 # Registro de cambios
 
 ## 0.1.0 — 19-oct-2026 (versión de pruebas)
+- **Avisos en el teléfono con la app cerrada (versión web)**: Web Push con servicio propio en Cloudflare (`push-worker/`, ver `AVISOS.md`). Botones Activar / Prueba / Desactivar en Ajustes, tarjeta en Hoy para activarlos. El servicio solo recibe horas e identificadores; el texto se queda en el teléfono.
 - **Respaldo en web/iPhone**: los avisos (`Alert.alert`) no se mostraban en el navegador, así que una contraseña corta o un error parecían «no hacer nada». Ahora hay `notify` multiplataforma y mensajes en pantalla; el respaldo se comparte (hoja de compartir: Guardar en Archivos, correo) o se descarga, con botones «Guardar o compartir» y «Descargar». Prueba de extremo a extremo: crear, descargar y recuperar un respaldo cifrado.
 - Restos de la interfaz anterior: barra de perfil de color, campos con borde, interruptores verde azulado de Material, tarjetas de personas con borde, gráficos con letra con serifas y el isotipo sin fondo cuando había dos en pantalla (id de degradado repetido).
 - **Rediseño estilo Apple con identidad propia** (ver `IDENTIDAD.md`): isologo único (calendario con una «N» formada por dos neuronas), iconografía propia en pestañas, listas, calendario e informe, ilustraciones de neurociencia (cerebro, neurona, EEG, sinapsis) en lugar de la mascota, fuente del sistema, colores de sistema de Apple con índigo de marca, listas agrupadas tipo Ajustes, título grande con la persona activa a la derecha y control segmentado con píldora deslizante. Nuevos iconos de app y PWA.
