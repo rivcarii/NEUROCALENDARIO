@@ -5,7 +5,8 @@ import { PressableScale } from '../../components/PressableScale';
 import { Text } from '../../components/Text';
 import { Gauge, Legend, onLevel } from '../../components/Status';
 import { Button, Card, Chips, ErrorBox, H, Loading, P, Row, Screen, TapText } from '../../components/ui';
-import { dayStatus, LEVEL_COLOR, LEVEL_LABEL, type DayStatus } from '../../domain/analysis';
+import { NeuroIcon } from '../../components/Brand';
+import { dayStatus, LEVEL_COLOR, LEVEL_LABEL, summarizePeriod, type DayStatus } from '../../domain/analysis';
 import { loadAnalysisInput, loadDay, loadMonthMarks, type DayData } from '../../domain/day';
 import { INTAKE_LABEL } from '../../domain/labels';
 import { addDays, DIAS_CORTOS, durationMinutes, formatDateLong, formatDuration, formatTime, localDateKey, monthGrid, monthName, startOfWeek } from '../../domain/time';
@@ -32,7 +33,9 @@ export default function Calendario() {
     const map = new Map<string, DayStatus>();
     for (const k of monthGrid(y, m - 1)) map.set(k, dayStatus(k, input, today));
     for (const k of weekDays) if (!map.has(k)) map.set(k, dayStatus(k, input, today));
-    return map;
+    const mm = String(m).padStart(2, '0');
+    const summary = summarizePeriod(input, `${y}-${mm}-01`, `${y}-${mm}-${String(new Date(y, m, 0).getDate()).padStart(2, '0')}`, new Date());
+    return { map, summary };
   }, [y, m, selected]);
 
   const step = mode === 'mes' ? 'mes' : mode === 'semana' ? 7 : 1;
@@ -65,7 +68,7 @@ export default function Calendario() {
               const mk = month.data?.get(k);
               const inMonth = mode === 'semana' || Number(k.split('-')[1]) === m;
               const sel = k === selected;
-              const st = status.data?.get(k);
+              const st = status.data?.map.get(k);
               const lvl = st?.level ?? 'sin_datos';
               return (
                 <PressableScale key={k} accessibilityRole="button"
@@ -73,19 +76,28 @@ export default function Calendario() {
                   onPress={() => setSelected(k)}
                   containerStyle={{ width: `${100 / 7}%`, padding: 2 }}
                   style={{ width: '100%', minHeight: MIN_TOUCH + 8, alignItems: 'center', justifyContent: 'center', borderRadius: 14,
-                    backgroundColor: lvl === 'sin_datos' ? 'transparent' : LEVEL_COLOR[lvl], borderWidth: sel ? 3 : k === today ? 1.5 : 0, borderColor: sel ? t.text : t.primary, opacity: inMonth ? 1 : 0.4, borderCurve: 'continuous' }}>
+                    backgroundColor: lvl === 'sin_datos' ? 'transparent' : LEVEL_COLOR[lvl], borderWidth: sel ? 2.5 : k === today ? 1.5 : 0, borderColor: t.primary, opacity: inMonth ? 1 : 0.4, borderCurve: 'continuous' }}>
                   <Text style={{ color: lvl === 'sin_datos' ? t.text : onLevel(lvl), fontWeight: '700' }}>{Number(k.split('-')[2])}</Text>
-                  <View style={{ flexDirection: 'row', gap: 3, height: 8 }}>
-                    {mk?.episodes ? <View style={{ width: 7, height: 7, borderRadius: 4, backgroundColor: lvl === 'sin_datos' ? t.danger : onLevel(lvl) }} /> : null}
-                    {mk?.appointments ? <View style={{ width: 7, height: 7, borderRadius: 4, backgroundColor: lvl === 'sin_datos' ? t.success : onLevel(lvl) }} /> : null}
-                    {mk?.exams ? <View style={{ width: 7, height: 7, borderRadius: 4, backgroundColor: lvl === 'sin_datos' ? t.warn : onLevel(lvl) }} /> : null}
+                  {/* Clave por tipo de evento, como en los calendarios de cefalea y de crisis */}
+                  <View style={{ flexDirection: 'row', gap: 1, height: 12, alignItems: 'center' }}>
+                    {st?.severe ? <NeuroIcon name="crisis" size={11} color={lvl === 'sin_datos' ? t.danger : onLevel(lvl)} active /> : null}
+                    {st?.headache ? <NeuroIcon name="cerebro" size={11} color={lvl === 'sin_datos' ? t.primary : onLevel(lvl)} active /> : null}
+                    {st?.rescue ? <NeuroIcon name="medicinas" size={11} color={lvl === 'sin_datos' ? t.primary : onLevel(lvl)} active /> : null}
+                    {mk?.appointments ? <NeuroIcon name="cita" size={11} color={lvl === 'sin_datos' ? t.success : onLevel(lvl)} active /> : null}
+                    {mk?.exams ? <NeuroIcon name="estudio" size={11} color={lvl === 'sin_datos' ? t.warn : onLevel(lvl)} active /> : null}
+                    {!st?.severe && !st?.headache && mk?.episodes ? <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: lvl === 'sin_datos' ? t.danger : onLevel(lvl) }} /> : null}
                   </View>
                 </PressableScale>
               );
             })}
           </View>
           <Legend />
-          <P muted small>Puntos: rojo = síntomas · verde = citas · ámbar = estudios. El color del día es el «semáforo» del estado.</P>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12, marginTop: 6 }}>
+            {([['crisis', 'Crisis o desmayo'], ['cerebro', 'Dolor de cabeza'], ['medicinas', 'Medicina para el síntoma'], ['cita', 'Cita'], ['estudio', 'Estudio']] as const).map(([i, l]) => (
+              <View key={i} style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}><NeuroIcon name={i} size={14} color={t.muted} active /><Text style={{ color: t.muted, fontSize: 13 }}>{l}</Text></View>
+            ))}
+          </View>
+          {mode === 'mes' && status.data ? <MonthSummary s={status.data.summary} /> : null}
         </View>
       ) : null}
       {month.error ? <ErrorBox message={month.error} onRetry={month.reload} /> : null}
@@ -93,12 +105,38 @@ export default function Calendario() {
       <H level={2}>{formatDateLong(selected)}</H>
       {day.loading && !day.data ? <Loading /> : null}
       {day.error ? <ErrorBox message={day.error} onRetry={day.reload} /> : null}
-      {status.data?.get(selected) ? <DayMeter s={status.data.get(selected)!} /> : null}
+      {status.data?.map.get(selected) ? <DayMeter s={status.data.map.get(selected)!} /> : null}
       {day.data ? <DayDetail d={day.data} /> : null}
       <Button title="Ver análisis semanal y mensual" onPress={() => router.push('/analisis')} />
       <Button title="Anotar un síntoma" kind="secondary" onPress={() => router.push('/episodio/nuevo')} />
       <Button title="Agregar cita" kind="secondary" onPress={() => router.push(`/cita/nueva?fecha=${selected}`)} />
     </Screen>
+  );
+}
+
+/** Resumen neurológico del mes: lo que el neurólogo suele preguntar primero. */
+function MonthSummary({ s }: { s: ReturnType<typeof summarizePeriod> }) {
+  const t = useTheme();
+  const items: [string, string][] = [
+    ['Días con dolor de cabeza', String(s.headacheDays)],
+    ['Días con crisis o desmayo', String(s.daily.filter((d) => d.severe).length)],
+    ['Días con medicina para el síntoma', String(s.rescueDays)],
+    ['Días con dolor intenso (7–10)', String(s.highPainDays)],
+    ['Días sin crisis seguidos', s.crisisFreeStreak === null ? 'sin crisis anotadas' : String(s.crisisFreeStreak)],
+    ['Días con registros', `${s.tracked} de ${s.days}`],
+  ];
+  return (
+    <Card style={{ marginTop: 10 }}>
+      <H level={2}>Resumen neurológico del mes</H>
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', rowGap: 12 }}>
+        {items.map(([k, v]) => (
+          <View key={k} style={{ width: '50%', paddingRight: 8 }}>
+            <Text style={{ color: t.text, fontSize: 22, fontWeight: '700' }}>{v}</Text>
+            <Text style={{ color: t.muted, fontSize: 13 }}>{k}</Text>
+          </View>
+        ))}
+      </View>
+    </Card>
   );
 }
 

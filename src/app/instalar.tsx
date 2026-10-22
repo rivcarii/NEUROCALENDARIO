@@ -1,7 +1,7 @@
 import { Stack } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { View } from 'react-native';
-import { Mascot } from '../components/Mascot';
+import { Isotipo } from '../components/Brand';
 import { Button, Card, H, P, Screen } from '../components/ui';
 import { canPromptInstall, isIos, isStandalone, promptInstall, subscribeInstall } from '../services/install';
 
@@ -13,7 +13,7 @@ export default function Instalar() {
     <>
       <Stack.Screen options={{ title: 'Instalar en este teléfono' }} />
       <Screen>
-        <View style={{ alignItems: 'center' }}><Mascot mood="hola" size={96} /></View>
+        <View style={{ alignItems: 'center' }}><Isotipo size={96} /></View>
         {isStandalone() ? (
           <Card><P>Ya está usando NeuroCalendario como app. 🎉</P></Card>
         ) : ios ? (

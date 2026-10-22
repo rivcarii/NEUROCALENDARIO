@@ -1,24 +1,23 @@
-import Ionicons from '@expo/vector-icons/Ionicons';
 import { router, usePathname } from 'expo-router';
 import { useState } from 'react';
 import { Platform, View, type LayoutChangeEvent } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { NeuroIcon } from './Brand';
 import { Glass } from './Glass';
+import type { IconName } from '../brand/geometry';
 import { PressableScale } from './PressableScale';
 import { Text } from './Text';
 import { space, useIsDark, useTheme } from '../theme';
 import { motion, useReduceMotion } from '../theme/motion';
 import { font } from '../theme/type';
 
-type IconName = React.ComponentProps<typeof Ionicons>['name'];
-
-export const TABS: { path: '/' | '/calendario' | '/episodios' | '/medicacion' | '/mas'; label: string; on: IconName; off: IconName }[] = [
-  { path: '/', label: 'Hoy', on: 'today', off: 'today-outline' },
-  { path: '/calendario', label: 'Calendario', on: 'calendar', off: 'calendar-outline' },
-  { path: '/episodios', label: 'Síntomas', on: 'pulse', off: 'pulse-outline' },
-  { path: '/medicacion', label: 'Medicinas', on: 'medkit', off: 'medkit-outline' },
-  { path: '/mas', label: 'Más', on: 'menu', off: 'menu-outline' },
+export const TABS: { path: '/' | '/calendario' | '/episodios' | '/medicacion' | '/mas'; label: string; icon: IconName }[] = [
+  { path: '/', label: 'Hoy', icon: 'hoy' },
+  { path: '/calendario', label: 'Calendario', icon: 'calendario' },
+  { path: '/episodios', label: 'Síntomas', icon: 'sintomas' },
+  { path: '/medicacion', label: 'Medicinas', icon: 'medicinas' },
+  { path: '/mas', label: 'Más', icon: 'mas' },
 ];
 
 // En Jest (sin módulo nativo) Reanimated se simula con un objeto vacío: se usa View.
@@ -58,8 +57,8 @@ export function GlassTabBar() {
           pointerEvents="none"
           style={({
             position: 'absolute', top: 0, bottom: 0, left: 0, width: itemW, borderRadius: 24,
-            backgroundColor: dark ? '#7FB0E033' : '#2F5D8A1F',
-            borderWidth: 1, borderColor: dark ? '#7FB0E04D' : '#2F5D8A26',
+            backgroundColor: dark ? '#9E9BFF2E' : '#4C46D61A',
+            borderWidth: 0,
             transform: [{ translateX: index * itemW }],
             // el indicador se desliza; el relleno ya existía: no hay nada que mover en el primer pintado
             transitionProperty: 'transform',
@@ -82,7 +81,7 @@ export function GlassTabBar() {
             style={{ minHeight: 56, borderRadius: android ? 16 : 24, alignItems: 'center', justifyContent: 'center', paddingVertical: 6, gap: 2,
               backgroundColor: android && focused ? t.chip : 'transparent' }}
           >
-            <Ionicons name={focused ? tab.on : tab.off} size={24} color={color} accessibilityElementsHidden importantForAccessibility="no" />
+            <NeuroIcon name={tab.icon} size={25} color={color} active={focused} />
             <Text numberOfLines={1} style={{ color, fontSize: 11, fontFamily: focused ? font.bodyBold : font.body }}>{tab.label}</Text>
           </PressableScale>
         );

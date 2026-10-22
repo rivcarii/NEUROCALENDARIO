@@ -2,6 +2,7 @@ import type { Appointment, Episode, Exam, Intake, Medication, Note, Schedule } f
 import { analyzePeriod, LEVEL_LABEL, PAIN_BAND_LABEL, PAIN_SCALE_ROWS, SOURCES, type Finding, type Level } from './analysis';
 import { computeAdherence } from './adherence';
 import { computeEpisodeStats } from './stats';
+import type { IconName } from '../brand/geometry';
 import { durationMinutes, formatDateShort, formatDateTime, formatDuration, isoToLocalDateKey } from './time';
 
 export interface ReportSections {
@@ -37,7 +38,11 @@ export const DISCLAIMER =
 
 /** Modelo del documento: un solo contenido que se dibuja como HTML (teléfono) o como PDF directo (navegador). */
 export type Block =
-  | { t: 'h1' | 'h2' | 'h3'; text: string }
+  | { t: 'cover'; title: string; subtitle: string; rows: [string, string][] }
+  | { t: 'h1' | 'h3'; text: string }
+  | { t: 'h2'; text: string; icon?: IconName }
+  | { t: 'kpis'; items: { label: string; value: string; hint?: string }[] }
+  | { t: 'painScale' }
   | { t: 'p'; text: string; style?: 'muted' | 'warn' }
   | { t: 'kv'; rows: [string, string][] }
   | { t: 'table'; headers: string[]; rows: string[][]; empty?: string }
@@ -51,8 +56,7 @@ export function buildReportDoc(r: ReportInput): Block[] {
   const inRange = (key: string) => key >= r.fromKey && key <= r.toKey;
   const eps = r.episodes.filter((e) => inRange(isoToLocalDateKey(e.startedAt))).sort((a, b) => a.startedAt.localeCompare(b.startedAt));
   const b: Block[] = [
-    { t: 'h1', text: 'Resumen de seguimiento neurológico' },
-    { t: 'kv', rows: [
+    { t: 'cover', title: 'Resumen de seguimiento neurológico', subtitle: 'Diario del paciente · NeuroCalendario', rows: [
       ['Persona', r.profileName],
       ['Período', `${formatDateShort(r.fromKey)} a ${formatDateShort(r.toKey)}`],
       ['Creado', `${formatDateTime(r.generatedAt.toISOString())} por ${r.generatedBy}`],
@@ -65,8 +69,15 @@ export function buildReportDoc(r: ReportInput): Block[] {
     const fmt = (n: number | null, u = '') => (n === null ? 'sin datos' : `${n}${u}`);
     const delta = (a: number | null, z: number | null) => (a === null || z === null ? '—' : `${a - z > 0 ? '+' : ''}${Math.round((a - z) * 10) / 10}`);
     b.push(
-      { t: 'h2', text: 'Resumen clínico del período' },
+      { t: 'h2', text: 'Resumen clínico del período', icon: 'cerebro' },
       { t: 'gauge', label: `Estado general: ${LEVEL_LABEL[c.overall]}`, value: c.avgScore, level: c.overall },
+      { t: 'kpis', items: [
+        { label: 'Días con síntomas', value: String(c.painDays), hint: `de ${c.days}` },
+        { label: 'Días con cefalea', value: String(c.headacheDays) },
+        { label: 'Crisis o desmayos', value: String(c.severeEvents) },
+        { label: 'Fuerza media', value: c.avgIntensity === null ? '—' : `${c.avgIntensity}/10` },
+        { label: 'Medicinas tomadas', value: c.adherence.pct === null ? '—' : `${c.adherence.pct} %` },
+      ] },
       { t: 'p', text: 'Medidor de 0 a 100 (100 = sin molestias) calculado día a día con la fuerza del dolor, cuántos síntomas hubo, eventos graves y dosis no tomadas. Es una regla de la app, no una escala clínica validada.', style: 'muted' },
       { t: 'strip', title: 'Semáforo por día (verde: tranquilo · amarillo: con molestias · rojo: día difícil · gris: sin registros)',
         cells: c.daily.map((d) => ({ label: String(Number(d.dateKey.slice(8))), level: d.level })) },
@@ -80,13 +91,18 @@ export function buildReportDoc(r: ReportInput): Block[] {
         ['Fuerza máxima (0–10)', fmt(c.maxIntensity), fmt(p.maxIntensity), '—'],
         ['Días con dolor intenso (7–10)', String(c.highPainDays), String(p.highPainDays), delta(c.highPainDays, p.highPainDays)],
         ['Convulsiones o desmayos', String(c.severeEvents), String(p.severeEvents), delta(c.severeEvents, p.severeEvents)],
+        ['Días con medicina para el síntoma', String(c.rescueDays), String(p.rescueDays), delta(c.rescueDays, p.rescueDays)],
+        ['Días seguidos sin crisis (al final)', c.crisisFreeStreak === null ? 'sin crisis' : String(c.crisisFreeStreak), '—', '—'],
+        ['Horas de sueño anotadas (media)', fmt(c.avgSleep), fmt(p.avgSleep), delta(c.avgSleep, p.avgSleep)],
         ['Medicinas tomadas (% de lo programado)', c.adherence.pct === null ? 'sin datos' : `${c.adherence.pct} %`, p.adherence.pct === null ? 'sin datos' : `${p.adherence.pct} %`, delta(c.adherence.pct, p.adherence.pct)],
       ] },
       { t: 'h3', text: 'Escala de dolor usada (numérica, 0–10)' },
+      { t: 'painScale' },
       { t: 'table', headers: ['Puntos', 'Nivel', 'Qué significa'], rows: PAIN_SCALE_ROWS.map((x) => [...x]) },
       { t: 'table', headers: ['Nivel de los síntomas anotados', 'Cantidad'], rows: (Object.keys(c.bands) as (keyof typeof c.bands)[]).map((k) => [PAIN_BAND_LABEL[k], String(c.bands[k])]) },
+      ...(c.topTriggers.length ? [{ t: 'table', headers: ['Desencadenante anotado', 'Veces'], rows: c.topTriggers.map((x) => [x.label, String(x.count)]) } as Block] : []),
       { t: 'bars', title: 'Momento del día en que ocurrieron los síntomas', data: c.partOfDay.map((x) => ({ label: x.label, value: x.count })) },
-      { t: 'h3', text: 'Hallazgos para comentar con el médico' },
+      { t: 'h2', text: 'Hallazgos para comentar con el médico', icon: 'alerta' },
       ...findings.map((f): Block => ({ t: 'finding', finding: f })),
     );
   }
@@ -96,7 +112,7 @@ export function buildReportDoc(r: ReportInput): Block[] {
     const fmt = (n: number | null, unit = '') => (n === null ? 'sin datos' : `${n}${unit}`);
     const dur = (n: number | null) => (n === null ? 'sin datos' : formatDuration(Math.round(n)));
     b.push(
-      { t: 'h2', text: 'Síntomas' },
+      { t: 'h2', text: 'Síntomas', icon: 'sintomas' },
       { t: 'list', items: [
         `Síntomas anotados: ${s.count}, en ${s.daysWithEpisodes} día(s)`,
         `Duración habitual: ${dur(s.avgMinutes)} · la mitad duró menos de: ${dur(s.medianMinutes)} · máxima: ${s.maxMinutes === null ? 'sin datos' : formatDuration(s.maxMinutes)} (${s.withDuration} de ${s.count} con hora de fin)`,
@@ -112,7 +128,7 @@ export function buildReportDoc(r: ReportInput): Block[] {
   if (r.sections.medications) {
     const adh = computeAdherence(r.medications, r.schedules, r.intakes, r.fromKey, r.toKey, r.generatedAt);
     b.push(
-      { t: 'h2', text: 'Medicinas' },
+      { t: 'h2', text: 'Medicinas', icon: 'medicinas' },
       { t: 'table', headers: ['Medicina', 'Dosis', 'Recetada por', 'Activa'], rows: r.medications.map((m) => [m.name, m.doseText, m.prescriber, m.active ? 'Sí' : 'No']) },
       { t: 'h3', text: 'Lo que debía tomar y lo que anotó' },
       { t: 'table', headers: ['Medicina', 'Debía tomar', 'Tomó', 'No tomó', 'Sin anotar'], rows: adh.map((a) => [a.name, String(a.scheduled), String(a.taken), String(a.skipped), String(a.unrecorded)]) },
@@ -121,19 +137,19 @@ export function buildReportDoc(r: ReportInput): Block[] {
   }
   if (r.sections.appointments) {
     const ap = r.appointments.filter((a) => inRange(isoToLocalDateKey(a.startsAt))).sort((a, z) => a.startsAt.localeCompare(z.startsAt));
-    b.push({ t: 'h2', text: 'Citas médicas' }, { t: 'table', headers: ['Fecha', 'Título', 'Profesional', 'Lugar', 'Estado'], rows: ap.map((a) => [formatDateTime(a.startsAt), a.title, a.provider, a.location, a.status]) });
+    b.push({ t: 'h2', text: 'Citas médicas', icon: 'cita' }, { t: 'table', headers: ['Fecha', 'Título', 'Profesional', 'Lugar', 'Estado'], rows: ap.map((a) => [formatDateTime(a.startsAt), a.title, a.provider, a.location, a.status]) });
   }
   if (r.sections.exams) {
     const ex = r.exams.filter((e) => inRange(e.examDate)).sort((a, z) => a.examDate.localeCompare(z.examDate));
-    b.push({ t: 'h2', text: 'Estudios y resultados' }, { t: 'table', headers: ['Fecha', 'Estudio', 'Estado', 'De dónde viene el resultado', 'Resultado'],
+    b.push({ t: 'h2', text: 'Estudios y resultados', icon: 'estudio' }, { t: 'table', headers: ['Fecha', 'Estudio', 'Estado', 'De dónde viene el resultado', 'Resultado'],
       rows: ex.map((e) => [formatDateShort(e.examDate), e.name, e.status.replace('_', ' '), e.status === 'con_resultado' ? (e.resultSource === 'informe_medico' ? 'Informe del médico' : 'Anotado por el paciente') : '—', e.resultText]) });
   }
   if (r.sections.notes) {
     const ns = r.notes.filter((n) => inRange(n.noteDate)).sort((a, z) => a.noteDate.localeCompare(z.noteDate));
-    b.push({ t: 'h2', text: 'Notas' }, { t: 'table', headers: ['Fecha', 'Autor', 'Nota'], rows: ns.map((n) => [formatDateShort(n.noteDate), n.authorRole, n.body]) });
+    b.push({ t: 'h2', text: 'Notas', icon: 'nota' }, { t: 'table', headers: ['Fecha', 'Autor', 'Nota'], rows: ns.map((n) => [formatDateShort(n.noteDate), n.authorRole, n.body]) });
   }
   if (r.sections.analysis) {
-    b.push({ t: 'h2', text: 'Fuentes consultadas' }, { t: 'list', items: SOURCES.map((s) => (s.url ? `${s.text} (${s.url})` : s.text)) });
+    b.push({ t: 'h2', text: 'Fuentes consultadas', icon: 'info' }, { t: 'list', items: SOURCES.map((s) => (s.url ? `${s.text} (${s.url})` : s.text)) });
   }
   b.push({ t: 'p', text: DISCLAIMER, style: 'muted' });
   return b;

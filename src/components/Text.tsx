@@ -1,12 +1,12 @@
 import { StyleSheet, Text as RNText, type TextProps } from 'react-native';
-import { bodyFamilyFor } from '../theme/type';
+import { resolveFont } from '../theme/type';
 
 /**
- * Texto de la app: aplica la tipografía de cuerpo y traduce `fontWeight` a la familia
- * correspondiente. Si el estilo trae `fontFamily` (p. ej. títulos), se respeta.
+ * Texto de la app: tipografía del sistema. Si el estilo trae un token (`font.display`…) se traduce
+ * a familia + peso + interletraje; si trae `fontWeight`, se respeta.
  */
 export function Text({ style, ...rest }: TextProps) {
   const flat = StyleSheet.flatten(style) ?? {};
-  const family = flat.fontFamily ?? bodyFamilyFor(flat.fontWeight);
-  return <RNText maxFontSizeMultiplier={1.6} {...rest} style={[style, { fontFamily: family, fontWeight: 'normal' }]} />;
+  const f = resolveFont(flat.fontFamily, flat.fontWeight);
+  return <RNText maxFontSizeMultiplier={1.6} {...rest} style={[style, f, flat.letterSpacing !== undefined ? { letterSpacing: flat.letterSpacing } : null]} />;
 }

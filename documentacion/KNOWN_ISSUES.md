@@ -12,7 +12,7 @@ La app **está lista para pruebas**, no para uso médico real, hasta completar:
 | Sincronización entre dispositivos y acceso de mamá desde otro teléfono | **No implementada.** Hay esquema + RLS probados; faltan autenticación, cliente de sincronización, resolución de conflictos y cifrado de extremo a extremo. Las cuentas familiares son solo un modelo local. |
 | Cambio de cuenta/usuario en la app | No expuesto en la UI (siempre actúa el propietario). |
 | Catálogo de síntomas editable | Reservado en la base; la UI usa listas integradas y texto libre. |
-| Iconos y *splash* | Ahora son de Nuri (generados con `scripts/make-icons.mjs`); no se han visto en un teléfono real (recorte del icono adaptativo de Android). |
+| Iconos y *splash* | Ahora son el isotipo de NeuroCalendario (generados con `node --experimental-strip-types scripts/make-icons.mjs` desde `src/brand/geometry.ts`); no se han visto en un teléfono real (recorte del icono adaptativo de Android). |
 | Idioma | Solo español. |
 
 ## Versión web instalable (PWA)

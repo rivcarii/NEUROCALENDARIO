@@ -5,7 +5,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Alert, View } from 'react-native';
 import { Text } from '../../components/Text';
 import { Deck } from '../../components/Deck';
-import { Mascot } from '../../components/Mascot';
+import { NeuroArt } from '../../components/NeuroArt';
 import { PressableScale } from '../../components/PressableScale';
 import { Reveal } from '../../components/Reveal';
 import { Ring } from '../../components/Ring';
@@ -130,7 +130,7 @@ export default function Hoy() {
       <Reveal id="hoy" index={0}>
         <View style={{ gap: 2 }}>
           <Text style={{ color: t.muted, fontSize: 15 }}>{greeting(hour)}</Text>
-          <H>{formatDateLong(today)}</H>
+          <H level={2}>{formatDateLong(today)}</H>
         </View>
       </Reveal>
 
@@ -206,10 +206,10 @@ export default function Hoy() {
       {data ? (
         <>
           <Reveal id="hoy" index={4}><View style={{ gap: 12 }}>
-          <SectionTitle icon="medkit">Medicinas de hoy</SectionTitle>
+          <SectionTitle icon="medicinas">Medicinas de hoy</SectionTitle>
           {doses.length > 0 && doses.every(settled) ? (
             <Card style={{ alignItems: 'center' }}>
-              <Mascot mood="contento" size={84} />
+              <NeuroArt kind="sinapsis" size={150} />
               <P>¡Todo al día! Ya anotó todas las medicinas de hoy.</P>
             </Card>
           ) : null}
@@ -230,7 +230,7 @@ export default function Hoy() {
           })}
           </View></Reveal>
           <Reveal id="hoy" index={5}><View style={{ gap: 12 }}>
-          <SectionTitle icon="calendar">Citas de hoy</SectionTitle>
+          <SectionTitle icon="cita">Citas de hoy</SectionTitle>
           {data.appointments.length === 0 ? <P muted>Sin citas hoy.</P> : null}
           {data.appointments.map((a) => (
             <Card key={a.id}>
@@ -240,7 +240,7 @@ export default function Hoy() {
           ))}
           </View></Reveal>
           <Reveal id="hoy" index={6}><View style={{ gap: 12 }}>
-          <SectionTitle icon="pulse">Síntomas de hoy</SectionTitle>
+          <SectionTitle icon="sintomas">Síntomas de hoy</SectionTitle>
           {data.episodes.length === 0 ? <P muted>Hoy no ha anotado síntomas.</P> : null}
           {data.episodes.map((e) => (
             <Card key={e.id}>

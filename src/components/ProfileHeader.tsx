@@ -1,39 +1,52 @@
 import { router } from 'expo-router';
-import { Platform, Pressable, View } from 'react-native';
-import { Text } from './Text';
+import { Platform, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useSession } from '../services/session';
-import { LinearGradient } from 'expo-linear-gradient';
-import { shade, space, useTheme } from '../theme';
+import { Isotipo } from './Brand';
+import { PressableScale } from './PressableScale';
+import { Text } from './Text';
 import { MAX_CONTENT } from './ui';
+import { useSession } from '../services/session';
+import { space, useTheme } from '../theme';
 import { font } from '../theme/type';
 
-/** Cabecera permanente: siempre muestra de QUIÉN son los datos que se ven. */
+const initials = (name: string) => name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]!.toUpperCase()).join('') || '·';
+
+/**
+ * Cabecera al estilo de las apps de Apple (Salud, Recordatorios): marca discreta arriba, título grande
+ * y, a la derecha, la persona cuyos datos se ven (siempre visible; tocarla permite cambiar de persona).
+ */
 export function ProfileHeader({ title }: { title: string }) {
   const { activeProfile, profiles } = useSession();
   const insets = useSafeAreaInsets();
   const t = useTheme();
   if (!activeProfile) return null;
+  const many = profiles.length > 1;
   return (
-    <View style={{ overflow: 'hidden', backgroundColor: activeProfile.color, paddingTop: insets.top + (Platform.OS === 'web' ? 26 : 6), paddingBottom: 16, borderBottomLeftRadius: 28, borderBottomRightRadius: 28, borderCurve: 'continuous', paddingHorizontal: space.lg, alignItems: 'center' }}>
-     <LinearGradient pointerEvents="none" colors={[activeProfile.color, shade(activeProfile.color, 0.3)]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }} />
-     {/* círculos translúcidos: profundidad sin imágenes */}
-     <View pointerEvents="none" style={{ position: 'absolute', width: 210, height: 210, borderRadius: 105, right: -60, top: -90, backgroundColor: '#FFFFFF', opacity: 0.1 }} />
-     <View pointerEvents="none" style={{ position: 'absolute', width: 120, height: 120, borderRadius: 60, right: 70, bottom: -70, backgroundColor: '#FFFFFF', opacity: 0.07 }} />
-     <View style={{ width: '100%', maxWidth: MAX_CONTENT, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-      <View style={{ flex: 1 }}>
-        <Text style={{ color: t.onHeaderSoft, fontSize: 13, letterSpacing: 0.3 }}>{title}</Text>
-        <Text accessibilityRole="header" style={{ color: t.onHeader, fontSize: 28, lineHeight: 32, letterSpacing: -0.4, fontFamily: font.display }} numberOfLines={1}>
-          {activeProfile.displayName}
-        </Text>
+    <View style={{ backgroundColor: t.bg, paddingTop: insets.top + (Platform.OS === 'web' ? 18 : 4), paddingBottom: 6, paddingHorizontal: space.lg, alignItems: 'center' }}>
+      <View style={{ width: '100%', maxWidth: MAX_CONTENT, flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', gap: space.md }}>
+        <View style={{ flex: 1, gap: 2 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+            <Isotipo size={18} />
+            <Text style={{ color: t.muted, fontSize: 12, fontWeight: '600', letterSpacing: 0.6 }}>NEUROCALENDARIO</Text>
+          </View>
+          <Text accessibilityRole="header" numberOfLines={1} style={{ color: t.text, fontSize: 34, lineHeight: 40, fontFamily: font.display }}>{title}</Text>
+        </View>
+        <PressableScale
+          accessibilityRole="button"
+          accessibilityLabel={many ? 'Cambiar de persona' : `Persona: ${activeProfile.displayName}`}
+          accessibilityHint={many ? `Ahora ve los datos de ${activeProfile.displayName}` : 'Ver personas'}
+          onPress={() => router.push('/perfiles')}
+          style={{ flexDirection: 'row', alignItems: 'center', gap: 8, minHeight: 44, paddingLeft: 4, paddingRight: 12, borderRadius: 999, backgroundColor: t.card, marginBottom: 4, maxWidth: 190, borderCurve: 'continuous' }}
+        >
+          <View style={{ width: 34, height: 34, borderRadius: 17, backgroundColor: activeProfile.color, alignItems: 'center', justifyContent: 'center' }}>
+            <Text style={{ color: '#FFFFFF', fontWeight: '700', fontSize: 14 }}>{initials(activeProfile.displayName)}</Text>
+          </View>
+          <View style={{ flexShrink: 1 }}>
+            <Text numberOfLines={1} style={{ color: t.text, fontWeight: '600', fontSize: 14 }}>{activeProfile.displayName}</Text>
+            {many ? <Text style={{ color: t.primary, fontSize: 12, fontWeight: '600' }}>Cambiar</Text> : null}
+          </View>
+        </PressableScale>
       </View>
-      {profiles.length > 1 ? (
-        <Pressable accessibilityRole="button" accessibilityLabel="Cambiar de persona" onPress={() => router.push('/perfiles')}
-          style={{ minHeight: 44, minWidth: 44, justifyContent: 'center', paddingHorizontal: space.md, borderRadius: 8, backgroundColor: t.headerButton }}>
-          <Text style={{ color: t.onHeader, fontWeight: '700' }}>Cambiar</Text>
-        </Pressable>
-      ) : null}
-     </View>
     </View>
   );
 }

@@ -1,14 +1,17 @@
 import { Platform, useColorScheme, type ViewStyle } from 'react-native';
 
+// Paleta inspirada en los colores del sistema de Apple, con el índigo de la marca (ver src/brand/geometry.ts).
 export const light = {
-  bg: '#F6F8FB', card: '#FFFFFF', text: '#14202B', muted: '#5B6B7A', border: '#D5DDE6',
-  primary: '#2F5D8A', onPrimary: '#FFFFFF', danger: '#B3261E', success: '#2E7D4F', warn: '#9A6700',
-  chip: '#E8EEF5', chipOn: '#2F5D8A', onHeader: '#FFFFFF', onHeaderSoft: '#FFFFFFCC', headerButton: '#FFFFFF33',
+  bg: '#F2F2F7', card: '#FFFFFF', text: '#1C1C1E', muted: '#6C6C70', border: '#E3E3E8',
+  primary: '#4C46D6', onPrimary: '#FFFFFF', danger: '#D70015', success: '#1F7A36', warn: '#A04800',
+  chip: '#E8E8F7', chipOn: '#4C46D6', onHeader: '#1C1C1E', onHeaderSoft: '#6C6C70', headerButton: '#E8E8F7',
+  accent: '#0A7686', tint: '#EDEBFF', separator: '#E3E3E8',
 };
 export const dark: typeof light = {
-  bg: '#0E141A', card: '#17202A', text: '#EAF0F6', muted: '#9DAEBF', border: '#2B3948',
-  primary: '#7FB0E0', onPrimary: '#0E141A', danger: '#FF8A80', success: '#74C69D', warn: '#E3B341',
-  chip: '#22303D', chipOn: '#7FB0E0', onHeader: '#FFFFFF', onHeaderSoft: '#FFFFFFCC', headerButton: '#FFFFFF33',
+  bg: '#000000', card: '#1C1C1E', text: '#F5F5F7', muted: '#A1A1A8', border: '#38383A',
+  primary: '#9E9BFF', onPrimary: '#0B0A26', danger: '#FF6961', success: '#30D158', warn: '#FFB340',
+  chip: '#2C2C2E', chipOn: '#9E9BFF', onHeader: '#F5F5F7', onHeaderSoft: '#A1A1A8', headerButton: '#2C2C2E',
+  accent: '#3CC8D8', tint: '#22214A', separator: '#38383A',
 };
 
 export type Theme = typeof light;
@@ -30,7 +33,7 @@ export const MIN_TOUCH_ANDROID = 48;
 export const platform = {
   // iOS 26+/«cristal»: formas concéntricas y cápsulas; Android: Material 3.
   buttonRadius: 999,
-  cardRadius: Platform.OS === 'android' ? 20 : 26,
+  cardRadius: Platform.OS === 'android' ? 20 : 22,
   inputRadius: Platform.OS === 'android' ? 12 : 16,
   /** Tamaño base del texto: 17 en iOS (Dynamic Type), 16 en Android. */
   body: Platform.OS === 'ios' ? 17 : 16,
@@ -38,9 +41,10 @@ export const platform = {
 
 export function cardSurface(dark: boolean): ViewStyle {
   if (Platform.OS === 'android') return { elevation: dark ? 0 : 1 };
+  // Apple: listas agrupadas planas sobre gris claro; solo un velo de sombra para separar del fondo.
   return dark
     ? {}
-    : { shadowColor: '#0B1F33', shadowOpacity: 0.07, shadowRadius: 10, shadowOffset: { width: 0, height: 3 } };
+    : { shadowColor: '#1C1C3A', shadowOpacity: 0.05, shadowRadius: 12, shadowOffset: { width: 0, height: 4 } };
 }
 
 /** Espacio que dejan las pantallas con pestañas al final para que la barra flotante no tape el contenido. */

@@ -52,7 +52,7 @@ export function Legend() {
   );
 }
 
-const TONE = { bien: ['#2E7D4F', 'Bien', 'checkmark-circle'], info: ['#2F5D8A', 'Información', 'information-circle'], atencion: ['#B7791F', 'Atención', 'alert-circle'], importante: ['#C0392B', 'Importante', 'warning'] } as const;
+const TONE = { bien: ['#1F7A36', 'Bien', 'checkmark-circle'], info: ['#4C46D6', 'Información', 'information-circle'], atencion: ['#A04800', 'Atención', 'alert-circle'], importante: ['#D70015', 'Importante', 'warning'] } as const;
 
 export function FindingCard({ f }: { f: Finding }) {
   const t = useTheme();

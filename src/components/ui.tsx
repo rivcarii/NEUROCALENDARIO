@@ -7,7 +7,11 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { formatDateShort, formatTime, localDateKey, parseDateKey } from '../domain/time';
 import { MIN_TOUCH, TAB_BAR_SPACE, cardSurface, platform, radius, space, useIsDark, useTheme } from '../theme';
 import { font, size } from '../theme/type';
-import { Mascot, type MascotMood } from './Mascot';
+import Animated from 'react-native-reanimated';
+import { NeuroIcon } from './Brand';
+import { NeuroArt, type NeuroArtKind } from './NeuroArt';
+import type { IconName } from '../brand/geometry';
+import { motion, useReduceMotion } from '../theme/motion';
 import { PressableScale } from './PressableScale';
 
 /** Ancho máximo del contenido: en tabletas y navegadores de escritorio no se estira. */
@@ -41,8 +45,8 @@ export function Card({ children, style }: { children: ReactNode; style?: StylePr
   return (
     <View style={[{
       backgroundColor: t.card, borderRadius: platform.cardRadius, padding: space.lg, gap: space.sm,
-      // iOS/web: sombra suave + filo; Android: elevación; modo oscuro: solo filo.
-      borderWidth: Platform.OS === 'android' && !dark ? 0 : StyleSheet.hairlineWidth * 2, borderColor: t.border,
+      // Estilo «lista agrupada» de Apple: superficie plana, esquinas continuas, sin borde.
+      borderCurve: 'continuous', borderWidth: 0, borderColor: t.border,
     }, cardSurface(dark), style]}>{children}</View>
   );
 }
@@ -61,7 +65,8 @@ export function Button({ title, onPress, kind = 'primary', disabled, loading, ac
   title: string; onPress: () => void; kind?: 'primary' | 'secondary' | 'danger'; disabled?: boolean; loading?: boolean; accessibilityHint?: string; /** Estado elegido: muestra una marca para que se vea que quedó guardado. */ checked?: boolean;
 }) {
   const t = useTheme();
-  const bg = kind === 'primary' ? t.primary : kind === 'danger' ? t.danger : 'transparent';
+  // Botones de Apple: «relleno» (principal), «tintado» (secundario) y rojo para lo destructivo.
+  const bg = kind === 'primary' ? t.primary : kind === 'danger' ? t.danger : t.chip;
   const fg = kind === 'secondary' ? t.primary : t.onPrimary;
   return (
     <PressableScale
@@ -70,10 +75,10 @@ export function Button({ title, onPress, kind = 'primary', disabled, loading, ac
       disabled={disabled || loading} onPress={onPress}
       style={{
         minHeight: MIN_TOUCH, borderRadius: platform.buttonRadius, paddingHorizontal: space.lg, alignItems: 'center', justifyContent: 'center',
-        backgroundColor: bg, borderWidth: kind === 'secondary' ? 1.5 : 0, borderColor: t.primary, flexDirection: 'row', gap: space.sm,
+        backgroundColor: bg, borderWidth: 0, flexDirection: 'row', gap: space.sm, borderCurve: 'continuous',
       }}>
       {loading ? <ActivityIndicator color={fg} /> : checked ? <Ionicons name="checkmark-circle" size={20} color={fg} /> : null}
-      <Text style={{ color: fg, fontSize: size.body, fontWeight: '600' }}>{title}</Text>
+      <Text style={{ color: fg, fontSize: size.body, fontWeight: '600', letterSpacing: -0.2 }}>{title}</Text>
     </PressableScale>
   );
 }
@@ -116,6 +121,7 @@ export function Chips<T extends string | number>({ label, options, value, onChan
 }) {
   const t = useTheme();
   const isOn = (v: T) => (multi ? (value as T[]).includes(v) : value === v);
+  if (!multi && !label && options.length <= 4) return <Segmented options={options} value={value as T} onChange={onChange} />;
   return (
     <View style={{ gap: 4 }}>
       {label ? <Text style={{ color: t.text, fontWeight: '600' }}>{label}</Text> : null}
@@ -123,8 +129,8 @@ export function Chips<T extends string | number>({ label, options, value, onChan
         {options.map((o) => (
           <PressableScale key={String(o.value)} onPress={() => onChange(o.value)} accessibilityRole={multi ? 'checkbox' : 'radio'}
             accessibilityState={{ selected: isOn(o.value), checked: isOn(o.value) }} accessibilityLabel={o.a11y ?? o.label}
-            style={{ minHeight: 44, paddingHorizontal: space.md, borderRadius: radius.pill, justifyContent: 'center', backgroundColor: isOn(o.value) ? t.chipOn : t.chip }}>
-            <Text style={{ color: isOn(o.value) ? t.onPrimary : t.text }}>{o.label}</Text>
+            style={{ minHeight: 44, paddingHorizontal: space.md, borderRadius: radius.pill, justifyContent: 'center', backgroundColor: isOn(o.value) ? t.chipOn : t.chip, borderCurve: 'continuous' }}>
+            <Text style={{ color: isOn(o.value) ? t.onPrimary : t.text, fontWeight: isOn(o.value) ? '600' : '400' }}>{o.label}</Text>
           </PressableScale>
         ))}
       </View>
@@ -176,11 +182,11 @@ export function DateTimeField({ label, date, time, onChange, withTime = true, op
   );
 }
 
-export function Empty({ title, hint, action, mood = 'descanso' }: { title: string; hint?: string; action?: ReactNode; mood?: MascotMood }) {
+export function Empty({ title, hint, action, art = 'neurona' }: { title: string; hint?: string; action?: ReactNode; art?: NeuroArtKind }) {
   return (
     <Card style={{ alignItems: 'center' }}>
-      <Mascot mood={mood} size={72} />
-      <P>{title}</P>
+      <NeuroArt kind={art} size={168} entrance={false} />
+      <P style={{ textAlign: 'center' } as never}>{title}</P>
       {hint ? <P muted small>{hint}</P> : null}
       {action}
     </Card>
@@ -219,7 +225,7 @@ export function ProfileBar({ name, color, label = 'Perfil' }: { name: string; co
   const t = useTheme();
   return (
     <View accessibilityRole="summary" accessibilityLabel={`${label}: ${name}`} style={{ backgroundColor: color, paddingVertical: 6, paddingHorizontal: space.lg }}>
-      <Text style={{ color: t.onHeader, fontWeight: '700' }}>{label}: {name}</Text>
+      <Text style={{ color: '#FFFFFF', fontWeight: '700' }}>{label}: {name}</Text>
     </View>
   );
 }
@@ -229,14 +235,51 @@ export function errorMessage(e: unknown): string {
 }
 
 /** Título de sección con icono en una pastilla tintada. */
-export function SectionTitle({ icon, children }: { icon: React.ComponentProps<typeof Ionicons>['name']; children: ReactNode }) {
+export function SectionTitle({ icon, children }: { icon: IconName; children: ReactNode }) {
   const t = useTheme();
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.sm, marginTop: space.sm }}>
-      <View style={{ width: 34, height: 34, borderRadius: 12, alignItems: 'center', justifyContent: 'center', backgroundColor: t.chip, borderCurve: 'continuous' }}>
-        <Ionicons name={icon} size={19} color={t.primary} accessibilityElementsHidden importantForAccessibility="no" />
+      <View style={{ width: 34, height: 34, borderRadius: 12, alignItems: 'center', justifyContent: 'center', backgroundColor: t.tint, borderCurve: 'continuous' }}>
+        <NeuroIcon name={icon} size={20} color={t.primary} />
       </View>
       <H level={2}>{children}</H>
+    </View>
+  );
+}
+
+// En Jest (sin módulo nativo) Reanimated se simula con un objeto vacío: se usa View sin transiciones.
+const AnimatedView = (Animated as { View?: typeof View }).View ?? View;
+
+/**
+ * Control segmentado de Apple: pista gris y una píldora blanca que se desliza a la opción elegida
+ * (transform, 220 ms, curva ease-out; sin desplazamiento con «reducir movimiento»).
+ */
+export function Segmented<T extends string | number>({ options, value, onChange }: { options: { value: T; label: string; a11y?: string }[]; value: T | null; onChange: (v: T) => void }) {
+  const t = useTheme();
+  const dark = useIsDark();
+  const reduced = useReduceMotion();
+  const [w, setW] = useState(0);
+  const idx = Math.max(0, options.findIndex((o) => o.value === value));
+  const seg = w / options.length;
+  return (
+    <View accessibilityRole="radiogroup" onLayout={(e) => setW(e.nativeEvent.layout.width - 4)}
+      style={{ flexDirection: 'row', backgroundColor: dark ? '#2C2C2E' : '#E4E4EB', borderRadius: 12, padding: 2, borderCurve: 'continuous' }}>
+      {w > 0 ? (
+        <AnimatedView pointerEvents="none" style={({
+          position: 'absolute', top: 2, bottom: 2, left: 2, width: seg, borderRadius: 10, backgroundColor: dark ? '#636366' : '#FFFFFF',
+          shadowColor: '#000', shadowOpacity: dark ? 0 : 0.12, shadowRadius: 4, shadowOffset: { width: 0, height: 2 },
+          transform: [{ translateX: idx * seg }], transitionProperty: 'transform', transitionDuration: reduced ? 0 : 220, transitionTimingFunction: motion.easeOut,
+        }) as unknown as object} />
+      ) : null}
+      {options.map((o) => {
+        const on = o.value === value;
+        return (
+          <Pressable key={String(o.value)} accessibilityRole="radio" accessibilityState={{ selected: on, checked: on }} accessibilityLabel={o.a11y ?? o.label}
+            onPress={() => onChange(o.value)} style={{ flex: 1, minHeight: 40, alignItems: 'center', justifyContent: 'center', borderRadius: 10, backgroundColor: w > 0 || !on ? 'transparent' : t.card }}>
+            <Text style={{ color: t.text, fontSize: 15, fontWeight: on ? '600' : '400' }}>{o.label}</Text>
+          </Pressable>
+        );
+      })}
     </View>
   );
 }

@@ -17,6 +17,7 @@ const body = () => page.locator('body').innerText();
 
 await page.goto(BASE, { waitUntil: 'networkidle' });
 await page.getByLabel('Su nombre (quien administra la app)').waitFor({ timeout: 20000 });
+await shot('bienvenida');
 await page.getByLabel('Su nombre (quien administra la app)').fill('Propietario Ficticio');
 await page.getByLabel('¿A quién va a acompañar principalmente?').fill('Mamá Ficticia');
 await page.getByRole('button', { name: 'Comenzar' }).click();
@@ -154,6 +155,8 @@ await page.getByRole('button', { name: /Día difícil|Con molestias|Tranquilo/ }
 await shot('calendario-semaforo');
 ok(true, 'el calendario pinta cada día con su color de semáforo');
 await page.locator('text="Más" >> visible=true').first().click();
+await page.getByText('Análisis semanal y mensual', { exact: true }).waitFor();
+await shot('mas');
 await page.getByText('Análisis semanal y mensual', { exact: true }).click();
 await page.getByText('Qué encontramos').waitFor();
 await shot('analisis-semana');

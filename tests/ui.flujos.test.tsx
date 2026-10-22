@@ -36,7 +36,7 @@ async function boot(seed?: (owner: Store, ids: { mom: string; me: string }) => P
 }
 
 async function onboard() {
-  await screen.findByText('Bienvenido a NeuroCalendario');
+  await screen.findByText('Le damos la bienvenida');
   await fireEvent.changeText(screen.getByLabelText('Su nombre (quien administra la app)'), 'Propietario Ficticio');
   await fireEvent.changeText(screen.getByLabelText('¿A quién va a acompañar principalmente?'), 'Mamá Ficticia');
   await fireEvent.press(screen.getByRole('button', { name: 'Comenzar' }));

@@ -1,31 +1,33 @@
-import { AtkinsonHyperlegible_400Regular, AtkinsonHyperlegible_700Bold } from '@expo-google-fonts/atkinson-hyperlegible';
-import { Fraunces_600SemiBold, Fraunces_700Bold } from '@expo-google-fonts/fraunces';
+import { Platform, type TextStyle } from 'react-native';
 
 /**
- * Tipografías:
- * - Fraunces (serif con carácter): títulos y nombre del perfil.
- * - Atkinson Hyperlegible (sans diseñada para baja visión): todo el texto de lectura y formularios.
- * En React Native el peso se elige con la familia, no con `fontWeight`.
+ * Tipografía: la del sistema (SF Pro en iPhone/iPad/Mac, Roboto en Android, system-ui en navegadores),
+ * como las apps de Apple: legible, con Dynamic Type y sin descargas.
+ * Los estilos se piden con «tokens» (`font.display`…) que `Text` traduce a familia + peso.
  */
-export const fontFiles = {
-  Fraunces_600SemiBold,
-  Fraunces_700Bold,
-  AtkinsonHyperlegible_400Regular,
-  AtkinsonHyperlegible_700Bold,
-};
+export const SYSTEM_FONT = Platform.select({ ios: 'System', web: 'System', default: undefined });
 
 export const font = {
-  display: 'Fraunces_700Bold',
-  displaySemi: 'Fraunces_600SemiBold',
-  body: 'AtkinsonHyperlegible_400Regular',
-  bodyBold: 'AtkinsonHyperlegible_700Bold',
+  display: 'nc:display',
+  displaySemi: 'nc:displaySemi',
+  body: 'nc:body',
+  bodyBold: 'nc:bodyBold',
 } as const;
 
-/** Escala tipográfica (px a tamaño de letra del sistema por defecto). */
-export const size = { caption: 13, body: 16, lead: 17, h2: 20, h1: 28 } as const;
+const TOKENS: Record<string, TextStyle> = {
+  [font.display]: { fontWeight: '700', letterSpacing: -0.4 },
+  [font.displaySemi]: { fontWeight: '600', letterSpacing: -0.2 },
+  [font.body]: { fontWeight: '400' },
+  [font.bodyBold]: { fontWeight: '600' },
+};
 
-/** Elige la familia de cuerpo según el peso pedido en el estilo. */
-export function bodyFamilyFor(weight: unknown): string {
-  const w = typeof weight === 'string' ? Number(weight) || (weight === 'bold' ? 700 : 400) : (weight as number | undefined) ?? 400;
-  return w >= 600 ? font.bodyBold : font.body;
+/** Convierte un token (o un peso suelto) en estilo real del sistema. */
+export function resolveFont(family: unknown, weight: unknown): TextStyle {
+  const tok = typeof family === 'string' ? TOKENS[family] : undefined;
+  if (tok) return { fontFamily: SYSTEM_FONT, ...tok };
+  if (typeof family === 'string' && family) return { fontFamily: family, fontWeight: (weight as TextStyle['fontWeight']) ?? '400' };
+  return { fontFamily: SYSTEM_FONT, fontWeight: (weight as TextStyle['fontWeight']) ?? '400' };
 }
+
+/** Escala tipográfica inspirada en las de iOS (Large Title 34, Title 2 22, Body 17, Footnote 13). */
+export const size = { caption: 13, body: 17, lead: 17, h2: 22, h1: 30 } as const;

@@ -2,7 +2,9 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { useRef, useState } from 'react';
 import { ScrollView, View, type LayoutChangeEvent, type NativeScrollEvent, type NativeSyntheticEvent } from 'react-native';
 import Animated from 'react-native-reanimated';
+import { NeuroIcon } from './Brand';
 import { PressableScale } from './PressableScale';
+import type { IconName as BrandIcon } from '../brand/geometry';
 import { Text } from './Text';
 import { cardSurface, platform, space, useIsDark, useTheme } from '../theme';
 import { motion, useReduceMotion } from '../theme/motion';
@@ -14,16 +16,16 @@ type IconName = React.ComponentProps<typeof Ionicons>['name'];
 const AnimatedView = (Animated as { View?: typeof View }).View ?? View;
 
 /** Tipos de afección: cada tarjeta agrupa los síntomas que se parecen (nombres que usa el paciente). */
-export const SYMPTOM_GROUPS: { key: string; title: string; hint: string; icon: IconName; accent: string; kinds: { kind: string; icon: IconName }[] }[] = [
-  { key: 'cabeza', title: 'Cabeza y equilibrio', hint: 'Dolor, giros, vista', icon: 'bulb-outline', accent: '#4C8BC7',
+export const SYMPTOM_GROUPS: { key: string; title: string; hint: string; icon: BrandIcon; accent: string; kinds: { kind: string; icon: IconName }[] }[] = [
+  { key: 'cabeza', title: 'Cabeza y equilibrio', hint: 'Dolor, giros, vista', icon: 'cerebro', accent: '#4C46D6',
     kinds: [{ kind: 'Dolor de cabeza', icon: 'thunderstorm-outline' }, { kind: 'Mareo', icon: 'sync-outline' }, { kind: 'Visión borrosa o doble', icon: 'eye-outline' }] },
-  { key: 'movimiento', title: 'Movimiento y fuerza', hint: 'Temblor, debilidad', icon: 'body-outline', accent: '#D9822B',
+  { key: 'movimiento', title: 'Movimiento y fuerza', hint: 'Temblor, debilidad', icon: 'crisis', accent: '#C2620A',
     kinds: [{ kind: 'Temblor', icon: 'pulse-outline' }, { kind: 'Debilidad', icon: 'battery-half-outline' }, { kind: 'Convulsión', icon: 'flash-outline' }] },
-  { key: 'sensaciones', title: 'Cómo se siente', hint: 'Hormigueo, cansancio', icon: 'hand-left-outline', accent: '#3E9C7A',
+  { key: 'sensaciones', title: 'Cómo se siente', hint: 'Hormigueo, cansancio', icon: 'neurona', accent: '#0A7686',
     kinds: [{ kind: 'Hormigueo o adormecimiento', icon: 'finger-print-outline' }, { kind: 'Mucho cansancio', icon: 'moon-outline' }, { kind: 'Desmayo', icon: 'arrow-down-circle-outline' }] },
-  { key: 'mente', title: 'Habla y memoria', hint: 'Palabras, olvidos', icon: 'chatbubble-ellipses-outline', accent: '#8A63C9',
+  { key: 'mente', title: 'Habla y memoria', hint: 'Palabras, olvidos', icon: 'nota', accent: '#8A4FC9',
     kinds: [{ kind: 'Dificultad para hablar', icon: 'chatbubble-outline' }, { kind: 'Confusión', icon: 'help-circle-outline' }, { kind: 'Olvidos', icon: 'time-outline' }] },
-  { key: 'otro', title: 'Otro síntoma', hint: 'Algo distinto', icon: 'add-circle-outline', accent: '#6B7C8C',
+  { key: 'otro', title: 'Otro síntoma', hint: 'Algo distinto', icon: 'mas', accent: '#636366',
     kinds: [{ kind: 'Otro', icon: 'add-circle-outline' }] },
 ];
 
@@ -73,7 +75,7 @@ export function SymptomDeck({ counts, flash, onPick }: { counts: Record<string, 
             >
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.sm, padding: space.md, backgroundColor: g.accent + (dark ? '33' : '22') }}>
                 <View style={{ width: 38, height: 38, borderRadius: 13, backgroundColor: g.accent, alignItems: 'center', justifyContent: 'center', borderCurve: 'continuous' }}>
-                  <Ionicons name={g.icon} size={22} color="#FFFFFF" />
+                  <NeuroIcon name={g.icon} size={22} color="#FFFFFF" active />
                 </View>
                 <View style={{ flex: 1 }}>
                   <Text style={{ color: t.text, fontFamily: font.displaySemi, fontSize: 17 }}>{g.title}</Text>

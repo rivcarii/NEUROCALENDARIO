@@ -8,11 +8,11 @@ Resultado de aplicar los skills de diseño (crítica y sistema) y de animación 
 | Color | claro/oscuro; texto, apagado, primario, peligro, éxito, aviso, chip, `onHeader*` | `index.ts` |
 | Espaciado | 4 · 8 · 12 · 16 · 24 | `space` |
 | Radio | 8 · 10 · 12 · 20 (píldora) | `radius` |
-| Tipografía | **Fraunces** (títulos, nombre del perfil) + **Atkinson Hyperlegible** (lectura y formularios); escala 13/16/17/20/28 | `type.ts` |
+| Tipografía | **Fuente del sistema** (SF Pro en Apple, Roboto en Android, system-ui en web); escala estilo iOS 13/17/22/30/34 (título grande) | `type.ts` |
 | Movimiento | pulsar 120 ms, estado 160 ms, escala 0,97, ease-out `cubic-bezier(0.23, 1, 0.32, 1)` | `motion.ts` |
 | Táctil | mínimo 48 (objetivos ≥44) | `MIN_TOUCH` |
 
-- **Por qué estas fuentes**: Fraunces da carácter y calidez a los títulos; Atkinson Hyperlegible fue diseñada para baja visión y distingue caracteres ambiguos (0/O, 1/l) — importante en horas, dosis y fechas. Efecto visible: el cero lleva una barra («08:00»). Si no cargan, la app usa la tipografía del sistema.
+- **Por qué la fuente del sistema**: es la de las apps de Apple, respeta Dynamic Type, no se descarga (abre más rápido) y en iPhone ofrece tamaños ópticos de SF Pro. Los títulos usan peso 700 con interletraje negativo.
 - En React Native el peso se elige con la familia: `components/Text.tsx` traduce `fontWeight` a la familia correcta; no use `fontWeight` con `fontFamily` propia.
 - La auditoría de colores fijos encontró `#fff`/`#B3261E`/`rgba` dispersos en cabeceras y onboarding; ahora son tokens (`onHeader`, `danger`…). Contraste AA verificado por prueba (`tests/contrast.test.ts`).
 
@@ -22,7 +22,7 @@ Resultado de aplicar los skills de diseño (crítica y sistema) y de animación 
 | `Button` | primary · secondary · danger; deshabilitado, cargando | Escala 0,97 al pulsar (`PressableScale`). |
 | `Chips` | simple/múltiple; seleccionado | Transición de color 120 ms; `a11y` para etiquetas largas («6 de 10»). |
 | `TextField`, `DateTimeField` | error, pista | Etiqueta siempre visible; error con rol de alerta. |
-| `Card`, `H`, `P`, `Row`, `Screen` | — | `H` nivel 1 = Fraunces 700, nivel 2 = Fraunces 600. |
+| `Card`, `H`, `P`, `Row`, `Screen` | — | `H` nivel 1 = sistema 700 (30), nivel 2 = sistema 600 (22). Tarjetas planas estilo «lista agrupada». |
 | `ProfileHeader` / `ProfileBar` | color por perfil | Siempre indica de quién son los datos. |
 | `TapText`, `PressableScale` | — | Área táctil ≥44 px; rol de botón. |
 | `BarChart` | — | Descripción textual completa para lectores de pantalla. |
@@ -87,3 +87,16 @@ A partir de una captura en iPhone se corrigió: etiquetas cortadas en la barra d
 **Rendimiento:** solo `transform`/`opacity`; ninguna propiedad de diseño (layout) se anima; sin `transition: all`; el cristal es estático. Verificado: el indicador usa `translateX` con duración 220 ms (en el DOM) y las entradas son animaciones CSS de Reanimated. **Pendiente en teléfono:** fluidez real en un iPhone/Android modestos y sensación del indicador.
 
 **Barra de pestañas:** ahora es una capa propia sobre el grupo de pestañas (no dentro del navegador, cuyo contenedor la recortaba en iOS); la altura de la raíz usa `--app-h` (medida, tope ventana + 34 px).
+
+## Rediseño estilo Apple (identidad propia)
+La identidad completa (isologo, colores, iconos, ilustraciones, plantilla del informe y movimiento) está en **`IDENTIDAD.md`**. Resumen de componentes nuevos:
+
+| Componente | Archivo | Uso |
+| --- | --- | --- |
+| `Isotipo`, `Isologo`, `NeuroIcon` | `src/components/Brand.tsx` | Marca e iconografía propia (pestañas, listas, títulos de sección, calendario). |
+| `NeuroArt` | `src/components/NeuroArt.tsx` | Ilustraciones de neurociencia (cerebro, neurona, EEG, sinapsis) en bienvenida, vacíos, «todo al día», acerca de. |
+| `Segmented` | `src/components/ui.tsx` | Control segmentado de iOS con píldora deslizante (Mes/Semana/Día, Semana/Mes). |
+| `ProfileHeader` | `src/components/ProfileHeader.tsx` | Título grande + persona activa a la derecha (como Salud de Apple). |
+| Plantilla de informe | `src/brand/report.ts`, `reportHtml.ts`, `reportPdf.ts` | Portada con marca, títulos con icono, indicadores, escala de dolor en color, pie con isotipo. |
+
+Movimiento añadido: solo la píldora del control segmentado (transform, 220 ms, ease-out) y la entrada suave de las ilustraciones (opacity + translate, 420 ms, una vez). Con «reducir movimiento» no hay desplazamiento.

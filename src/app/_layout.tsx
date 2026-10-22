@@ -1,17 +1,17 @@
-import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Platform, View } from 'react-native';
 import { Text } from '../components/Text';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { Mascot } from '../components/Mascot';
+import { Isologo } from '../components/Brand';
+import { NeuroArt } from '../components/NeuroArt';
 import { UpdatePrompt } from '../components/UpdatePrompt';
 import { Button, Card, H, P, Screen, TextField } from '../components/ui';
 import { configureNotifications, rescheduleAll } from '../services/notifications';
 import { SessionProvider, useSession } from '../services/session';
 import { useTheme } from '../theme';
-import { font, fontFiles } from '../theme/type';
+import { SYSTEM_FONT } from '../theme/type';
 
 export default function RootLayout() {
   return (
@@ -27,8 +27,6 @@ export default function RootLayout() {
 function Gate() {
   const s = useSession();
   const t = useTheme();
-  // Si una fuente falla, la app sigue con la tipografía del sistema.
-  const [fontsLoaded, fontsError] = useFonts(fontFiles);
   useEffect(() => { configureNotifications(); }, []);
 
   // Mantiene sincronizados los recordatorios locales con los datos persistidos.
@@ -47,7 +45,7 @@ function Gate() {
     return () => clearTimeout(id);
   }, [s.status, s.store, s.version]);
 
-  if (s.status === 'loading' || (!fontsLoaded && !fontsError)) {
+  if (s.status === 'loading') {
     return <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: t.bg }}><ActivityIndicator size="large" color={t.primary} accessibilityLabel="Abriendo" /></View>;
   }
   if (s.status === 'error') {
@@ -65,7 +63,7 @@ function Gate() {
   return (
     <>
       <StatusBar style="auto" />
-      <Stack screenOptions={{ headerBackButtonDisplayMode: 'minimal', headerShadowVisible: Platform.OS !== 'ios', headerStyle: { backgroundColor: t.card }, headerTintColor: t.text, headerTitleStyle: { fontFamily: font.displaySemi, fontSize: 18 } }}>
+      <Stack screenOptions={{ headerBackButtonDisplayMode: 'minimal', headerShadowVisible: false, headerStyle: { backgroundColor: t.bg }, headerTintColor: t.primary, headerTitleStyle: { fontFamily: SYSTEM_FONT, fontWeight: '600', fontSize: 17, color: t.text }, contentStyle: { backgroundColor: t.bg } }}>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       </Stack>
     </>
@@ -82,9 +80,11 @@ function Onboarding() {
   const [err, setErr] = useState<string | null>(null);
   return (
     <Screen>
-      <View style={{ alignItems: 'center' }}><Mascot mood="hola" size={150} entrance /></View>
-      <H>Bienvenido a NeuroCalendario</H>
-      <P>¡Hola! Soy Nuri y voy a acompañarle.</P>
+      <View style={{ alignItems: 'center', gap: 4, paddingTop: 8 }}>
+        <Isologo size={30} stacked />
+        <NeuroArt kind="cerebro" size={240} />
+      </View>
+      <H>Le damos la bienvenida</H>
       <P muted>Un diario para anotar cómo se siente, sus medicinas y sus citas, y compartirlo con su médico. Sus datos se guardan solo en este teléfono. No reemplaza la atención médica.</P>
       <Card>
         <TextField label="Su nombre (quien administra la app)" value={owner} onChangeText={setOwner} autoCapitalize="words" />

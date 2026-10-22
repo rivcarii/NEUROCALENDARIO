@@ -27,8 +27,8 @@ const indexPath = join(dist, 'index.html');
 let html = readFileSync(indexPath, 'utf8');
 // Ajustes de plataforma móvil (iOS Safari / Android Chrome) para que la web se sienta como una app instalada.
 const mobileCss = `
-  html{-webkit-tap-highlight-color:transparent;-webkit-text-size-adjust:100%;text-size-adjust:100%;overscroll-behavior:none;color-scheme:light dark;background:#F6F8FB}
-  @media (prefers-color-scheme:dark){html{background:#0E141A}}
+  html{-webkit-tap-highlight-color:transparent;-webkit-text-size-adjust:100%;text-size-adjust:100%;overscroll-behavior:none;color-scheme:light dark;background:#F2F2F7}
+  @media (prefers-color-scheme:dark){html{background:#000000}}
   html,body{height:100%}
   body{position:fixed;top:0;left:0;right:0;height:var(--app-h,100%);overscroll-behavior:none;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
   #root{position:fixed;top:0;left:0;right:0;height:var(--app-h,100%);display:flex}
@@ -36,7 +36,7 @@ const mobileCss = `
   button,[role=button],[role=radio],[role=checkbox],[role=tab],a{touch-action:manipulation;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
   /* iOS hace zoom al enfocar campos de menos de 16 px */
   input,textarea,select{font-size:16px}
-  input:focus,textarea:focus{outline:2px solid #2F5D8A;outline-offset:0}
+  input:focus,textarea:focus{outline:2px solid #4C46D6;outline-offset:0}
   @media (prefers-color-scheme:dark){input:focus,textarea:focus{outline-color:#7FB0E0}}
   /* menos transparencia: el cristal pasa a ser una superficie sólida */
   @media (prefers-reduced-transparency:reduce){div[style*="backdrop-filter"]{-webkit-backdrop-filter:none!important;backdrop-filter:none!important;background-color:#fff!important}}
@@ -54,8 +54,8 @@ const head = [
   `<link rel="manifest" href="${base}/manifest.webmanifest">`,
   `<link rel="apple-touch-icon" href="${base}/apple-touch-icon.png">`,
   `<link rel="icon" href="${base}/icon-192.png">`,
-  '<meta name="theme-color" media="(prefers-color-scheme: light)" content="#2F5D8A">',
-  '<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0E141A">',
+  '<meta name="theme-color" media="(prefers-color-scheme: light)" content="#F2F2F7">',
+  '<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000000">',
   '<meta name="description" content="Diario y calendario de síntomas, medicinas y citas.">',
   '<meta name="robots" content="noindex, nofollow">',
   '<meta name="apple-mobile-web-app-capable" content="yes">',

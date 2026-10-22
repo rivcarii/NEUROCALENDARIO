@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Modal, View } from 'react-native';
 import { Text } from './Text';
-import { Mascot } from './Mascot';
+import { Isotipo } from './Brand';
 import { Button } from './ui';
 import { applyUpdate, postpone, startUpdates, subscribeUpdates, updatesSupported } from '../services/updates';
 import { radius, space, useTheme } from '../theme';
@@ -26,12 +26,12 @@ export function UpdatePrompt() {
   const label = version === 'nueva' ? '' : ` (${version.split('+')[0]})`;
   return (
     <Modal transparent animationType="fade" visible onRequestClose={postpone}>
-      <View style={{ flex: 1, backgroundColor: '#00000088', alignItems: 'center', justifyContent: 'center', padding: space.lg }}>
+      <View style={{ flex: 1, backgroundColor: '#00000066', alignItems: 'center', justifyContent: 'center', padding: space.lg }}>
         <View
           accessibilityViewIsModal accessibilityRole="alert"
-          style={{ backgroundColor: t.card, borderRadius: radius.lg, padding: space.xl, gap: space.md, maxWidth: 420, width: '100%', alignItems: 'center' }}
+          style={{ backgroundColor: t.card, borderRadius: 28, borderCurve: 'continuous', padding: space.xl, gap: space.md, maxWidth: 420, width: '100%', alignItems: 'center' }}
         >
-          <Mascot mood="contento" size={88} />
+          <Isotipo size={72} />
           <Text style={{ color: t.text, fontSize: 20, fontFamily: font.displaySemi, textAlign: 'center' }}>Hay una versión nueva de NeuroCalendario</Text>
           <Text style={{ color: t.muted, fontSize: 16, textAlign: 'center' }}>
             Actualice para tener las últimas mejoras{label}. Sus datos no se tocan y la app se reinicia en un segundo.

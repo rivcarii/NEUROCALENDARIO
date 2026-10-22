@@ -1,4 +1,6 @@
-import { PDFDocument, StandardFonts, rgb, type PDFFont, type PDFPage } from 'pdf-lib';
+import { LineCapStyle, PDFDocument, StandardFonts, rgb, type PDFFont, type PDFPage } from 'pdf-lib';
+import { BRAND, ICONS, ISOTIPO, type IconName } from '../brand/geometry';
+import { PAIN_COLORS, PAIN_SCALE_LABELS } from '../brand/report';
 import { LEVEL_COLOR, LEVEL_LABEL } from './analysis';
 import type { Block } from './reportDoc';
 
@@ -20,6 +22,21 @@ export async function buildReportPdf(doc: Block[], opts: { title: string }): Pro
   const ok = new Set(reg.getCharacterSet());
   const clean = (s: string) => [...String(s ?? '')].map((c) => REPLACE[c] ?? (c === '\n' || ok.has(c.codePointAt(0)!) ? c : '?')).join('');
   const col = (h: string) => { const [r, g, b] = hex(h); return rgb(r, g, b); };
+
+  /** Isotipo vectorial (misma geometría que la app). `x`,`y` = esquina superior izquierda. */
+  const isotipo = (pg: PDFPage, x: number, y: number, size: number, mode: 'tile' | 'white' | 'color') => {
+    const sc = size / 100;
+    const ink = mode === 'color' ? col(BRAND.indigo) : col('#FFFFFF');
+    const acc = mode === 'color' ? col(BRAND.teal) : col('#FFFFFF');
+    if (mode === 'tile') pg.drawSvgPath(ISOTIPO.tile, { x, y, scale: sc, color: col(BRAND.indigo) });
+    pg.drawSvgPath(ISOTIPO.frame, { x, y, scale: sc, borderColor: ink, borderWidth: ISOTIPO.stroke });
+    pg.drawSvgPath(ISOTIPO.tabs, { x, y, scale: sc, borderColor: ink, borderWidth: ISOTIPO.stroke, borderLineCap: LineCapStyle.Round });
+    pg.drawSvgPath(ISOTIPO.pathway, { x, y, scale: sc, borderColor: acc, borderWidth: ISOTIPO.stroke - 1, borderLineCap: LineCapStyle.Round });
+    pg.drawSvgPath(ISOTIPO.dendrites, { x, y, scale: sc, borderColor: acc, borderWidth: ISOTIPO.thin, borderLineCap: LineCapStyle.Round });
+    pg.drawSvgPath(ISOTIPO.somas + ISOTIPO.terminals, { x, y, scale: sc, color: acc });
+  };
+  const icon = (pg: PDFPage, name: IconName, x: number, y: number, size: number, color: string) =>
+    pg.drawSvgPath(ICONS[name], { x, y, scale: size / 24, borderColor: col(color), borderWidth: 2.1, borderLineCap: LineCapStyle.Round });
 
   let page: PDFPage = pdf.addPage([W, H]);
   let y = H - M;
@@ -58,17 +75,72 @@ export async function buildReportPdf(doc: Block[], opts: { title: string }): Pro
 
   for (const b of doc) {
     switch (b.t) {
-      case 'h1': text(b.text, { size: 20, font: bold, color: '#14202B', gap: 6 }); break;
-      case 'h2':
-        need(40); y -= 10; text(b.text, { size: 14, font: bold, color: '#2F5D8A', gap: 2 });
-        page.drawLine({ start: { x: M, y: y + 1 }, end: { x: W - M, y: y + 1 }, thickness: 1.5, color: col('#2F5D8A') }); y -= 6; break;
-      case 'h3': need(30); y -= 4; text(b.text, { size: 11, font: bold, gap: 3 }); break;
+      case 'cover': {
+        const h = 148;
+        page.drawRectangle({ x: M, y: y - h, width: W - 2 * M, height: h, color: col(BRAND.indigo) });
+        // franja de profundidad (degradado aproximado con dos capas)
+        page.drawRectangle({ x: M + (W - 2 * M) * 0.62, y: y - h, width: (W - 2 * M) * 0.38, height: h, color: col(BRAND.indigoDeep), opacity: 0.45 });
+        page.drawCircle({ x: W - M - 46, y: y - 46, size: 42, color: col(BRAND.violet), opacity: 0.35 });
+        isotipo(page, M + 16, y - 16, 40, 'white');
+        const wx = M + 64;
+        page.drawText('Neuro', { x: wx, y: y - 36, size: 16, font: bold, color: col('#FFFFFF') });
+        page.drawText('Calendario', { x: wx + bold.widthOfTextAtSize('Neuro', 16), y: y - 36, size: 16, font: reg, color: col('#FFFFFF') });
+        page.drawText(clean(b.subtitle), { x: wx, y: y - 50, size: 8.5, font: reg, color: col('#E8E7FF') });
+        page.drawText(clean(b.title), { x: M + 16, y: y - 86, size: 19, font: bold, color: col('#FFFFFF') });
+        let mx = M + 16;
+        for (const [k, v] of b.rows) {
+          const vw = Math.max(bold.widthOfTextAtSize(clean(v), 10), reg.widthOfTextAtSize(clean(k.toUpperCase()), 7.5));
+          page.drawText(clean(k.toUpperCase()), { x: mx, y: y - 112, size: 7.5, font: reg, color: col('#D9D8FF') });
+          page.drawText(clean(v), { x: mx, y: y - 126, size: 10, font: bold, color: col('#FFFFFF') });
+          mx += vw + 22;
+        }
+        y -= h + 12; break;
+      }
+      case 'h1': text(b.text, { size: 20, font: bold, color: BRAND.ink, gap: 6 }); break;
+      case 'h2': {
+        need(44); y -= 12;
+        const ix = b.icon ? M + 28 : M;
+        if (b.icon) {
+          page.drawRectangle({ x: M, y: y - 20, width: 20, height: 20, color: col(BRAND.indigo) });
+          icon(page, b.icon, M + 3, y - 3, 14, '#FFFFFF');
+        }
+        page.drawText(clean(b.text), { x: ix, y: y - 15, size: 14, font: bold, color: col(BRAND.indigo) });
+        y -= 26;
+        page.drawLine({ start: { x: M, y }, end: { x: W - M, y }, thickness: 1.2, color: col(BRAND.lavender) }); y -= 8; break;
+      }
+      case 'kpis': {
+        const n = b.items.length, gap = 8, w = (W - 2 * M - gap * (n - 1)) / n, h = 52;
+        need(h + 8);
+        b.items.forEach((k, i) => {
+          const x = M + i * (w + gap);
+          page.drawRectangle({ x, y: y - h, width: w, height: h, color: col('#F2F2F7') });
+          page.drawText(clean(k.value), { x: x + 8, y: y - 22, size: 16, font: bold, color: col(BRAND.indigo) });
+          wrap(k.label + (k.hint ? ` ${k.hint}` : ''), reg, 7.5, w - 14).slice(0, 2).forEach((ln, j) => page.drawText(ln, { x: x + 8, y: y - 34 - j * 9, size: 7.5, font: reg, color: col('#3A3A3C') }));
+        });
+        y -= h + 10; break;
+      }
+      case 'painScale': {
+        const w = (W - 2 * M) / 11;
+        need(40);
+        PAIN_COLORS.forEach((c, i) => {
+          page.drawRectangle({ x: M + i * w, y: y - 18, width: w, height: 18, color: col(c) });
+          const lb = String(i);
+          page.drawText(lb, { x: M + i * w + w / 2 - bold.widthOfTextAtSize(lb, 9) / 2, y: y - 13, size: 9, font: bold, color: col('#FFFFFF') });
+        });
+        for (const [a, z, l] of PAIN_SCALE_LABELS) {
+          const lb = clean(`${l} (${a === z ? a : `${a}-${z}`})`);
+          const cx = M + ((a + z + 1) / 2) * w;
+          page.drawText(lb, { x: cx - reg.widthOfTextAtSize(lb, 7.5) / 2, y: y - 29, size: 7.5, font: reg, color: col('#3A3A3C') });
+        }
+        y -= 40; break;
+      }
+      case 'h3': need(70); y -= 4; text(b.text, { size: 11, font: bold, gap: 3 }); break;
       case 'kv': for (const [k, v] of b.rows) text(`${k}: ${v}`, { size: 10.5, gap: 1 }); y -= 4; break;
       case 'p': {
         if (b.style === 'warn') {
           const lines = wrap(b.text, bold, 9.5, W - 2 * M - 16);
           const h = lines.length * 12.5 + 12;
-          need(h); page.drawRectangle({ x: M, y: y - h, width: W - 2 * M, height: h, color: col('#FDF1EF'), borderColor: col('#C0392B'), borderWidth: 1 });
+          need(h); page.drawRectangle({ x: M, y: y - h, width: W - 2 * M, height: h, color: col('#FFF2F2'), borderColor: col('#F5C2C2'), borderWidth: 1 });
           let yy = y - 6;
           for (const ln of lines) { yy -= 11.5; page.drawText(ln, { x: M + 8, y: yy, size: 9.5, font: bold, color: col('#1B1B1B') }); yy -= 1; }
           y -= h + 8;
@@ -115,7 +187,7 @@ export async function buildReportPdf(doc: Block[], opts: { title: string }): Pro
         b.data.forEach((d, i) => {
           const h = (bh - 20) * (d.value / max);
           const x = M + i * slot + 2;
-          page.drawRectangle({ x, y: y - bh + 10, width: Math.max(1, slot - 4), height: h, color: col('#2F5D8A') });
+          page.drawRectangle({ x, y: y - bh + 10, width: Math.max(1, slot - 4), height: h, color: col(BRAND.indigo) });
           if (d.value > 0) { const v = String(d.value); page.drawText(v, { x: x + (slot - 4) / 2 - reg.widthOfTextAtSize(v, 7) / 2, y: y - bh + 12 + h, size: 7, font: reg }); }
           if (n <= 16 || i % Math.ceil(n / 12) === 0) { const lb = clean(d.label); page.drawText(lb, { x: x + (slot - 4) / 2 - reg.widthOfTextAtSize(lb, 7) / 2, y: y - bh + 1, size: 7, font: reg, color: col('#555555') }); }
         });
@@ -123,14 +195,14 @@ export async function buildReportPdf(doc: Block[], opts: { title: string }): Pro
       }
       case 'finding': {
         const f = b.finding;
-        const color = { bien: '#2E7D4F', info: '#2F5D8A', atencion: '#B7791F', importante: '#C0392B' }[f.tone];
+        const color = { bien: '#1F7A36', info: BRAND.indigo, atencion: '#A04800', importante: '#D70015' }[f.tone];
         const label = { bien: 'Bien', info: 'Información', atencion: 'Atención', importante: 'Importante' }[f.tone];
         const w = W - 2 * M - 14;
         const lines = [...wrap(`${label.toUpperCase()}  ${f.title}`, bold, 10, w), ...wrap(f.text, reg, 9.5, w), ...wrap(`Base: ${f.basis}`, reg, 8, w)];
         const h = lines.length * 12 + 8;
         need(Math.min(h, 120));
         page.drawRectangle({ x: M, y: y - h, width: 4, height: h, color: col(color) });
-        page.drawRectangle({ x: M + 4, y: y - h, width: W - 2 * M - 4, height: h, color: col('#F7F9FB') });
+        page.drawRectangle({ x: M + 4, y: y - h, width: W - 2 * M - 4, height: h, color: col('#F7F7FB') });
         let yy = y - 4;
         const t1 = wrap(`${label.toUpperCase()}  ${f.title}`, bold, 10, w), t2 = wrap(f.text, reg, 9.5, w), t3 = wrap(`Base: ${f.basis}`, reg, 8, w);
         for (const ln of t1) { yy -= 11; page.drawText(ln, { x: M + 10, y: yy, size: 10, font: bold, color: col(color) }); yy -= 1; }
@@ -154,19 +226,26 @@ export async function buildReportPdf(doc: Block[], opts: { title: string }): Pro
           need(Math.min(h, 140));
           let x = M;
           wrapped.forEach((lines, i) => {
-            page.drawRectangle({ x, y: y - h, width: cw[i]!, height: h, color: fill ? col(fill) : undefined, borderColor: col('#BBBBBB'), borderWidth: 0.5 });
+            page.drawRectangle({ x, y: y - h, width: cw[i]!, height: h, color: fill ? col(fill) : undefined, borderColor: col('#E3E3E8'), borderWidth: 0.6 });
             lines.forEach((ln, li) => page.drawText(ln, { x: x + 4, y: y - 4 - size - li * (size + 2.5) + 1.5, size, font: f, color: col('#1B1B1B') }));
             x += cw[i]!;
           });
           y -= h;
         };
-        row(b.headers, bold, '#EEF3F8');
+        row(b.headers, bold, '#F2F2F7');
         for (const r of b.rows) row(r.map((c) => c ?? ''), reg);
         y -= 8; break;
       }
     }
   }
   const pages = pdf.getPages();
-  pages.forEach((p, i) => p.drawText(`NeuroCalendario · página ${i + 1} de ${pages.length}`, { x: M, y: 20, size: 7.5, font: reg, color: col('#888888') }));
+  pages.forEach((p, i) => {
+    p.drawLine({ start: { x: M, y: 30 }, end: { x: W - M, y: 30 }, thickness: 0.6, color: col('#E3E3E8') });
+    isotipo(p, M, 25, 11, 'tile');
+    p.drawText('NeuroCalendario', { x: M + 15, y: 16.5, size: 7.5, font: bold, color: col(BRAND.indigo) });
+    p.drawText(clean(' · informe creado con los datos anotados por el paciente o su cuidador'), { x: M + 15 + bold.widthOfTextAtSize('NeuroCalendario', 7.5), y: 16.5, size: 7.5, font: reg, color: col('#6C6C70') });
+    const pg = `${i + 1} / ${pages.length}`;
+    p.drawText(pg, { x: W - M - reg.widthOfTextAtSize(pg, 7.5), y: 16.5, size: 7.5, font: reg, color: col('#6C6C70') });
+  });
   return pdf.save();
 }
