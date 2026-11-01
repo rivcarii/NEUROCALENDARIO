@@ -18,6 +18,15 @@ const body = () => page.locator('body').innerText();
 await page.goto(BASE, { waitUntil: 'networkidle' });
 await page.getByLabel('Su nombre (quien administra la app)').waitFor({ timeout: 20000 });
 await shot('bienvenida');
+// Regresión: en el teléfono, al abrirse el teclado la página se desplaza; eso NO debe quitar el foco del campo.
+await page.getByLabel('Su nombre (quien administra la app)').focus();
+await page.evaluate(() => {
+  const sc = [...document.querySelectorAll('div')].find((d) => ['auto', 'scroll'].includes(getComputedStyle(d).overflowY) && d.scrollHeight > d.clientHeight);
+  sc.scrollTop += 80;
+  sc.dispatchEvent(new Event('scroll'));
+});
+await page.waitForTimeout(400);
+ok((await page.evaluate(() => document.activeElement?.getAttribute('aria-label'))) === 'Su nombre (quien administra la app)', 'el campo sigue activo al desplazarse (el teclado no se cierra solo)');
 await page.getByLabel('Su nombre (quien administra la app)').fill('Propietario Ficticio');
 await page.getByLabel('¿A quién va a acompañar principalmente?').fill('Mamá Ficticia');
 await page.getByRole('button', { name: 'Comenzar' }).click();
@@ -104,7 +113,9 @@ ok(true, 'al volver al perfil de mamá se ven sus episodios');
 await page.locator('text="Calendario" >> visible=true').first().click();
 await page.getByRole('button', { name: 'Ir a hoy' }).waitFor();
 await shot('calendario');
-ok((await body()).includes('octubre 2026'), 'calendario mensual muestra el mes actual');
+const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+const mesActual = `${MESES[new Date().getMonth()]} ${new Date().getFullYear()}`;
+ok((await body()).includes(mesActual), 'calendario mensual muestra el mes actual');
 await page.getByRole('button', { name: 'Agregar cita' }).click();
 await page.getByLabel('Título').fill('Control neurología (ficticia)');
 await page.getByRole('button', { name: 'Guardar' }).click();

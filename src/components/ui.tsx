@@ -30,7 +30,8 @@ export function Screen({ children, scroll = true, footer, tabs = false }: { chil
         <ScrollView
           contentContainerStyle={{ padding: space.lg, gap: space.md, paddingBottom: bottomPad, width: '100%', maxWidth: MAX_CONTENT, alignSelf: 'center' }}
           keyboardShouldPersistTaps="handled"
-          keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
+          // En web NUNCA «on-drag»: el navegador desplaza la página al abrir el teclado y eso lo cerraba al instante.
+          keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : Platform.OS === 'android' ? 'on-drag' : 'none'}
           automaticallyAdjustKeyboardInsets // iOS: el teclado no tapa el campo que se escribe
           contentInsetAdjustmentBehavior="automatic"
         >

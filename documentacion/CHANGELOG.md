@@ -1,6 +1,7 @@
 # Registro de cambios
 
 ## 0.1.0 — 19-oct-2026 (versión de pruebas)
+- **Teclado que se cerraba al instante en el teléfono (versión web)**: la lista desplazable tenía «cerrar el teclado al desplazar»; al abrirse el teclado el navegador desplaza la página y eso quitaba el foco del campo, impidiendo escribir (p. ej. en la bienvenida). Ahora en web nunca se cierra por desplazamiento. Prueba de regresión en `e2e/e2e.mjs`.
 - **Avisos en el teléfono con la app cerrada (versión web)**: Web Push con servicio propio en Cloudflare (`push-worker/`, ver `AVISOS.md`). Botones Activar / Prueba / Desactivar en Ajustes, tarjeta en Hoy para activarlos. El servicio solo recibe horas e identificadores; el texto se queda en el teléfono.
 - **Respaldo en web/iPhone**: los avisos (`Alert.alert`) no se mostraban en el navegador, así que una contraseña corta o un error parecían «no hacer nada». Ahora hay `notify` multiplataforma y mensajes en pantalla; el respaldo se comparte (hoja de compartir: Guardar en Archivos, correo) o se descarga, con botones «Guardar o compartir» y «Descargar». Prueba de extremo a extremo: crear, descargar y recuperar un respaldo cifrado.
 - Restos de la interfaz anterior: barra de perfil de color, campos con borde, interruptores verde azulado de Material, tarjetas de personas con borde, gráficos con letra con serifas y el isotipo sin fondo cuando había dos en pantalla (id de degradado repetido).
